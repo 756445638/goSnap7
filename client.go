@@ -77,19 +77,33 @@ func Cli_GetParam(Client S7Object, paraNumber ParamNumber) (value interface{}, e
 	case P_u16_LocalPort:
 		value = *(*uint16)(pValue)
 	case P_u16_RemotePort:
+		value = *(*uint16)(pValue)
 	case P_i32_PingTimeout:
+		value = *(*int32)(pValue)
 	case P_i32_SendTimeout:
+		value = *(*int32)(pValue)
 	case P_i32_RecvTimeout:
+		value = *(*int32)(pValue)
 	case P_i32_WorkInterval:
+		value = *(*int32)(pValue)
 	case P_u16_SrcRef:
+		value = *(*uint16)(pValue)
 	case P_u16_DstRef:
+		value = *(*uint16)(pValue)
 	case P_u16_SrcTSap:
+		value = *(*uint16)(pValue)
 	case P_i32_PDURequest:
+		value = *(*int32)(pValue)
 	case P_i32_MaxClients:
+		value = *(*int32)(pValue)
 	case P_i32_BSendTimeout:
+		value = *(*int32)(pValue)
 	case P_i32_BRecvTimeout:
+		value = *(*int32)(pValue)
 	case P_u32_RecoveryTime:
+		value = *(*uint32)(pValue)
 	case P_u32_KeepAliveTime:
+		value = *(*uint32)(pValue)
 	}
 	return
 }
