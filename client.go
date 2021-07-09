@@ -31,8 +31,67 @@ func Cli_ConnectTo(Client S7Object, Address string, Rack int, Slot int) (err err
 	return
 }
 
-func Cli_GetParam(Client S7Object, paraNumber int) (interface{}, error) {
-
+/*
+	ParamNumber 为P_u16_LocalPort的时候 value的数据是uint16 其他情况类似的
+*/
+func Cli_GetParam(Client S7Object, paraNumber ParamNumber) (value interface{}, err error) {
+	var pValue unsafe.Pointer
+	switch paraNumber {
+	case P_u16_LocalPort:
+		pValue = unsafe.Pointer(new(uint16))
+	case P_u16_RemotePort:
+		pValue = unsafe.Pointer(new(uint16))
+	case P_i32_PingTimeout:
+		pValue = unsafe.Pointer(new(int32))
+	case P_i32_SendTimeout:
+		pValue = unsafe.Pointer(new(int32))
+	case P_i32_RecvTimeout:
+		pValue = unsafe.Pointer(new(int32))
+	case P_i32_WorkInterval:
+		pValue = unsafe.Pointer(new(int32))
+	case P_u16_SrcRef:
+		pValue = unsafe.Pointer(new(uint16))
+	case P_u16_DstRef:
+		pValue = unsafe.Pointer(new(uint16))
+	case P_u16_SrcTSap:
+		pValue = unsafe.Pointer(new(uint16))
+	case P_i32_PDURequest:
+		pValue = unsafe.Pointer(new(int32))
+	case P_i32_MaxClients:
+		pValue = unsafe.Pointer(new(int32))
+	case P_i32_BSendTimeout:
+		pValue = unsafe.Pointer(new(int32))
+	case P_i32_BRecvTimeout:
+		pValue = unsafe.Pointer(new(int32))
+	case P_u32_RecoveryTime:
+		pValue = unsafe.Pointer(new(uint32))
+	case P_u32_KeepAliveTime:
+		pValue = unsafe.Pointer(new(uint32))
+	}
+	var code C.int = C.Cli_GetParam(Client, C.int(paraNumber), pValue)
+	err = cliErrorsTable[int(code)]
+	if err != nil {
+		return
+	}
+	switch paraNumber {
+	case P_u16_LocalPort:
+		value = *(*uint16)(pValue)
+	case P_u16_RemotePort:
+	case P_i32_PingTimeout:
+	case P_i32_SendTimeout:
+	case P_i32_RecvTimeout:
+	case P_i32_WorkInterval:
+	case P_u16_SrcRef:
+	case P_u16_DstRef:
+	case P_u16_SrcTSap:
+	case P_i32_PDURequest:
+	case P_i32_MaxClients:
+	case P_i32_BSendTimeout:
+	case P_i32_BRecvTimeout:
+	case P_u32_RecoveryTime:
+	case P_u32_KeepAliveTime:
+	}
+	return
 }
 func Cli_GetCpuInfo(cli S7Object) (info TS7CpuInfo, err error) {
 	var code C.int = C.Cli_GetCpuInfo(cli, (*C.TS7CpuInfo)(unsafe.Pointer(&info)))
