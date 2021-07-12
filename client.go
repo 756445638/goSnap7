@@ -149,9 +149,6 @@ func Cli_ReadArea(cli S7Object, area S7Area, dBNumber int, start int, amount int
 	return
 }
 
-func dataLength(wordLen S7WL, amount int32, start int32) int32 {
-	return wordLen.Size()*amount + start
-}
 func Cli_WriteArea(cli S7Object, area S7Area, dBNumber int, start int, amount int, wordLen S7WL, pUsrData []byte) (err error) {
 	pUsrData = make([]byte, dataLength(wordLen, int32(amount), int32(start)))
 	var code C.int = C.Cli_WriteArea(cli, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
@@ -211,6 +208,11 @@ func Cli_CTRead(cli S7Object, dBNumber int, start int, amount int) (pUsrData []b
 }
 func Cli_CTWrite(cli S7Object, dBNumber int, start int, amount int, pUsrData []byte) (err error) {
 	return Cli_WriteArea(cli, S7AreaCT, dBNumber, start, amount, S7WLByte, pUsrData)
+}
+func Cli_ListBlocks(cli S7Object) (pUsrData TS7BlocksList, err error) {
+	var code C.int = C.Cli_ListBlocks(cli, (*C.TS7BlocksList)(unsafe.Pointer(&pUsrData)))
+	err = cliErrorsTable[int(code)]
+	return
 }
 
 func Cli_GetCpuInfo(cli S7Object) (info TS7CpuInfo, err error) {

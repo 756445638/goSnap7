@@ -1,8 +1,5 @@
 package snap7go
 
-
-
-
 import "fmt"
 import "unsafe"
 
@@ -28,9 +25,6 @@ const P_i32_BRecvTimeout ParamNumber = 13
 const P_u32_RecoveryTime ParamNumber = 14
 const P_u32_KeepAliveTime ParamNumber = 15
 
-<<<<<<< HEAD
-
-=======
 //******************************************************************************
 //                                   CLIENT
 //******************************************************************************
@@ -62,7 +56,15 @@ const S7WLReal S7WL = 0x08
 const S7WLCounter S7WL = 0x1C
 const S7WLTimer S7WL = 0x1D
 
-func (s S7WL) Size() int32 {
+// CPU status
+const S7CpuStatusUnknown = 0x00
+const S7CpuStatusRun = 0x08
+const S7CpuStatusStop = 0x04
+
+func dataLength(wordLen S7WL, amount int32, start int32) int32 {
+	return wordLen.size()*amount + start
+}
+func (s S7WL) size() int32 {
 	switch s {
 	case S7WLBit:
 		return 1
@@ -81,7 +83,6 @@ func (s S7WL) Size() int32 {
 	}
 	panic(fmt.Sprintf("S7WL not exist:", s))
 }
-
 
 func Value_Pvalue(paraNumber ParamNumber, value interface{}) (pValue unsafe.Pointer) {
 	switch paraNumber {
