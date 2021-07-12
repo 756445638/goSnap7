@@ -55,7 +55,7 @@ const S7WLReal S7WL = 0x08
 const S7WLCounter S7WL = 0x1C
 const S7WLTimer S7WL = 0x1D
 
-func (s S7WL) Size() int {
+func (s S7WL) Size() int32 {
 	switch s {
 	case S7WLBit:
 		return 1

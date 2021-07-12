@@ -13,35 +13,35 @@ import (
 
 type S7Object = C.S7Object
 
-func Cli_Create() (client S7Object) {
-	client = C.Cli_Create()
+func Cli_Create() (cli S7Object) {
+	cli = C.Cli_Create()
 	return
 }
-func Cli_Destroy(client S7Object) {
-	C.Cli_Destroy((*C.S7Object)(unsafe.Pointer(&client)))
+func Cli_Destroy(cli S7Object) {
+	C.Cli_Destroy((*C.S7Object)(unsafe.Pointer(&cli)))
 	return
 }
-func Cli_ConnectTo(Client S7Object, Address string, Rack int, Slot int) (err error) {
-	s := C.CString(Address)
+func Cli_ConnectTo(cli S7Object, address string, rack int, slot int) (err error) {
+	s := C.CString(address)
 	defer func() {
 		C.free(unsafe.Pointer(s))
 	}()
-	var code C.int = C.Cli_ConnectTo(Client, s, C.int(Rack), C.int(Slot))
+	var code C.int = C.Cli_ConnectTo(cli, s, C.int(rack), C.int(slot))
 	err = cliErrorsTable[int(code)]
 	return
 }
 
-func Cli_SetConnectionParams(Client S7Object, Address string, LocalTSAP uint16, RemoteTSAP uint16) (err error) {
-	s := C.CString(Address)
+func Cli_SetConnectionParams(cli S7Object, address string, localTSAP uint16, remoteTSAP uint16) (err error) {
+	s := C.CString(address)
 	defer func() {
 		C.free(unsafe.Pointer(s))
 	}()
-	var code C.int = C.Cli_SetConnectionParams(Client, s, C.word(LocalTSAP), C.word(RemoteTSAP))
+	var code C.int = C.Cli_SetConnectionParams(cli, s, C.word(localTSAP), C.word(remoteTSAP))
 	err = cliErrorsTable[int(code)]
 	return
 }
-func Cli_SetConnectionType(Client S7Object, connectionType CONNTYPE) (err error) {
-	var code C.int = C.Cli_SetConnectionType(Client, C.word(connectionType))
+func Cli_SetConnectionType(cli S7Object, connectionType CONNTYPE) (err error) {
+	var code C.int = C.Cli_SetConnectionType(cli, C.word(connectionType))
 	err = cliErrorsTable[int(code)]
 	return
 }
@@ -59,7 +59,7 @@ func Cli_Disconnect(cli S7Object) (err error) {
 /*
 	ParamNumber 为P_u16_LocalPort的时候 value的数据是uint16 其他情况类似的
 */
-func Cli_GetParam(Client S7Object, paraNumber ParamNumber) (value interface{}, err error) {
+func Cli_GetParam(cli S7Object, paraNumber ParamNumber) (value interface{}, err error) {
 	var pValue unsafe.Pointer
 	switch paraNumber {
 	case P_u16_LocalPort:
@@ -93,7 +93,7 @@ func Cli_GetParam(Client S7Object, paraNumber ParamNumber) (value interface{}, e
 	case P_u32_KeepAliveTime:
 		pValue = unsafe.Pointer(new(uint32))
 	}
-	var code C.int = C.Cli_GetParam(Client, C.int(paraNumber), pValue)
+	var code C.int = C.Cli_GetParam(cli, C.int(paraNumber), pValue)
 	err = cliErrorsTable[int(code)]
 	if err != nil {
 		return
@@ -136,51 +136,81 @@ func Cli_GetParam(Client S7Object, paraNumber ParamNumber) (value interface{}, e
 /*
 	P_u16_LocalPort 设定端口为uint16
 */
-func Cli_SetParam(Client S7Object, paraNumber ParamNumber, value interface{}) (err error) {
-	var pValue unsafe.Pointer
-	switch paraNumber {
-	case P_u16_LocalPort:
-		t := new(uint16)
-		*t = value.(uint16)
-		pValue = unsafe.Pointer(t)
-	case P_u16_RemotePort:
-
-	case P_i32_PingTimeout:
-
-	case P_i32_SendTimeout:
-
-	case P_i32_RecvTimeout:
-
-	case P_i32_WorkInterval:
-
-	case P_u16_SrcRef:
-
-	case P_u16_DstRef:
-
-	case P_u16_SrcTSap:
-
-	case P_i32_PDURequest:
-
-	case P_i32_MaxClients:
-
-	case P_i32_BSendTimeout:
-
-	case P_i32_BRecvTimeout:
-
-	case P_u32_RecoveryTime:
-
-	case P_u32_KeepAliveTime:
-
-	}
-	var code C.int = C.Cli_SetParam(Client, C.int(paraNumber), pValue)
+func Cli_SetParam(cli S7Object, paraNumber ParamNumber, value interface{}) (err error) {
+	pvalue := Value_Pvalue(paraNumber, value)
+	var code C.int = C.Cli_SetParam(cli, C.int(paraNumber), pvalue)
 	err = cliErrorsTable[int(code)]
 	return
 }
-func Cli_ReadArea(cli S7Object, Area S7Area, DBNumber int, Start int, Amount int, WordLen S7WL) (pUsrData []byte, err error) {
-	pUsrData = make([]byte, WordLen.Size()*Amount+Start)
-	var code C.int = C.Cli_ReadArea(cli, C.int(Area), C.int(DBNumber), C.int(Start), C.int(Amount), C.int(WordLen), unsafe.Pointer(&pUsrData[0]))
+func Cli_ReadArea(cli S7Object, area S7Area, dBNumber int, start int, amount int, wordLen S7WL) (pUsrData []byte, err error) {
+	pUsrData = make([]byte, dataLength(wordLen, int32(amount), int32(start)))
+	var code C.int = C.Cli_ReadArea(cli, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
 	err = cliErrorsTable[int(code)]
 	return
+}
+
+func dataLength(wordLen S7WL, amount int32, start int32) int32 {
+	return wordLen.Size()*amount + start
+}
+func Cli_WriteArea(cli S7Object, area S7Area, dBNumber int, start int, amount int, wordLen S7WL, pUsrData []byte) (err error) {
+	pUsrData = make([]byte, dataLength(wordLen, int32(amount), int32(start)))
+	var code C.int = C.Cli_WriteArea(cli, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
+	err = cliErrorsTable[int(code)]
+	return
+}
+func Cli_ReadMultiVars(cli S7Object, items []TS7DataItem) (datas [][]byte, err error) {
+	itemsCount := len(items)
+	for _, v := range items {
+		t := make([]byte, dataLength(S7WL(v.WordLen), v.Amount, v.Start))
+		datas = append(datas, t)
+		v.Pdata = &t[0]
+	}
+	var code C.int = C.Cli_ReadMultiVars(cli, (C.PS7DataItem)(unsafe.Pointer(&items[0])), C.int(itemsCount))
+	err = cliErrorsTable[int(code)]
+	return
+}
+func Cli_WriteMultiVars(cli S7Object, items []TS7DataItem) (datas [][]byte, err error) {
+	itemsCount := len(items)
+	var code C.int = C.Cli_WriteMultiVars(cli, (C.PS7DataItem)(unsafe.Pointer(&items[0])), C.int(itemsCount))
+	err = cliErrorsTable[int(code)]
+	return
+}
+
+func Cli_DBRead(cli S7Object, dBNumber int, start int, amount int) (pUsrData []byte, err error) {
+	return Cli_ReadArea(cli, S7AreaDB, dBNumber, start, amount, S7WLByte)
+}
+func Cli_DBWrite(cli S7Object, dBNumber int, start int, amount int, pUsrData []byte) (err error) {
+	return Cli_WriteArea(cli, S7AreaDB, dBNumber, start, amount, S7WLByte, pUsrData)
+}
+func Cli_MBRead(cli S7Object, dBNumber int, start int, amount int) (pUsrData []byte, err error) {
+	return Cli_ReadArea(cli, S7AreaMK, dBNumber, start, amount, S7WLByte)
+}
+func Cli_MBWrite(cli S7Object, dBNumber int, start int, amount int, pUsrData []byte) (err error) {
+	return Cli_WriteArea(cli, S7AreaMK, dBNumber, start, amount, S7WLByte, pUsrData)
+}
+func Cli_EBRead(cli S7Object, dBNumber int, start int, amount int) (pUsrData []byte, err error) {
+	return Cli_ReadArea(cli, S7AreaPE, dBNumber, start, amount, S7WLByte)
+}
+func Cli_EBWrite(cli S7Object, dBNumber int, start int, amount int, pUsrData []byte) (err error) {
+	return Cli_WriteArea(cli, S7AreaPE, dBNumber, start, amount, S7WLByte, pUsrData)
+}
+func Cli_ABRead(cli S7Object, dBNumber int, start int, amount int) (pUsrData []byte, err error) {
+	return Cli_ReadArea(cli, S7AreaPA, dBNumber, start, amount, S7WLByte)
+}
+func Cli_ABWrite(cli S7Object, dBNumber int, start int, amount int, pUsrData []byte) (err error) {
+	return Cli_WriteArea(cli, S7AreaPA, dBNumber, start, amount, S7WLByte, pUsrData)
+}
+func Cli_TMRead(cli S7Object, dBNumber int, start int, amount int) (pUsrData []byte, err error) {
+	return Cli_ReadArea(cli, S7AreaTM, dBNumber, start, amount, S7WLByte)
+}
+func Cli_TMWrite(cli S7Object, dBNumber int, start int, amount int, pUsrData []byte) (err error) {
+	return Cli_WriteArea(cli, S7AreaTM, dBNumber, start, amount, S7WLByte, pUsrData)
+}
+func Cli_CTRead(cli S7Object, dBNumber int, start int, amount int) (pUsrData []byte, err error) {
+	return Cli_ReadArea(cli, S7AreaCT, dBNumber, start, amount, S7WLByte)
+}
+func Cli_CTWrite(cli S7Object, dBNumber int, start int, amount int, pUsrData []byte) (err error) {
+	return Cli_WriteArea(cli, S7AreaCT, dBNumber, start, amount, S7WLByte, pUsrData)
 }
 
 func Cli_GetCpuInfo(cli S7Object) (info TS7CpuInfo, err error) {
