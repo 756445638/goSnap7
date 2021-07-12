@@ -1,11 +1,15 @@
 package snap7go
 
+
+
+
 import "fmt"
 import "unsafe"
 
 //------------------------------------------------------------------------------
 //                                  PARAMS LIST
 //------------------------------------------------------------------------------
+
 type ParamNumber = int
 
 const P_u16_LocalPort ParamNumber = 1
@@ -24,6 +28,9 @@ const P_i32_BRecvTimeout ParamNumber = 13
 const P_u32_RecoveryTime ParamNumber = 14
 const P_u32_KeepAliveTime ParamNumber = 15
 
+<<<<<<< HEAD
+
+=======
 //******************************************************************************
 //                                   CLIENT
 //******************************************************************************
@@ -74,6 +81,7 @@ func (s S7WL) Size() int32 {
 	}
 	panic(fmt.Sprintf("S7WL not exist:", s))
 }
+
 
 func Value_Pvalue(paraNumber ParamNumber, value interface{}) (pValue unsafe.Pointer) {
 	switch paraNumber {
