@@ -31,6 +31,31 @@ func Cli_ConnectTo(Client S7Object, Address string, Rack int, Slot int) (err err
 	return
 }
 
+func Cli_SetConnectionParams(Client S7Object, Address string, LocalTSAP uint16, RemoteTSAP uint16) (err error) {
+	s := C.CString(Address)
+	defer func() {
+		C.free(unsafe.Pointer(s))
+	}()
+	var code C.int = C.Cli_SetConnectionParams(Client, s, C.word(LocalTSAP), C.word(RemoteTSAP))
+	err = cliErrorsTable[int(code)]
+	return
+}
+func Cli_SetConnectionType(Client S7Object, connectionType CONNTYPE) (err error) {
+	var code C.int = C.Cli_SetConnectionType(Client, C.word(connectionType))
+	err = cliErrorsTable[int(code)]
+	return
+}
+func Cli_Connect(cli S7Object) (err error) {
+	var code C.int = C.Cli_Connect(cli)
+	err = cliErrorsTable[int(code)]
+	return
+}
+func Cli_Disconnect(cli S7Object) (err error) {
+	var code C.int = C.Cli_Disconnect(cli)
+	err = cliErrorsTable[int(code)]
+	return
+}
+
 /*
 	ParamNumber 为P_u16_LocalPort的时候 value的数据是uint16 其他情况类似的
 */
@@ -107,6 +132,57 @@ func Cli_GetParam(Client S7Object, paraNumber ParamNumber) (value interface{}, e
 	}
 	return
 }
+
+/*
+	P_u16_LocalPort 设定端口为uint16
+*/
+func Cli_SetParam(Client S7Object, paraNumber ParamNumber, value interface{}) (err error) {
+	var pValue unsafe.Pointer
+	switch paraNumber {
+	case P_u16_LocalPort:
+		t := new(uint16)
+		*t = value.(uint16)
+		pValue = unsafe.Pointer(t)
+	case P_u16_RemotePort:
+
+	case P_i32_PingTimeout:
+
+	case P_i32_SendTimeout:
+
+	case P_i32_RecvTimeout:
+
+	case P_i32_WorkInterval:
+
+	case P_u16_SrcRef:
+
+	case P_u16_DstRef:
+
+	case P_u16_SrcTSap:
+
+	case P_i32_PDURequest:
+
+	case P_i32_MaxClients:
+
+	case P_i32_BSendTimeout:
+
+	case P_i32_BRecvTimeout:
+
+	case P_u32_RecoveryTime:
+
+	case P_u32_KeepAliveTime:
+
+	}
+	var code C.int = C.Cli_SetParam(Client, C.int(paraNumber), pValue)
+	err = cliErrorsTable[int(code)]
+	return
+}
+func Cli_ReadArea(cli S7Object, Area S7Area, DBNumber int, Start int, Amount int, WordLen S7WL) (pUsrData []byte, err error) {
+	pUsrData = make([]byte, WordLen.Size()*Amount+Start)
+	var code C.int = C.Cli_ReadArea(cli, C.int(Area), C.int(DBNumber), C.int(Start), C.int(Amount), C.int(WordLen), unsafe.Pointer(&pUsrData[0]))
+	err = cliErrorsTable[int(code)]
+	return
+}
+
 func Cli_GetCpuInfo(cli S7Object) (info TS7CpuInfo, err error) {
 	var code C.int = C.Cli_GetCpuInfo(cli, (*C.TS7CpuInfo)(unsafe.Pointer(&info)))
 	err = cliErrorsTable[int(code)]
