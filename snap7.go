@@ -1,5 +1,7 @@
 package snap7go
 
+import "unsafe"
+
 type ParamNumber = int
 
 const P_u16_LocalPort ParamNumber = 1
@@ -18,13 +20,7 @@ const P_i32_BRecvTimeout ParamNumber = 13
 const P_u32_RecoveryTime ParamNumber = 14
 const P_u32_KeepAliveTime ParamNumber = 15
 
-// Area ID
-const byte S7AreaPE = 0x81
-const byte S7AreaPA = 0x82
-const byte S7AreaMK = 0x83
-const byte S7AreaDB = 0x84
-const byte S7AreaCT = 0x1C
-const byte S7AreaTM = 0x1D
+
 
 func Value_Pvalue(paraNumber ParamNumber, value interface{}) (pValue unsafe.Pointer) {
 	switch paraNumber {
