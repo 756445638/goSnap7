@@ -17,7 +17,7 @@ package snap7go
 //#include "snap7.h"
 //#include <stdlib.h>
 /*
-	// real go implementation
+	// go implemetation protocol
 	extern void S7API GlobalAsCallback(void *usrPtr, int opCode, int opResult);
 
 */
