@@ -23,14 +23,14 @@ package snap7go
 import "C"
 import "unsafe"
 
-var registeredCallBacks = make(map[uintptr]func(usrptr *C.void, opCode int, opResult int))
+var registeredCallBacks = make(map[uintptr]func(usrptr uintptr, opCode int, opResult int))
 
 /*
 
  */
 func Cli_SetAsCallback(
 	client S7Object,
-	callback func(usrptr *C.void, opCode int, opResult int),
+	callback func(usrptr uintptr, opCode int, opResult int),
 	usrptr uintptr) error {
 	var code C.int = C.Cli_SetAsCallback(
 		client,
@@ -54,5 +54,5 @@ func GlobalAsCallback(usrptr *C.void, opCode C.int, opResult C.int) {
 	if callback == nil {
 		return
 	}
-	callback(usrptr, int(opCode), int(opResult))
+	callback(uintptr(unsafe.Pointer(usrptr)), int(opCode), int(opResult))
 }
