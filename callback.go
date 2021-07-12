@@ -7,8 +7,9 @@ package snap7go
 	2.把注册时候的usrptr作为key存入registeredCallBacks
 	3.GlobalAsCallback的时候根据usrptr的时候动态指派
 
-	注意，再为每个client注册回调函数时候，务必使usrptr不同
+	注意，再为每个client注册回调函数时候，务必使usrptr不同!!
 
+	usrptr在这里充当了上下文的作用，caller去确定需要什么样的上下文。
 
 */
 
