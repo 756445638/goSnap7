@@ -10,17 +10,6 @@ import (
 	"unsafe"
 )
 
-var serverErrorsTable = map[int]error{
-	0x001: errors.New("The server cannot be started."),
-	0x002: errors.New("A null was passed as area pointer."),
-	0x003: errors.New("Trying to re-registering an area."),
-	0x004: errors.New("Area code unknown."),
-	0x005: errors.New("Invalid param(s) supplied to the current function."),
-	0x006: errors.New("Trying to registering too many DB (>2048)."),
-	0x007: errors.New("Invalid param number suppilied to Get/SetParam."),
-	0x008: errors.New("Cannot change parameter because running."),
-}
-
 func Srv_Create() (server S7Object) {
 	server = C.Srv_Create()
 	return
@@ -214,10 +203,10 @@ func Srv_SetMask(Server S7Object, MaskKind int, Mask uint32) (err error) {
 }
 
 // func Srv_EventText(TSrvEvent *Event, char *Text, int TextLen)
-func Srv_EventText( Event TSrvEvent ) error {
-	 const length = 512
+func Srv_EventText(Event TSrvEvent) error {
+	const length = 512
 	var buf [length]byte
-	var errCode = C.Srv_EventText((*C.TSrvEvent)(unsafe.Pointer(&Event)),(*C.char)(unsafe.Pointer(&buf[0])),length)
+	var errCode = C.Srv_EventText((*C.TSrvEvent)(unsafe.Pointer(&Event)), (*C.char)(unsafe.Pointer(&buf[0])), length)
 	if errCode != 0 {
 		if e, ok := serverErrorsTable[int(errCode)]; ok {
 			return e
@@ -227,5 +216,3 @@ func Srv_EventText( Event TSrvEvent ) error {
 	}
 	return errors.New(string(buf[:]))
 }
-
-
