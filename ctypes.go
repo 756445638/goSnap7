@@ -67,3 +67,4 @@ type TSrvEvent struct {
 	EvtParam3	uint16
 	EvtParam4	uint16
 }
+type TS7BlocksOfType [8192]uint16

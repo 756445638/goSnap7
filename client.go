@@ -27,7 +27,7 @@ func Cli_ConnectTo(cli S7Object, address string, rack int, slot int) (err error)
 		C.free(unsafe.Pointer(s))
 	}()
 	var code C.int = C.Cli_ConnectTo(cli, s, C.int(rack), C.int(slot))
-	err = cliErrorsTable[int(code)]
+	err = Cli_ErrorText(int(code))
 	return
 }
 
@@ -37,22 +37,22 @@ func Cli_SetConnectionParams(cli S7Object, address string, localTSAP uint16, rem
 		C.free(unsafe.Pointer(s))
 	}()
 	var code C.int = C.Cli_SetConnectionParams(cli, s, C.word(localTSAP), C.word(remoteTSAP))
-	err = cliErrorsTable[int(code)]
+	err = Cli_ErrorText(int(code))
 	return
 }
 func Cli_SetConnectionType(cli S7Object, connectionType CONNTYPE) (err error) {
 	var code C.int = C.Cli_SetConnectionType(cli, C.word(connectionType))
-	err = cliErrorsTable[int(code)]
+	err = Cli_ErrorText(int(code))
 	return
 }
 func Cli_Connect(cli S7Object) (err error) {
 	var code C.int = C.Cli_Connect(cli)
-	err = cliErrorsTable[int(code)]
+	err = Cli_ErrorText(int(code))
 	return
 }
 func Cli_Disconnect(cli S7Object) (err error) {
 	var code C.int = C.Cli_Disconnect(cli)
-	err = cliErrorsTable[int(code)]
+	err = Cli_ErrorText(int(code))
 	return
 }
 
@@ -94,7 +94,7 @@ func Cli_GetParam(cli S7Object, paraNumber ParamNumber) (value interface{}, err 
 		pValue = unsafe.Pointer(new(uint32))
 	}
 	var code C.int = C.Cli_GetParam(cli, C.int(paraNumber), pValue)
-	err = cliErrorsTable[int(code)]
+	err = Cli_ErrorText(int(code))
 	if err != nil {
 		return
 	}
@@ -139,20 +139,20 @@ func Cli_GetParam(cli S7Object, paraNumber ParamNumber) (value interface{}, err 
 func Cli_SetParam(cli S7Object, paraNumber ParamNumber, value interface{}) (err error) {
 	pvalue := Value_Pvalue(paraNumber, value)
 	var code C.int = C.Cli_SetParam(cli, C.int(paraNumber), pvalue)
-	err = cliErrorsTable[int(code)]
+	err = Cli_ErrorText(int(code))
 	return
 }
 func Cli_ReadArea(cli S7Object, area S7Area, dBNumber int, start int, amount int, wordLen S7WL) (pUsrData []byte, err error) {
 	pUsrData = make([]byte, dataLength(wordLen, int32(amount), int32(start)))
 	var code C.int = C.Cli_ReadArea(cli, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
-	err = cliErrorsTable[int(code)]
+	err = Cli_ErrorText(int(code))
 	return
 }
 
 func Cli_WriteArea(cli S7Object, area S7Area, dBNumber int, start int, amount int, wordLen S7WL, pUsrData []byte) (err error) {
 	pUsrData = make([]byte, dataLength(wordLen, int32(amount), int32(start)))
 	var code C.int = C.Cli_WriteArea(cli, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
-	err = cliErrorsTable[int(code)]
+	err = Cli_ErrorText(int(code))
 	return
 }
 func Cli_ReadMultiVars(cli S7Object, items []TS7DataItem) (datas [][]byte, err error) {
@@ -163,13 +163,13 @@ func Cli_ReadMultiVars(cli S7Object, items []TS7DataItem) (datas [][]byte, err e
 		v.Pdata = &t[0]
 	}
 	var code C.int = C.Cli_ReadMultiVars(cli, (C.PS7DataItem)(unsafe.Pointer(&items[0])), C.int(itemsCount))
-	err = cliErrorsTable[int(code)]
+	err = Cli_ErrorText(int(code))
 	return
 }
 func Cli_WriteMultiVars(cli S7Object, items []TS7DataItem) (datas [][]byte, err error) {
 	itemsCount := len(items)
 	var code C.int = C.Cli_WriteMultiVars(cli, (C.PS7DataItem)(unsafe.Pointer(&items[0])), C.int(itemsCount))
-	err = cliErrorsTable[int(code)]
+	err = Cli_ErrorText(int(code))
 	return
 }
 
@@ -211,18 +211,35 @@ func Cli_CTWrite(cli S7Object, dBNumber int, start int, amount int, pUsrData []b
 }
 func Cli_ListBlocks(cli S7Object) (pUsrData TS7BlocksList, err error) {
 	var code C.int = C.Cli_ListBlocks(cli, (*C.TS7BlocksList)(unsafe.Pointer(&pUsrData)))
-	err = cliErrorsTable[int(code)]
+	err = Cli_ErrorText(int(code))
 	return
 }
 func Cli_GetAgBlockInfo(cli S7Object, blockType Block, blockNum int) (pUsrData TS7BlockInfo, err error) {
 	var code C.int = C.Cli_GetAgBlockInfo(cli, C.int(blockType), C.int(blockNum), (*C.TS7BlockInfo)(unsafe.Pointer(&pUsrData)))
-	err = cliErrorsTable[int(code)]
+	err = Cli_ErrorText(int(code))
 	return
 }
 
+//int S7API Cli_GetPgBlockInfo(S7Object Client, void *pBlock, TS7BlockInfo *pUsrData, int Size);
+func Cli_GetPgBlockInfo(cli S7Object, size int) (pBlock []byte, pUsrData TS7BlockInfo, err error) {
+	pBlock = make([]byte, size)
+	var code C.int = C.Cli_GetPgBlockInfo(cli, unsafe.Pointer(&pBlock[0]), (*C.TS7BlockInfo)(unsafe.Pointer(&pUsrData)), C.int(size))
+	err = Cli_ErrorText(int(code))
+	return
+}
+
+//int S7API Cli_ListBlocksOfType(S7Object Client, int BlockType, TS7BlocksOfType *pUsrData, int *ItemsCount);
+func Cli_ListBlocksOfType(cli S7Object, blockType Block) (pUsrData TS7BlocksOfType, itemsCount int, err error) {
+	var code C.int = C.Cli_ListBlocksOfType(cli, C.int(blockType), (*C.TS7BlocksOfType)(unsafe.Pointer(&pUsrData[0])), (*C.int)(unsafe.Pointer(&itemsCount)))
+	err = Cli_ErrorText(int(code))
+	return
+}
+
+//int S7API Cli_Upload(S7Object Client, int BlockType, int BlockNum, void *pUsrData, int *Size);
+
 func Cli_GetCpuInfo(cli S7Object) (info TS7CpuInfo, err error) {
 	var code C.int = C.Cli_GetCpuInfo(cli, (*C.TS7CpuInfo)(unsafe.Pointer(&info)))
-	err = cliErrorsTable[int(code)]
+	err = Cli_ErrorText(int(code))
 	return
 }
 
