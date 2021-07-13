@@ -6,6 +6,7 @@ package snap7go
 import "C"
 import (
 	"errors"
+	"fmt"
 	"unsafe"
 )
 
@@ -211,3 +212,20 @@ func Srv_SetMask(Server S7Object, MaskKind int, Mask uint32) (err error) {
 	err = serverErrorsTable[int(code)]
 	return
 }
+
+// func Srv_EventText(TSrvEvent *Event, char *Text, int TextLen)
+func Srv_EventText( Event TSrvEvent ) error {
+	 const length = 512
+	var buf [length]byte
+	var errCode = C.Srv_EventText((*C.TSrvEvent)(unsafe.Pointer(&Event)),(*C.char)(unsafe.Pointer(&buf[0])),length)
+	if errCode != 0 {
+		if e, ok := serverErrorsTable[int(errCode)]; ok {
+			return e
+		} else {
+			return fmt.Errorf("unknown error code %d", errCode)
+		}
+	}
+	return errors.New(string(buf[:]))
+}
+
+
