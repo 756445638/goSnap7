@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        uses: n8maninger/action-golang-test@v1
+      - uses: n8maninger/action-golang-test@v1
   lint:
     runs-on: ubuntu-latest
     steps:
