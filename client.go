@@ -236,6 +236,20 @@ func Cli_ListBlocksOfType(cli S7Object, blockType Block) (pUsrData TS7BlocksOfTy
 }
 
 //int S7API Cli_Upload(S7Object Client, int BlockType, int BlockNum, void *pUsrData, int *Size);
+func Cli_Upload(cli S7Object, blockType Block, blockNum int, pUsrData []byte, size int) (err error) {
+	pUsrData = make([]byte, size)
+	var code C.int = C.Cli_Upload(cli, C.int(blockType), C.int(blockNum), unsafe.Pointer(&pUsrData[0]), (*C.int)(unsafe.Pointer(&size)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_FullUpload(S7Object Client, int BlockType, int BlockNum, void *pUsrData, int *Size);
+func Cli_FullUpload(cli S7Object, blockType Block, blockNum int, pUsrData []byte, size int) (err error) {
+	pUsrData = make([]byte, size)
+	var code C.int = C.Cli_FullUpload(cli, C.int(blockType), C.int(blockNum), unsafe.Pointer(&pUsrData[0]), (*C.int)(unsafe.Pointer(&size)))
+	err = Cli_ErrorText(code)
+	return
+}
 
 func Cli_GetCpuInfo(cli S7Object) (info TS7CpuInfo, err error) {
 	var code C.int = C.Cli_GetCpuInfo(cli, (*C.TS7CpuInfo)(unsafe.Pointer(&info)))
