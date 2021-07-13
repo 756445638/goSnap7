@@ -22,10 +22,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: n8maninger/action-golang-test@v1
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run GolangCI-Lint Action by building from repository
-        uses: matoous/golangci-lint-action@v1.1.0
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Run GolangCI-Lint Action by building from repository
+  #       uses: matoous/golangci-lint-action@v1.1.0
 
         
