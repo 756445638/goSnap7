@@ -111,7 +111,7 @@ func (s S7WL) size() int32 {
 	case S7WLTimer:
 		return 1
 	}
-	panic(fmt.Sprintf("S7WL not exist:", s))
+	panic(fmt.Sprintf("S7WL not exist:%d", s))
 }
 
 func Value_Pvalue(paraNumber ParamNumber, value interface{}) (pValue unsafe.Pointer) {
