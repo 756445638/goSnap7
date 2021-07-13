@@ -1,7 +1,9 @@
 package snap7go
 
-import "fmt"
-import "unsafe"
+import (
+	"fmt"
+	"unsafe"
+)
 
 //------------------------------------------------------------------------------
 //                                  PARAMS LIST
