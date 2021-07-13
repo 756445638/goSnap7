@@ -67,6 +67,9 @@ type TSrvEvent struct {
 	EvtParam3	uint16
 	EvtParam4	uint16
 }
+
+type TS7BlocksOfType [8192]uint16
+
 type PS7Tag struct {
 	Area		int32
 	DBNumber	int32
@@ -74,3 +77,4 @@ type PS7Tag struct {
 	Size		int32
 	WordLen		int32
 }
+
