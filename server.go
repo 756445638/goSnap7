@@ -108,11 +108,9 @@ func Srv_GetParam(Server S7Object, paraNumber ParamNumber) (value interface{}, e
 	return
 }
 
- 
-
 func Srv_SetParam(Server S7Object, paraNumber ParamNumber, value interface{}) (err error) {
 	var pValue unsafe.Pointer
-	pValue = Value_Pvalue(paraNumber,value)
+	pValue = Value_Pvalue(paraNumber, value)
 	var code C.int = C.Srv_SetParam(Server, C.int(paraNumber), pValue)
 	err = cliErrorsTable[int(code)]
 	return
@@ -146,35 +144,35 @@ func Srv_Stop(Server S7Object) (err error) {
 //typedef uint16_t   word;
 // func Srv_RegisterArea(S7Object Server, int AreaCode, word Index, void *pUsrData, int Size)
 func Srv_RegisterArea(Server S7Object, AreaCode int, Index uint16, pUsrData []byte, Size int) (err error) {
-	var code C.int = C.Srv_RegisterArea(Server,C.int(AreaCode),C.uint16_t(Index),unsafe.Pointer(&pUsrData[0]),C.int(Size))
+	var code C.int = C.Srv_RegisterArea(Server, C.int(AreaCode), C.uint16_t(Index), unsafe.Pointer(&pUsrData[0]), C.int(Size))
 	err = cliErrorsTable[int(code)]
 	return
 }
 
 // func Srv_UnregisterArea(S7Object Server, int AreaCode, word Index);
 func Srv_UnregisterArea(Server S7Object, AreaCode int, Index uint16) (err error) {
-	var code C.int = C.Srv_UnregisterArea(Server,C.int(AreaCode),C.uint16_t(Index))
+	var code C.int = C.Srv_UnregisterArea(Server, C.int(AreaCode), C.uint16_t(Index))
 	err = cliErrorsTable[int(code)]
 	return
 }
 
 // func Srv_LockArea(S7Object Server, int AreaCode, word Index);
 func Srv_LockArea(Server S7Object, AreaCode int, Index uint16) (err error) {
-	var code C.int = C.Srv_LockArea(Server,C.int(AreaCode),C.uint16_t(Index))
+	var code C.int = C.Srv_LockArea(Server, C.int(AreaCode), C.uint16_t(Index))
 	err = cliErrorsTable[int(code)]
 	return
 }
 
 // func Srv_UnlockArea(S7Object Server, int AreaCode, word Index);
 func Srv_UnlockArea(Server S7Object, AreaCode int, Index uint16) (err error) {
-	var code C.int = C.Srv_UnlockArea(Server,C.int(AreaCode),C.uint16_t(Index))
+	var code C.int = C.Srv_UnlockArea(Server, C.int(AreaCode), C.uint16_t(Index))
 	err = cliErrorsTable[int(code)]
 	return
 }
 
 // func Srv_GetStatus(S7Object Server, int *ServerStatus, int *CpuStatus, int *ClientsCount);
-func Srv_GetStatus( Server S7Object, CpuStatus int, ClientsCount int) (ServerStatus int,err error) {
-	var code C.int = C.Srv_GetStatus(Server,(*C.int)(unsafe.Pointer(&ServerStatus)),(*C.int)(unsafe.Pointer(&CpuStatus)),(*C.int)(unsafe.Pointer(&ClientsCount)))
+func Srv_GetStatus(Server S7Object, CpuStatus int, ClientsCount int) (ServerStatus int, err error) {
+	var code C.int = C.Srv_GetStatus(Server, (*C.int)(unsafe.Pointer(&ServerStatus)), (*C.int)(unsafe.Pointer(&CpuStatus)), (*C.int)(unsafe.Pointer(&ClientsCount)))
 	err = cliErrorsTable[int(code)]
 	return
 }
