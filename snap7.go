@@ -58,7 +58,15 @@ const S7WLReal S7WL = 0x08
 const S7WLCounter S7WL = 0x1C
 const S7WLTimer S7WL = 0x1D
 
-func (s S7WL) Size() int {
+// CPU status
+const S7CpuStatusUnknown = 0x00
+const S7CpuStatusRun = 0x08
+const S7CpuStatusStop = 0x04
+
+func dataLength(wordLen S7WL, amount int32, start int32) int32 {
+	return wordLen.size()*amount + start
+}
+func (s S7WL) size() int32 {
 	switch s {
 	case S7WLBit:
 		return 1
