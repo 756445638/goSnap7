@@ -87,9 +87,11 @@ const Block_SFB Block = 0x46
 // const byte BlockLangGRAPH     = 0x06;
 
 // CPU status
-const S7CpuStatusUnknown = 0x00
-const S7CpuStatusRun = 0x08
-const S7CpuStatusStop = 0x04
+type S7CpuStatus int
+
+const S7CpuStatusUnknown S7CpuStatus = 0x00
+const S7CpuStatusRun S7CpuStatus = 0x08
+const S7CpuStatusStop S7CpuStatus = 0x04
 
 func dataLength(wordLen S7WL, amount int32, start int32) int32 {
 	return wordLen.size()*amount + start

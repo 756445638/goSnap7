@@ -7,7 +7,6 @@ import "C"
 //#include <stdlib.h>
 import "C"
 import (
-	"errors"
 	"unsafe"
 )
 
@@ -236,64 +235,142 @@ func Cli_ListBlocksOfType(cli S7Object, blockType Block) (pUsrData TS7BlocksOfTy
 }
 
 //int S7API Cli_Upload(S7Object Client, int BlockType, int BlockNum, void *pUsrData, int *Size);
-func Cli_Upload(cli S7Object, blockType Block, blockNum int, pUsrData []byte, size int) (err error) {
-	pUsrData = make([]byte, size)
+func Cli_Upload(cli S7Object, blockType Block, blockNum int, pUsrData []byte) (size int, err error) {
+	size = len(pUsrData)
 	var code C.int = C.Cli_Upload(cli, C.int(blockType), C.int(blockNum), unsafe.Pointer(&pUsrData[0]), (*C.int)(unsafe.Pointer(&size)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_FullUpload(S7Object Client, int BlockType, int BlockNum, void *pUsrData, int *Size);
-func Cli_FullUpload(cli S7Object, blockType Block, blockNum int, pUsrData []byte, size int) (err error) {
-	pUsrData = make([]byte, size)
+func Cli_FullUpload(cli S7Object, blockType Block, blockNum int, pUsrData []byte) (size int, err error) {
+	size = len(pUsrData)
 	var code C.int = C.Cli_FullUpload(cli, C.int(blockType), C.int(blockNum), unsafe.Pointer(&pUsrData[0]), (*C.int)(unsafe.Pointer(&size)))
 	err = Cli_ErrorText(code)
 	return
 }
 
-func Cli_GetCpuInfo(cli S7Object) (info TS7CpuInfo, err error) {
-	var code C.int = C.Cli_GetCpuInfo(cli, (*C.TS7CpuInfo)(unsafe.Pointer(&info)))
+//int S7API Cli_Download(S7Object Client, int BlockNum, void *pUsrData, int Size);
+func Cli_Download(cli S7Object, blockNum int, pUsrData []byte, size int) (err error) {
+	pUsrData = make([]byte, size)
+	var code C.int = C.Cli_Download(cli, C.int(blockNum), unsafe.Pointer(&pUsrData[0]), C.int(size))
 	err = Cli_ErrorText(code)
 	return
 }
 
-var cliErrorsTable = map[int]error{
-	0x001: errors.New("error during PDU negotiation."),
-	0x002: errors.New("Invalid param(s) supplied to the current function."),
-	0x003: errors.New("A Job is pending : there is an async function in progress."),
-	0x004: errors.New("More than 20 items where passed to a MultiRead/Write area function."),
-	0x005: errors.New("Invalid Wordlen param supplied to the current function"),
-	0x006: errors.New("Partial data where written : The target area is smaller than the DataSize supplied."),
-	0x007: errors.New("A MultiRead/MultiWrite function has datasize over the PDU size."),
-	0x008: errors.New("Invalid answer from the PLC."),
-	0x009: errors.New("An address out of range was specified."),
-	0x00A: errors.New("Invalid Transportsize parameter was supplied to a Read/WriteArea function."),
-	0x00B: errors.New("Invalid datasize parameter supplied to the current function."),
-	0x00C: errors.New("Item requested was not found in the PLC."),
-	0x00D: errors.New("Invalid value supplied to the current function."),
-	0x00E: errors.New("PLC cannot be started."),
-	0x00F: errors.New("PLC is already in RUN stare."),
-	0x010: errors.New("PLC cannot be stopped."),
-	0x011: errors.New("Cannot copy RAM to ROM : the PLC is running or doesn’t support this function."),
-	0x012: errors.New("Cannot compress : the PLC is running or doesn’t support this function."),
-	0x013: errors.New("PLC is already in STOP state."),
-	0x014: errors.New("Function not available."),
-	0x015: errors.New("Block upload sequence failed."),
-	0x016: errors.New("Invalid data size received from the PLC."),
-	0x017: errors.New("Invalid block type supplied to the current function."),
-	0x018: errors.New("Invalid block supplied to the current function."),
-	0x019: errors.New("Invalid block size supplied to the current function."),
-	0x01A: errors.New("Block download sequence failed."),
-	0x01B: errors.New("Insert command (implicit command sent after a block download) refused."),
-	0x01C: errors.New("Delete command refused."),
-	0x01D: errors.New("This operation is password protected."),
-	0x01E: errors.New("Invalid password supplied."),
-	0x01F: errors.New("There is no password to set or clear : the protection is OFF."),
-	0x020: errors.New("Job timeout."),
-	0x021: errors.New("Partial data where read : The source area is greater than the DataSize supplied."),
-	0x022: errors.New("The buffer supplied is too small."),
-	0x023: errors.New("Function refused by the PLC."),
-	0x024: errors.New("Invalid param number suppilied to Get/SetParam."),
-	0x025: errors.New("Cannot perform : the client is destroying."),
-	0x026: errors.New("Cannot change parameter because connected."),
+//int S7API Cli_Delete(S7Object Client, int BlockType, int BlockNum);
+func Cli_Delete(cli S7Object, blockType Block, blockNum int) (err error) {
+	var code C.int = C.Cli_Delete(cli, C.int(blockType), C.int(blockNum))
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_DBGet(S7Object Client, int DBNumber, void *pUsrData, int *Size);
+func Cli_DBGet(cli S7Object, dBNumber int, pUsrData []byte) (size int, err error) {
+	return Cli_Upload(cli, Block_DB, dBNumber, pUsrData)
+}
+
+//int S7API Cli_DBFill(S7Object Client, int DBNumber, int FillChar);
+func Cli_DBFill(cli S7Object, dBNumber int, fillChar int) (err error) {
+	var code C.int = C.Cli_DBFill(cli, C.int(dBNumber), C.int(fillChar))
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_GetPlcDateTime(S7Object Client, tm *DateTime);
+func Cli_GetPlcDateTime(cli S7Object) (dataTime Tm, err error) {
+	var code C.int = C.Cli_GetPlcDateTime(cli, (*C.tm)(unsafe.Pointer(&dataTime)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_SetPlcDateTime(S7Object Client, tm *DateTime);
+func Cli_SetPlcDateTime(cli S7Object, dataTime Tm) (err error) {
+	var code C.int = C.Cli_SetPlcDateTime(cli, (*C.tm)(unsafe.Pointer(&dataTime)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_SetPlcSystemDateTime(S7Object Client);
+func Cli_SetPlcSystemDateTime(cli S7Object) (err error) {
+	var code C.int = C.Cli_SetPlcSystemDateTime(cli)
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_GetOrderCode(S7Object Client, TS7OrderCode *pUsrData);
+func Cli_GetOrderCode(cli S7Object) (pUsrData TS7OrderCode, err error) {
+	var code C.int = C.Cli_GetOrderCode(cli, (*C.TS7OrderCode)(unsafe.Pointer(&pUsrData)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_GetCpuInfo(S7Object Client, TS7CpuInfo *pUsrData);
+func Cli_GetCpuInfo(cli S7Object) (pUsrData TS7CpuInfo, err error) {
+	var code C.int = C.Cli_GetCpuInfo(cli, (*C.TS7CpuInfo)(unsafe.Pointer(&pUsrData)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_GetCpInfo(S7Object Client, TS7CpInfo *pUsrData);
+func Cli_GetCpInfo(cli S7Object) (pUsrData TS7CpInfo, err error) {
+	var code C.int = C.Cli_GetCpInfo(cli, (*C.TS7CpInfo)(unsafe.Pointer(&pUsrData)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_ReadSZL(S7Object Client, int ID, int Index, TS7SZL *pUsrData, int *Size);
+func Cli_ReadSZL(cli S7Object, id int, index int) (pUsrData TS7SZL, size int, err error) {
+	var code C.int = C.Cli_ReadSZL(cli, C.int(id), C.int(index), (*C.TS7SZL)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&size)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_ReadSZLList(S7Object Client, TS7SZLList *pUsrData, int *ItemsCount);
+func Cli_ReadSZLList(cli S7Object) (pUsrData TS7SZLList, itemsCount int, err error) {
+	var code C.int = C.Cli_ReadSZLList(cli, (*C.TS7SZLList)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&itemsCount)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_PlcHotStart(S7Object Client);
+func Cli_PlcHotStart(cli S7Object) (err error) {
+	var code C.int = C.Cli_PlcHotStart(cli)
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_PlcColdStart(S7Object Client);
+func Cli_PlcColdStart(cli S7Object) (err error) {
+	var code C.int = C.Cli_PlcColdStart(cli)
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_PlcStop(S7Object Client);
+func Cli_PlcStop(cli S7Object) (err error) {
+	var code C.int = C.Cli_PlcStop(cli)
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_CopyRamToRom(S7Object Client, int Timeout);
+func Cli_CopyRamToRom(cli S7Object, timeout int) (err error) {
+	var code C.int = C.Cli_CopyRamToRom(cli, C.int(timeout))
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_Compress(S7Object Client, int Timeout);
+func Cli_Compress(cli S7Object, timeout int) (err error) {
+	var code C.int = C.Cli_Compress(cli, C.int(timeout))
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_GetPlcStatus(S7Object Client, int *Status);
+func Cli_GetPlcStatus(cli S7Object) (status S7CpuStatus, err error) {
+	var code C.int = C.Cli_GetPlcStatus(cli, (*C.int)(unsafe.Pointer(&status)))
+	err = Cli_ErrorText(code)
+	return
 }

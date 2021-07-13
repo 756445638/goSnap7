@@ -14,3 +14,8 @@ type TSrvEvent C.TSrvEvent
 type TS7BlocksOfType C.TS7BlocksOfType
 
 type PS7Tag C.TS7Tag
+type TS7OrderCode C.TS7OrderCode
+type TS7CpInfo C.TS7CpInfo
+type SZL_HEADER C.SZL_HEADER
+type TS7SZL C.TS7SZL
+type TS7SZLList C.TS7SZLList

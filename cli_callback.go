@@ -41,7 +41,7 @@ func Cli_SetAsCallback(
 		*/
 		(*[0]byte)(unsafe.Pointer(C.GlobalCliAsCallback)),
 		unsafe.Pointer(usrptr))
-	err := cliErrorsTable[int(code)]
+	err := Cli_ErrorText(code)
 	if err != nil {
 		return err
 	}
