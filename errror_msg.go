@@ -10,36 +10,28 @@ import (
 	"unsafe"
 )
 
-func Cli_ErrorText(code int) error {
+func Cli_ErrorText(code C.int) error {
 	if code == 0 {
 		return nil
 	}
 	const length = 512
 	var buf [length]byte
-	var errCode = C.Cli_ErrorText(C.int(code), (*C.char)(unsafe.Pointer(&buf[0])), length)
+	var errCode = C.Cli_ErrorText(code, (*C.char)(unsafe.Pointer(&buf[0])), length)
 	if errCode != 0 {
-		if e, ok := cliErrorsTable[int(errCode)]; ok {
-			return e
-		} else {
-			return fmt.Errorf("unknown error code %d", errCode)
-		}
+		return fmt.Errorf(" C.Cli_ErrorText failed code :%d,origin code %d", errCode, code)
 	}
 	return errors.New(string(buf[:]))
 }
 
-func Srv_ErrorText(code int) error {
+func Srv_ErrorText(code C.int) error {
 	if code == 0 {
 		return nil
 	}
 	const length = 512
 	var buf [length]byte
-	var errCode = C.Srv_ErrorText(C.int(code), (*C.char)(unsafe.Pointer(&buf[0])), length)
+	var errCode = C.Srv_ErrorText(code, (*C.char)(unsafe.Pointer(&buf[0])), length)
 	if errCode != 0 {
-		if e, ok := serverErrorsTable[int(errCode)]; ok {
-			return e
-		} else {
-			return fmt.Errorf("unknown error code %d", errCode)
-		}
+		return fmt.Errorf(" C.Srv_ErrorText failed code :%d,origin code %d", errCode, code)
 	}
 	return errors.New(string(buf[:]))
 }
