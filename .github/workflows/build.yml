@@ -12,8 +12,8 @@ jobs:
         name: Checkout
         uses: actions/checkout@v2
       -
-        name: sudo install gcc 
-        run: apt install gcc -y
+        name: install gcc 
+        run: sudo apt install gcc -y
       -
         name: build 
         run: go build
