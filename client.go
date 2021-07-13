@@ -1,5 +1,5 @@
 package snap7go
-
+1
 import "C"
 
 //#cgo CFLAGS: -I .
