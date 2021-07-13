@@ -214,6 +214,11 @@ func Cli_ListBlocks(cli S7Object) (pUsrData TS7BlocksList, err error) {
 	err = cliErrorsTable[int(code)]
 	return
 }
+func Cli_GetAgBlockInfo(cli S7Object, blockType Block, blockNum int) (pUsrData TS7BlockInfo, err error) {
+	var code C.int = C.Cli_GetAgBlockInfo(cli, C.int(blockType), C.int(blockNum), (*C.TS7BlockInfo)(unsafe.Pointer(&pUsrData)))
+	err = cliErrorsTable[int(code)]
+	return
+}
 
 func Cli_GetCpuInfo(cli S7Object) (info TS7CpuInfo, err error) {
 	var code C.int = C.Cli_GetCpuInfo(cli, (*C.TS7CpuInfo)(unsafe.Pointer(&info)))

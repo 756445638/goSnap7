@@ -56,6 +56,34 @@ const S7WLReal S7WL = 0x08
 const S7WLCounter S7WL = 0x1C
 const S7WLTimer S7WL = 0x1D
 
+// Block type
+type Block int32
+
+const Block_OB Block = 0x38
+const Block_DB Block = 0x41
+const Block_SDB Block = 0x42
+const Block_FC Block = 0x43
+const Block_SFC Block = 0x44
+const Block_FB Block = 0x45
+const Block_SFB Block = 0x46
+
+// Sub Block Type
+// const byte SubBlk_OB  = 0x08;
+// const byte SubBlk_DB  = 0x0A;
+// const byte SubBlk_SDB = 0x0B;
+// const byte SubBlk_FC  = 0x0C;
+// const byte SubBlk_SFC = 0x0D;
+// const byte SubBlk_FB  = 0x0E;
+// const byte SubBlk_SFB = 0x0F;
+
+// Block languages
+// const byte BlockLangAWL       = 0x01;
+// const byte BlockLangKOP       = 0x02;
+// const byte BlockLangFUP       = 0x03;
+// const byte BlockLangSCL       = 0x04;
+// const byte BlockLangDB        = 0x05;
+// const byte BlockLangGRAPH     = 0x06;
+
 // CPU status
 const S7CpuStatusUnknown = 0x00
 const S7CpuStatusRun = 0x08
