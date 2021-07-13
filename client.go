@@ -1,7 +1,5 @@
 package snap7go
 
-import "C"
-
 //#cgo CFLAGS: -I .
 //#include "snap7.h"
 //#include <stdlib.h>
