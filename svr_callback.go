@@ -26,7 +26,7 @@ var (
 // int S7API Srv_SetEventsCallback(S7Object Server, pfn_SrvCallBack pCallback, void *usrPtr);
 func Srv_SetEventsCallback(svr S7Object, handle Pfn_SrvEventCallBack, usrPtr uintptr) error {
 	var code C.int = C.Srv_SetEventsCallback(svr, (*[0]byte)(C.GlobalEventsCallback), unsafe.Pointer(usrPtr))
-	err := Srv_ErrorText(int(code))
+	err := Srv_ErrorText(code)
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func Srv_SetEventsCallback(svr S7Object, handle Pfn_SrvEventCallBack, usrPtr uin
 //int S7API Srv_SetReadEventsCallback(S7Object Server, pfn_SrvCallBack pCallback, void *usrPtr);
 func Srv_SetReadEventsCallback(svr S7Object, handle Pfn_SrvEventCallBack, usrPtr uintptr) error {
 	var code C.int = C.Srv_SetReadEventsCallback(svr, (*[0]byte)(C.GlobalReadEventsCallback), unsafe.Pointer(usrPtr))
-	err := Srv_ErrorText(int(code))
+	err := Srv_ErrorText(code)
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func Srv_SetReadEventsCallback(svr S7Object, handle Pfn_SrvEventCallBack, usrPtr
 //int S7API Srv_SetRWAreaCallback(S7Object Server, pfn_RWAreaCallBack pCallback, void *usrPtr);
 func Srv_SetRWAreaCallback(svr S7Object, handle Pfn_RWAreaCallBack, usrPtr uintptr) error {
 	var code C.int = C.Srv_SetRWAreaCallback(svr, (*[0]byte)(C.GlobalRWAreaCallback), unsafe.Pointer(usrPtr))
-	err := Srv_ErrorText(int(code))
+	err := Srv_ErrorText(code)
 	if err != nil {
 		return err
 	}
@@ -89,11 +89,12 @@ func getPS7TagFormC(t C.PS7Tag) (et PS7Tag) {
 
 //export GlobalRWAreaCallback
 func GlobalRWAreaCallback(usrPtr *C.void, sender C.int, operation C.int, pTag C.PS7Tag, pUserData *C.void) {
+	up := uintptr(unsafe.Pointer(usrPtr))
 	callback := svrRWAreaCallbacks[up]
 	if callback == nil {
 		return
 	}
-	up := uintptr(unsafe.Pointer(usrPtr))
+
 	pt := getPS7TagFormC(pTag)
 	callback(up, int(sender), int(operation), &pt, pUserData)
 }
