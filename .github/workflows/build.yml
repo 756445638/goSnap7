@@ -16,6 +16,6 @@ jobs:
         run: sudo apt install gcc -y
       -
         name: build 
-        run: pwd && go build
+        run: go build
 
         
