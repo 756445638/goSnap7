@@ -24,7 +24,7 @@ package snap7go
 import "C"
 import "unsafe"
 
-var registeredCliAsCallBacks = make(map[uintptr]func(usrptr uintptr, opCode int, opResult int))
+var cliAsCallBacks = make(map[uintptr]func(usrptr uintptr, opCode int, opResult int))
 
 /*
 
@@ -45,13 +45,13 @@ func Cli_SetAsCallback(
 	if err != nil {
 		return err
 	}
-	registeredCliAsCallBacks[usrptr] = callback
+	cliAsCallBacks[usrptr] = callback
 	return err
 }
 
 //export GlobalCliAsCallback
 func GlobalCliAsCallback(usrptr *C.void, opCode C.int, opResult C.int) {
-	callback := registeredCliAsCallBacks[uintptr(unsafe.Pointer(usrptr))]
+	callback := cliAsCallBacks[uintptr(unsafe.Pointer(usrptr))]
 	if callback == nil {
 		return
 	}
