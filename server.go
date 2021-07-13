@@ -227,3 +227,5 @@ func Srv_EventText( Event TSrvEvent ) error {
 	}
 	return errors.New(string(buf[:]))
 }
+
+
