@@ -378,3 +378,46 @@ func Cli_GetPlcStatus(cli S7Object) (status S7CpuStatus, err error) {
 	err = Cli_ErrorText(code)
 	return
 }
+
+//int S7API Cli_GetProtection(S7Object Client, TS7Protection *pUsrData);
+func Cli_GetProtection(cli S7Object) (pUsrData TS7Protection, err error) {
+	var code C.int = C.Cli_GetProtection(cli, (*C.TS7Protection)(unsafe.Pointer(&pUsrData)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_SetSessionPassword(S7Object Client, char *Password);
+func Cli_SetSessionPassword(cli S7Object, password string) (err error) {
+	var code C.int = C.Cli_SetSessionPassword(cli, (*C.char)(unsafe.Pointer(&password)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_ClearSessionPassword(S7Object Client);
+func Cli_ClearSessionPassword(cli S7Object) (err error) {
+	var code C.int = C.Cli_ClearSessionPassword(cli)
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_IsoExchangeBuffer(S7Object Client, void *pUsrData, int *Size);
+func Cli_IsoExchangeBuffer(cli S7Object, pUsrData []byte) (size int, err error) {
+	size = len(pUsrData)
+	var code C.int = C.Cli_IsoExchangeBuffer(cli, unsafe.Pointer(&pUsrData[0]), (*C.int)(unsafe.Pointer(&size)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_GetExecTime(S7Object Client, int *Time);
+func Cli_GetExecTime(cli S7Object) (time int, err error) {
+	var code C.int = C.Cli_GetExecTime(cli, (*C.int)(unsafe.Pointer(&time)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+//int S7API Cli_GetLastError(S7Object Client, int *LastError);
+
+//int S7API Cli_GetPduLength(S7Object Client, int *Requested, int *Negotiated);
+//int S7API Cli_ErrorText(int Error, char *Text, int TextLen);
+//// 1.1.0
+//int S7API Cli_GetConnected(S7Object Client, int *Connected);
