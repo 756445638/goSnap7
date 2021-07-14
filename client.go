@@ -163,9 +163,13 @@ func Cli_ReadMultiVars(cli S7Object, items []TS7DataItem) (datas [][]byte, err e
 	err = Cli_ErrorText(code)
 	return
 }
-func Cli_WriteMultiVars(cli S7Object, items []TS7DataItem) (datas [][]byte, err error) {
+func Cli_WriteMultiVars(cli S7Object, items []TS7DataItemGo) (err error) {
 	itemsCount := len(items)
-	var code C.int = C.Cli_WriteMultiVars(cli, (C.PS7DataItem)(unsafe.Pointer(&items[0])), C.int(itemsCount))
+	itemsC := make([]TS7DataItem, itemsCount)
+	for k, v := range items {
+		itemsC[k] = v.ToC()
+	}
+	var code C.int = C.Cli_WriteMultiVars(cli, (C.PS7DataItem)(unsafe.Pointer(&itemsC[0])), C.int(itemsCount))
 	err = Cli_ErrorText(code)
 	return
 }
