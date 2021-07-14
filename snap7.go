@@ -38,46 +38,46 @@ const errLibInvalidObject JobStatus = -2
 //                                   CLIENT
 //******************************************************************************
 // Error codes
-type ErrorCode int
+type CliErrorCode int
 
-const errNegotiatingPDU ErrorCode = 0x00100000
-const errCliInvalidParams ErrorCode = 0x00200000
-const errCliJobPending ErrorCode = 0x00300000
-const errCliTooManyItems ErrorCode = 0x00400000
-const errCliInvalidWordLen ErrorCode = 0x00500000
-const errCliPartialDataWritten ErrorCode = 0x00600000
-const errCliSizeOverPDU ErrorCode = 0x00700000
-const errCliInvalidPlcAnswer ErrorCode = 0x00800000
-const errCliAddressOutOfRange ErrorCode = 0x00900000
-const errCliInvalidTransportSize ErrorCode = 0x00A00000
-const errCliWriteDataSizeMismatch ErrorCode = 0x00B00000
-const errCliItemNotAvailable ErrorCode = 0x00C00000
-const errCliInvalidValue ErrorCode = 0x00D00000
-const errCliCannotStartPLC ErrorCode = 0x00E00000
-const errCliAlreadyRun ErrorCode = 0x00F00000
-const errCliCannotStopPLC ErrorCode = 0x01000000
-const errCliCannotCopyRamToRom ErrorCode = 0x01100000
-const errCliCannotCompress ErrorCode = 0x01200000
-const errCliAlreadyStop ErrorCode = 0x01300000
-const errCliFunNotAvailable ErrorCode = 0x01400000
-const errCliUploadSequenceFailed ErrorCode = 0x01500000
-const errCliInvalidDataSizeRecvd ErrorCode = 0x01600000
-const errCliInvalidBlockType ErrorCode = 0x01700000
-const errCliInvalidBlockNumber ErrorCode = 0x01800000
-const errCliInvalidBlockSize ErrorCode = 0x01900000
-const errCliDownloadSequenceFailed ErrorCode = 0x01A00000
-const errCliInsertRefused ErrorCode = 0x01B00000
-const errCliDeleteRefused ErrorCode = 0x01C00000
-const errCliNeedPassword ErrorCode = 0x01D00000
-const errCliInvalidPassword ErrorCode = 0x01E00000
-const errCliNoPasswordToSetOrClear ErrorCode = 0x01F00000
-const errCliJobTimeout ErrorCode = 0x02000000
-const errCliPartialDataRead ErrorCode = 0x02100000
-const errCliBufferTooSmall ErrorCode = 0x02200000
-const errCliFunctionRefused ErrorCode = 0x02300000
-const errCliDestroying ErrorCode = 0x02400000
-const errCliInvalidParamNumber ErrorCode = 0x02500000
-const errCliCannotChangeParam ErrorCode = 0x02600000
+const errNegotiatingPDU CliErrorCode = 0x00100000
+const errCliInvalidParams CliErrorCode = 0x00200000
+const errCliJobPending CliErrorCode = 0x00300000
+const errCliTooManyItems CliErrorCode = 0x00400000
+const errCliInvalidWordLen CliErrorCode = 0x00500000
+const errCliPartialDataWritten CliErrorCode = 0x00600000
+const errCliSizeOverPDU CliErrorCode = 0x00700000
+const errCliInvalidPlcAnswer CliErrorCode = 0x00800000
+const errCliAddressOutOfRange CliErrorCode = 0x00900000
+const errCliInvalidTransportSize CliErrorCode = 0x00A00000
+const errCliWriteDataSizeMismatch CliErrorCode = 0x00B00000
+const errCliItemNotAvailable CliErrorCode = 0x00C00000
+const errCliInvalidValue CliErrorCode = 0x00D00000
+const errCliCannotStartPLC CliErrorCode = 0x00E00000
+const errCliAlreadyRun CliErrorCode = 0x00F00000
+const errCliCannotStopPLC CliErrorCode = 0x01000000
+const errCliCannotCopyRamToRom CliErrorCode = 0x01100000
+const errCliCannotCompress CliErrorCode = 0x01200000
+const errCliAlreadyStop CliErrorCode = 0x01300000
+const errCliFunNotAvailable CliErrorCode = 0x01400000
+const errCliUploadSequenceFailed CliErrorCode = 0x01500000
+const errCliInvalidDataSizeRecvd CliErrorCode = 0x01600000
+const errCliInvalidBlockType CliErrorCode = 0x01700000
+const errCliInvalidBlockNumber CliErrorCode = 0x01800000
+const errCliInvalidBlockSize CliErrorCode = 0x01900000
+const errCliDownloadSequenceFailed CliErrorCode = 0x01A00000
+const errCliInsertRefused CliErrorCode = 0x01B00000
+const errCliDeleteRefused CliErrorCode = 0x01C00000
+const errCliNeedPassword CliErrorCode = 0x01D00000
+const errCliInvalidPassword CliErrorCode = 0x01E00000
+const errCliNoPasswordToSetOrClear CliErrorCode = 0x01F00000
+const errCliJobTimeout CliErrorCode = 0x02000000
+const errCliPartialDataRead CliErrorCode = 0x02100000
+const errCliBufferTooSmall CliErrorCode = 0x02200000
+const errCliFunctionRefused CliErrorCode = 0x02300000
+const errCliDestroying CliErrorCode = 0x02400000
+const errCliInvalidParamNumber CliErrorCode = 0x02500000
+const errCliCannotChangeParam CliErrorCode = 0x02600000
 
 // Client Connection Type
 type CONNTYPE = uint16

@@ -430,7 +430,7 @@ func (c *S7Client) GetExecTime() (time int, err error) {
 }
 
 //int S7API Cli_GetLastError(S7Object Client, int *LastError);
-func (c *S7Client) GetLastError() (lastError ErrorCode, err error) {
+func (c *S7Client) GetLastError() (lastError CliErrorCode, err error) {
 	var code C.int = C.Cli_GetLastError(c.client, (*C.int)(unsafe.Pointer(&lastError)))
 	err = Cli_ErrorText(code)
 	return
@@ -452,9 +452,128 @@ func (c *S7Client) GetConnected() (connected int, err error) {
 	return
 }
 
-//int S7API Cli_CheckAsCompletion(S7Object Client, int *opResult);
+//int S7API Cli_AsReadArea(S7Object Client, int Area, int DBNumber, int Start, int Amount, int WordLen, void *pUsrData);
+func (c *S7Client) AsReadArea(area S7Area, dBNumber int, start int, amount int, wordLen S7WL) (pUsrData []byte, err error) {
+	pUsrData = make([]byte, dataLength(wordLen, int32(amount), int32(start)))
+	var code C.int = C.Cli_AsReadArea(c.client, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
+	err = Cli_ErrorText(code)
+	return
+}
+
+// int S7API Cli_AsWriteArea(S7Object Client, int Area, int DBNumber, int Start, int Amount, int WordLen, void *pUsrData);
+func (c *S7Client) AsWriteArea(area S7Area, dBNumber int, start int, amount int, wordLen S7WL, pUsrData []byte) (err error) {
+	pUsrData = make([]byte, dataLength(wordLen, int32(amount), int32(start)))
+	var code C.int = C.Cli_AsWriteArea(c.client, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
+	err = Cli_ErrorText(code)
+	return
+}
+
+// int S7API Cli_AsDBRead(S7Object Client, int DBNumber, int Start, int Size, void *pUsrData);
+func (c *S7Client) AsDBRead(dBNumber int, start int, amount int) (pUsrData []byte, err error) {
+	return c.AsReadArea(S7AreaDB, dBNumber, start, amount, S7WLByte)
+}
+
+// int S7API Cli_AsDBWrite(S7Object Client, int DBNumber, int Start, int Size, void *pUsrData);
+// int S7API Cli_AsMBRead(S7Object Client, int Start, int Size, void *pUsrData);
+// int S7API Cli_AsMBWrite(S7Object Client, int Start, int Size, void *pUsrData);
+// int S7API Cli_AsEBRead(S7Object Client, int Start, int Size, void *pUsrData);
+// int S7API Cli_AsEBWrite(S7Object Client, int Start, int Size, void *pUsrData);
+// int S7API Cli_AsABRead(S7Object Client, int Start, int Size, void *pUsrData);
+// int S7API Cli_AsABWrite(S7Object Client, int Start, int Size, void *pUsrData);
+// int S7API Cli_AsTMRead(S7Object Client, int Start, int Amount, void *pUsrData);
+// int S7API Cli_AsTMWrite(S7Object Client, int Start, int Amount, void *pUsrData);
+// int S7API Cli_AsCTRead(S7Object Client, int Start, int Amount, void *pUsrData);
+// int S7API Cli_AsCTWrite(S7Object Client, int Start, int Amount, void *pUsrData);
+
+// int S7API Cli_AsListBlocksOfType(S7Object Client, int BlockType, TS7BlocksOfType *pUsrData, int *ItemsCount);
+func (c *S7Client) AsListBlocksOfType(blockType Block) (pUsrData TS7BlocksOfType, itemsCount int, err error) {
+	var code C.int = C.Cli_AsListBlocksOfType(c.client, C.int(blockType), (*C.TS7BlocksOfType)(unsafe.Pointer(&pUsrData[0])), (*C.int)(unsafe.Pointer(&itemsCount)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+// int S7API Cli_AsReadSZL(S7Object Client, int ID, int Index, TS7SZL *pUsrData, int *Size);
+func (c *S7Client) AsReadSZL(id int, index int) (pUsrData TS7SZL, size int, err error) {
+	var code C.int = C.Cli_AsReadSZL(c.client, C.int(id), C.int(index), (*C.TS7SZL)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&size)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+// int S7API Cli_AsReadSZLList(S7Object Client, TS7SZLList *pUsrData, int *ItemsCount);
+func (c *S7Client) AsReadSZLList() (pUsrData TS7SZLList, itemsCount int, err error) {
+	var code C.int = C.Cli_AsReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&itemsCount)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+// int S7API Cli_AsUpload(S7Object Client, int BlockType, int BlockNum, void *pUsrData, int *Size);
+func (c *S7Client) AsUpload(blockType Block, blockNum int, pUsrData []byte) (size int, err error) {
+	size = len(pUsrData)
+	var code C.int = C.Cli_AsUpload(c.client, C.int(blockType), C.int(blockNum), unsafe.Pointer(&pUsrData[0]), (*C.int)(unsafe.Pointer(&size)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+// int S7API Cli_AsFullUpload(S7Object Client, int BlockType, int BlockNum, void *pUsrData, int *Size);
+func (c *S7Client) AsFullUpload(blockType Block, blockNum int, pUsrData []byte) (size int, err error) {
+	size = len(pUsrData)
+	var code C.int = C.Cli_AsFullUpload(c.client, C.int(blockType), C.int(blockNum), unsafe.Pointer(&pUsrData[0]), (*C.int)(unsafe.Pointer(&size)))
+	err = Cli_ErrorText(code)
+	return
+}
+
+// int S7API Cli_AsDownload(S7Object Client, int BlockNum, void *pUsrData, int Size);
+func (c *S7Client) AsDownload(BlockNum int, pUsrData []byte, size int) (err error) {
+	pUsrData = make([]byte, size)
+	var code C.int = C.Cli_AsDownload(c.client, C.int(BlockNum), unsafe.Pointer(&pUsrData[0]), C.int(size))
+	err = Cli_ErrorText(code)
+	return
+}
+
+// int S7API Cli_AsCopyRamToRom(S7Object Client, int Timeout);
+func (c *S7Client) AsCopyRamToRom(Timeout int) (err error) {
+	var code C.int = C.Cli_AsCopyRamToRom(c.client, C.int(Timeout))
+	err = Cli_ErrorText(code)
+	return
+}
+
+// int S7API Cli_AsCompress(S7Object Client, int Timeout);
+func (c *S7Client) AsCompress(Timeout int) (err error) {
+	var code C.int = C.Cli_AsCompress(c.client, C.int(Timeout))
+	err = Cli_ErrorText(code)
+	return
+}
+
+// int S7API Cli_AsDBGet(S7Object Client, int DBNumber, void *pUsrData, int *Size);
+func (c *S7Client) AsDBGet(DBNumber int, pUsrData []byte) (Size int, err error) {
+	return c.AsUpload(Block_DB, DBNumber, pUsrData)
+	return
+}
+
+// int S7API Cli_AsDBFill(S7Object Client, int DBNumber, int FillChar);
+func (c *S7Client) AsDBFill(DBNumber int, FillChar int) (err error) {
+	var code C.int = C.Cli_AsDBFill(c.client, C.int(DBNumber), C.int(FillChar))
+	err = Cli_ErrorText(code)
+	return
+}
+
+// int S7API Cli_CheckAsCompletion(S7Object Client, int *opResult);
 func (c *S7Client) CheckAsCompletion() (opResult JobStatus, err error) {
 	var code C.int = C.Cli_CheckAsCompletion(c.client, (*C.int)(unsafe.Pointer(&opResult)))
 	err = Cli_ErrorText(code)
 	return
 }
+
+//int S7API Cli_WaitAsCompletion(S7Object Client, int Timeout);
+func (c *S7Client) WaitAsCompletion(Timeout int) (err error) {
+	var code C.int = C.Cli_WaitAsCompletion(c.client, C.int(Timeout))
+	err = Cli_ErrorText(code)
+	return
+}
+
+////int S7API Cli_CheckAsCompletion(S7Object Client, int *opResult);
+//func (c *S7Client) CheckAsCompletion() (opResult JobStatus, err error) {
+//	var code C.int = C.Cli_CheckAsCompletion(c.client, (*C.int)(unsafe.Pointer(&opResult)))
+//	err = Cli_ErrorText(code)
+//	return
+//}
