@@ -451,3 +451,10 @@ func (c *S7Client) GetConnected() (connected int, err error) {
 	err = Cli_ErrorText(code)
 	return
 }
+
+//int S7API Cli_CheckAsCompletion(S7Object Client, int *opResult);
+func (c *S7Client) CheckAsCompletion() (opResult JobStatus, err error) {
+	var code C.int = C.Cli_CheckAsCompletion(c.client, (*C.int)(unsafe.Pointer(&opResult)))
+	err = Cli_ErrorText(code)
+	return
+}
