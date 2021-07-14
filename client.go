@@ -8,47 +8,48 @@ import (
 	"unsafe"
 )
 
-type S7Object = C.S7Object
-
 func Cli_Create() (cli S7Object) {
 	cli = C.Cli_Create()
 	return
 }
-func Cli_Destroy(cli S7Object) {
-	C.Cli_Destroy((*C.S7Object)(unsafe.Pointer(&cli)))
+
+type S7Object = C.S7Object
+
+func (c *S7Client) Destroy() {
+	C.Cli_Destroy((*C.S7Object)(unsafe.Pointer(&c.client)))
 	return
 }
-func Cli_ConnectTo(cli S7Object, address string, rack int, slot int) (err error) {
+func (c *S7Client) ConnectTo(address string, rack int, slot int) (err error) {
 	s := C.CString(address)
 	defer func() {
 		C.free(unsafe.Pointer(s))
 	}()
-	var code C.int = C.Cli_ConnectTo(cli, s, C.int(rack), C.int(slot))
+	var code C.int = C.Cli_ConnectTo(c.client, s, C.int(rack), C.int(slot))
 	err = Cli_ErrorText(code)
 	return
 }
 
-func Cli_SetConnectionParams(cli S7Object, address string, localTSAP uint16, remoteTSAP uint16) (err error) {
+func (c *S7Client) SetConnectionParams(address string, localTSAP uint16, remoteTSAP uint16) (err error) {
 	s := C.CString(address)
 	defer func() {
 		C.free(unsafe.Pointer(s))
 	}()
-	var code C.int = C.Cli_SetConnectionParams(cli, s, C.word(localTSAP), C.word(remoteTSAP))
+	var code C.int = C.Cli_SetConnectionParams(c.client, s, C.word(localTSAP), C.word(remoteTSAP))
 	err = Cli_ErrorText(code)
 	return
 }
-func Cli_SetConnectionType(cli S7Object, connectionType CONNTYPE) (err error) {
-	var code C.int = C.Cli_SetConnectionType(cli, C.word(connectionType))
+func (c *S7Client) SetConnectionType(connectionType CONNTYPE) (err error) {
+	var code C.int = C.Cli_SetConnectionType(c.client, C.word(connectionType))
 	err = Cli_ErrorText(code)
 	return
 }
-func Cli_Connect(cli S7Object) (err error) {
-	var code C.int = C.Cli_Connect(cli)
+func (c *S7Client) Connect() (err error) {
+	var code C.int = C.Cli_Connect(c.client)
 	err = Cli_ErrorText(code)
 	return
 }
-func Cli_Disconnect(cli S7Object) (err error) {
-	var code C.int = C.Cli_Disconnect(cli)
+func (c *S7Client) Disconnect() (err error) {
+	var code C.int = C.Cli_Disconnect(c.client)
 	err = Cli_ErrorText(code)
 	return
 }
@@ -56,7 +57,7 @@ func Cli_Disconnect(cli S7Object) (err error) {
 /*
 	ParamNumber 为P_u16_LocalPort的时候 value的数据是uint16 其他情况类似的
 */
-func Cli_GetParam(cli S7Object, paraNumber ParamNumber) (value interface{}, err error) {
+func (c *S7Client) GetParam(paraNumber ParamNumber) (value interface{}, err error) {
 	var pValue unsafe.Pointer
 	switch paraNumber {
 	case P_u16_LocalPort:
@@ -90,7 +91,7 @@ func Cli_GetParam(cli S7Object, paraNumber ParamNumber) (value interface{}, err 
 	case P_u32_KeepAliveTime:
 		pValue = unsafe.Pointer(new(uint32))
 	}
-	var code C.int = C.Cli_GetParam(cli, C.int(paraNumber), pValue)
+	var code C.int = C.Cli_GetParam(c.client, C.int(paraNumber), pValue)
 	err = Cli_ErrorText(code)
 	if err != nil {
 		return
@@ -133,27 +134,27 @@ func Cli_GetParam(cli S7Object, paraNumber ParamNumber) (value interface{}, err 
 /*
 	P_u16_LocalPort 设定端口为uint16
 */
-func Cli_SetParam(cli S7Object, paraNumber ParamNumber, value interface{}) (err error) {
+func (c *S7Client) SetParam(paraNumber ParamNumber, value interface{}) (err error) {
 	pvalue := Value_Pvalue(paraNumber, value)
-	var code C.int = C.Cli_SetParam(cli, C.int(paraNumber), pvalue)
+	var code C.int = C.Cli_SetParam(c.client, C.int(paraNumber), pvalue)
 	err = Cli_ErrorText(code)
 	return
 }
-func Cli_ReadArea(cli S7Object, area S7Area, dBNumber int, start int, amount int, wordLen S7WL) (pUsrData []byte, err error) {
+func (c *S7Client) ReadArea(area S7Area, dBNumber int, start int, amount int, wordLen S7WL) (pUsrData []byte, err error) {
 	pUsrData = make([]byte, dataLength(wordLen, int32(amount), int32(start)))
-	var code C.int = C.Cli_ReadArea(cli, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
+	var code C.int = C.Cli_ReadArea(c.client, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
 	err = Cli_ErrorText(code)
 	return
 }
 
-func Cli_WriteArea(cli S7Object, area S7Area, dBNumber int, start int, amount int, wordLen S7WL, pUsrData []byte) (err error) {
+func (c *S7Client) WriteArea(area S7Area, dBNumber int, start int, amount int, wordLen S7WL, pUsrData []byte) (err error) {
 	pUsrData = make([]byte, dataLength(wordLen, int32(amount), int32(start)))
-	var code C.int = C.Cli_WriteArea(cli, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
+	var code C.int = C.Cli_WriteArea(c.client, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
 	err = Cli_ErrorText(code)
 	return
 }
 
-func Cli_ReadMultiVars(cli S7Object, items []TS7DataItemGo) (err error) {
+func (c *S7Client) ReadMultiVars(items []TS7DataItemGo) (err error) {
 	itemsCount := len(items)
 	itemsC := make([]TS7DataItem, itemsCount)
 
@@ -162,7 +163,7 @@ func Cli_ReadMultiVars(cli S7Object, items []TS7DataItemGo) (err error) {
 		v.Pdata = t
 		itemsC[k] = v.ToC()
 	}
-	var code C.int = C.Cli_ReadMultiVars(cli, (C.PS7DataItem)(unsafe.Pointer(&itemsC[0])), C.int(itemsCount))
+	var code C.int = C.Cli_ReadMultiVars(c.client, (C.PS7DataItem)(unsafe.Pointer(&itemsC[0])), C.int(itemsCount))
 	err = Cli_ErrorText(code)
 	if err != nil {
 		return
@@ -172,13 +173,13 @@ func Cli_ReadMultiVars(cli S7Object, items []TS7DataItemGo) (err error) {
 	}
 	return
 }
-func Cli_WriteMultiVars(cli S7Object, items []TS7DataItemGo) (err error) {
+func (c *S7Client) WriteMultiVars(items []TS7DataItemGo) (err error) {
 	itemsCount := len(items)
 	itemsC := make([]TS7DataItem, itemsCount)
 	for k, v := range items {
 		itemsC[k] = v.ToC()
 	}
-	var code C.int = C.Cli_WriteMultiVars(cli, (C.PS7DataItem)(unsafe.Pointer(&itemsC[0])), C.int(itemsCount))
+	var code C.int = C.Cli_WriteMultiVars(c.client, (C.PS7DataItem)(unsafe.Pointer(&itemsC[0])), C.int(itemsCount))
 	err = Cli_ErrorText(code)
 	if err != nil {
 		return
@@ -189,248 +190,248 @@ func Cli_WriteMultiVars(cli S7Object, items []TS7DataItemGo) (err error) {
 	return
 }
 
-func Cli_DBRead(cli S7Object, dBNumber int, start int, amount int) (pUsrData []byte, err error) {
-	return Cli_ReadArea(cli, S7AreaDB, dBNumber, start, amount, S7WLByte)
+func (c *S7Client) DBRead(dBNumber int, start int, amount int) (pUsrData []byte, err error) {
+	return c.ReadArea(S7AreaDB, dBNumber, start, amount, S7WLByte)
 }
-func Cli_DBWrite(cli S7Object, dBNumber int, start int, amount int, pUsrData []byte) (err error) {
-	return Cli_WriteArea(cli, S7AreaDB, dBNumber, start, amount, S7WLByte, pUsrData)
+func (c *S7Client) DBWrite(dBNumber int, start int, amount int, pUsrData []byte) (err error) {
+	return c.WriteArea(S7AreaDB, dBNumber, start, amount, S7WLByte, pUsrData)
 }
-func Cli_MBRead(cli S7Object, dBNumber int, start int, amount int) (pUsrData []byte, err error) {
-	return Cli_ReadArea(cli, S7AreaMK, dBNumber, start, amount, S7WLByte)
+func (c *S7Client) MBRead(dBNumber int, start int, amount int) (pUsrData []byte, err error) {
+	return c.ReadArea(S7AreaMK, dBNumber, start, amount, S7WLByte)
 }
-func Cli_MBWrite(cli S7Object, dBNumber int, start int, amount int, pUsrData []byte) (err error) {
-	return Cli_WriteArea(cli, S7AreaMK, dBNumber, start, amount, S7WLByte, pUsrData)
+func (c *S7Client) MBWrite(dBNumber int, start int, amount int, pUsrData []byte) (err error) {
+	return c.WriteArea(S7AreaMK, dBNumber, start, amount, S7WLByte, pUsrData)
 }
-func Cli_EBRead(cli S7Object, dBNumber int, start int, amount int) (pUsrData []byte, err error) {
-	return Cli_ReadArea(cli, S7AreaPE, dBNumber, start, amount, S7WLByte)
+func (c *S7Client) EBRead(dBNumber int, start int, amount int) (pUsrData []byte, err error) {
+	return c.ReadArea(S7AreaPE, dBNumber, start, amount, S7WLByte)
 }
-func Cli_EBWrite(cli S7Object, dBNumber int, start int, amount int, pUsrData []byte) (err error) {
-	return Cli_WriteArea(cli, S7AreaPE, dBNumber, start, amount, S7WLByte, pUsrData)
+func (c *S7Client) EBWrite(dBNumber int, start int, amount int, pUsrData []byte) (err error) {
+	return c.WriteArea(S7AreaPE, dBNumber, start, amount, S7WLByte, pUsrData)
 }
-func Cli_ABRead(cli S7Object, dBNumber int, start int, amount int) (pUsrData []byte, err error) {
-	return Cli_ReadArea(cli, S7AreaPA, dBNumber, start, amount, S7WLByte)
+func (c *S7Client) ABRead(dBNumber int, start int, amount int) (pUsrData []byte, err error) {
+	return c.ReadArea(S7AreaPA, dBNumber, start, amount, S7WLByte)
 }
-func Cli_ABWrite(cli S7Object, dBNumber int, start int, amount int, pUsrData []byte) (err error) {
-	return Cli_WriteArea(cli, S7AreaPA, dBNumber, start, amount, S7WLByte, pUsrData)
+func (c *S7Client) ABWrite(dBNumber int, start int, amount int, pUsrData []byte) (err error) {
+	return c.WriteArea(S7AreaPA, dBNumber, start, amount, S7WLByte, pUsrData)
 }
-func Cli_TMRead(cli S7Object, dBNumber int, start int, amount int) (pUsrData []byte, err error) {
-	return Cli_ReadArea(cli, S7AreaTM, dBNumber, start, amount, S7WLByte)
+func (c *S7Client) TMRead(dBNumber int, start int, amount int) (pUsrData []byte, err error) {
+	return c.ReadArea(S7AreaTM, dBNumber, start, amount, S7WLByte)
 }
-func Cli_TMWrite(cli S7Object, dBNumber int, start int, amount int, pUsrData []byte) (err error) {
-	return Cli_WriteArea(cli, S7AreaTM, dBNumber, start, amount, S7WLByte, pUsrData)
+func (c *S7Client) TMWrite(dBNumber int, start int, amount int, pUsrData []byte) (err error) {
+	return c.WriteArea(S7AreaTM, dBNumber, start, amount, S7WLByte, pUsrData)
 }
-func Cli_CTRead(cli S7Object, dBNumber int, start int, amount int) (pUsrData []byte, err error) {
-	return Cli_ReadArea(cli, S7AreaCT, dBNumber, start, amount, S7WLByte)
+func (c *S7Client) CTRead(dBNumber int, start int, amount int) (pUsrData []byte, err error) {
+	return c.ReadArea(S7AreaCT, dBNumber, start, amount, S7WLByte)
 }
-func Cli_CTWrite(cli S7Object, dBNumber int, start int, amount int, pUsrData []byte) (err error) {
-	return Cli_WriteArea(cli, S7AreaCT, dBNumber, start, amount, S7WLByte, pUsrData)
+func (c *S7Client) CTWrite(dBNumber int, start int, amount int, pUsrData []byte) (err error) {
+	return c.WriteArea(S7AreaCT, dBNumber, start, amount, S7WLByte, pUsrData)
 }
-func Cli_ListBlocks(cli S7Object) (pUsrData TS7BlocksList, err error) {
-	var code C.int = C.Cli_ListBlocks(cli, (*C.TS7BlocksList)(unsafe.Pointer(&pUsrData)))
+func (c *S7Client) ListBlocks() (pUsrData TS7BlocksList, err error) {
+	var code C.int = C.Cli_ListBlocks(c.client, (*C.TS7BlocksList)(unsafe.Pointer(&pUsrData)))
 	err = Cli_ErrorText(code)
 	return
 }
-func Cli_GetAgBlockInfo(cli S7Object, blockType Block, blockNum int) (pUsrData TS7BlockInfo, err error) {
-	var code C.int = C.Cli_GetAgBlockInfo(cli, C.int(blockType), C.int(blockNum), (*C.TS7BlockInfo)(unsafe.Pointer(&pUsrData)))
+func (c *S7Client) GetAgBlockInfo(blockType Block, blockNum int) (pUsrData TS7BlockInfo, err error) {
+	var code C.int = C.Cli_GetAgBlockInfo(c.client, C.int(blockType), C.int(blockNum), (*C.TS7BlockInfo)(unsafe.Pointer(&pUsrData)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_GetPgBlockInfo(S7Object Client, void *pBlock, TS7BlockInfo *pUsrData, int Size);
-func Cli_GetPgBlockInfo(cli S7Object, size int) (pBlock []byte, pUsrData TS7BlockInfo, err error) {
+func (c *S7Client) GetPgBlockInfo(size int) (pBlock []byte, pUsrData TS7BlockInfo, err error) {
 	pBlock = make([]byte, size)
-	var code C.int = C.Cli_GetPgBlockInfo(cli, unsafe.Pointer(&pBlock[0]), (*C.TS7BlockInfo)(unsafe.Pointer(&pUsrData)), C.int(size))
+	var code C.int = C.Cli_GetPgBlockInfo(c.client, unsafe.Pointer(&pBlock[0]), (*C.TS7BlockInfo)(unsafe.Pointer(&pUsrData)), C.int(size))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_ListBlocksOfType(S7Object Client, int BlockType, TS7BlocksOfType *pUsrData, int *ItemsCount);
-func Cli_ListBlocksOfType(cli S7Object, blockType Block) (pUsrData TS7BlocksOfType, itemsCount int, err error) {
-	var code C.int = C.Cli_ListBlocksOfType(cli, C.int(blockType), (*C.TS7BlocksOfType)(unsafe.Pointer(&pUsrData[0])), (*C.int)(unsafe.Pointer(&itemsCount)))
+func (c *S7Client) ListBlocksOfType(blockType Block) (pUsrData TS7BlocksOfType, itemsCount int, err error) {
+	var code C.int = C.Cli_ListBlocksOfType(c.client, C.int(blockType), (*C.TS7BlocksOfType)(unsafe.Pointer(&pUsrData[0])), (*C.int)(unsafe.Pointer(&itemsCount)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_Upload(S7Object Client, int BlockType, int BlockNum, void *pUsrData, int *Size);
-func Cli_Upload(cli S7Object, blockType Block, blockNum int, pUsrData []byte) (size int, err error) {
+func (c *S7Client) Upload(blockType Block, blockNum int, pUsrData []byte) (size int, err error) {
 	size = len(pUsrData)
-	var code C.int = C.Cli_Upload(cli, C.int(blockType), C.int(blockNum), unsafe.Pointer(&pUsrData[0]), (*C.int)(unsafe.Pointer(&size)))
+	var code C.int = C.Cli_Upload(c.client, C.int(blockType), C.int(blockNum), unsafe.Pointer(&pUsrData[0]), (*C.int)(unsafe.Pointer(&size)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_FullUpload(S7Object Client, int BlockType, int BlockNum, void *pUsrData, int *Size);
-func Cli_FullUpload(cli S7Object, blockType Block, blockNum int, pUsrData []byte) (size int, err error) {
+func (c *S7Client) FullUpload(blockType Block, blockNum int, pUsrData []byte) (size int, err error) {
 	size = len(pUsrData)
-	var code C.int = C.Cli_FullUpload(cli, C.int(blockType), C.int(blockNum), unsafe.Pointer(&pUsrData[0]), (*C.int)(unsafe.Pointer(&size)))
+	var code C.int = C.Cli_FullUpload(c.client, C.int(blockType), C.int(blockNum), unsafe.Pointer(&pUsrData[0]), (*C.int)(unsafe.Pointer(&size)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_Download(S7Object Client, int BlockNum, void *pUsrData, int Size);
-func Cli_Download(cli S7Object, blockNum int, pUsrData []byte, size int) (err error) {
+func (c *S7Client) Download(blockNum int, pUsrData []byte, size int) (err error) {
 	pUsrData = make([]byte, size)
-	var code C.int = C.Cli_Download(cli, C.int(blockNum), unsafe.Pointer(&pUsrData[0]), C.int(size))
+	var code C.int = C.Cli_Download(c.client, C.int(blockNum), unsafe.Pointer(&pUsrData[0]), C.int(size))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_Delete(S7Object Client, int BlockType, int BlockNum);
-func Cli_Delete(cli S7Object, blockType Block, blockNum int) (err error) {
-	var code C.int = C.Cli_Delete(cli, C.int(blockType), C.int(blockNum))
+func (c *S7Client) Delete(blockType Block, blockNum int) (err error) {
+	var code C.int = C.Cli_Delete(c.client, C.int(blockType), C.int(blockNum))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_DBGet(S7Object Client, int DBNumber, void *pUsrData, int *Size);
-func Cli_DBGet(cli S7Object, dBNumber int, pUsrData []byte) (size int, err error) {
-	return Cli_Upload(cli, Block_DB, dBNumber, pUsrData)
+func (c *S7Client) DBGet(dBNumber int, pUsrData []byte) (size int, err error) {
+	return c.Upload(Block_DB, dBNumber, pUsrData)
 }
 
 //int S7API Cli_DBFill(S7Object Client, int DBNumber, int FillChar);
-func Cli_DBFill(cli S7Object, dBNumber int, fillChar int) (err error) {
-	var code C.int = C.Cli_DBFill(cli, C.int(dBNumber), C.int(fillChar))
+func (c *S7Client) DBFill(dBNumber int, fillChar int) (err error) {
+	var code C.int = C.Cli_DBFill(c.client, C.int(dBNumber), C.int(fillChar))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_GetPlcDateTime(S7Object Client, tm *DateTime);
-func Cli_GetPlcDateTime(cli S7Object) (dataTime Tm, err error) {
-	var code C.int = C.Cli_GetPlcDateTime(cli, (*C.tm)(unsafe.Pointer(&dataTime)))
+func (c *S7Client) GetPlcDateTime() (dataTime Tm, err error) {
+	var code C.int = C.Cli_GetPlcDateTime(c.client, (*C.tm)(unsafe.Pointer(&dataTime)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_SetPlcDateTime(S7Object Client, tm *DateTime);
-func Cli_SetPlcDateTime(cli S7Object, dataTime Tm) (err error) {
-	var code C.int = C.Cli_SetPlcDateTime(cli, (*C.tm)(unsafe.Pointer(&dataTime)))
+func (c *S7Client) SetPlcDateTime(dataTime Tm) (err error) {
+	var code C.int = C.Cli_SetPlcDateTime(c.client, (*C.tm)(unsafe.Pointer(&dataTime)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_SetPlcSystemDateTime(S7Object Client);
-func Cli_SetPlcSystemDateTime(cli S7Object) (err error) {
-	var code C.int = C.Cli_SetPlcSystemDateTime(cli)
+func (c *S7Client) SetPlcSystemDateTime() (err error) {
+	var code C.int = C.Cli_SetPlcSystemDateTime(c.client)
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_GetOrderCode(S7Object Client, TS7OrderCode *pUsrData);
-func Cli_GetOrderCode(cli S7Object) (pUsrData TS7OrderCode, err error) {
-	var code C.int = C.Cli_GetOrderCode(cli, (*C.TS7OrderCode)(unsafe.Pointer(&pUsrData)))
+func (c *S7Client) GetOrderCode() (pUsrData TS7OrderCode, err error) {
+	var code C.int = C.Cli_GetOrderCode(c.client, (*C.TS7OrderCode)(unsafe.Pointer(&pUsrData)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_GetCpuInfo(S7Object Client, TS7CpuInfo *pUsrData);
-func Cli_GetCpuInfo(cli S7Object) (pUsrData TS7CpuInfo, err error) {
-	var code C.int = C.Cli_GetCpuInfo(cli, (*C.TS7CpuInfo)(unsafe.Pointer(&pUsrData)))
+func (c *S7Client) GetCpuInfo() (pUsrData TS7CpuInfo, err error) {
+	var code C.int = C.Cli_GetCpuInfo(c.client, (*C.TS7CpuInfo)(unsafe.Pointer(&pUsrData)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_GetCpInfo(S7Object Client, TS7CpInfo *pUsrData);
-func Cli_GetCpInfo(cli S7Object) (pUsrData TS7CpInfo, err error) {
-	var code C.int = C.Cli_GetCpInfo(cli, (*C.TS7CpInfo)(unsafe.Pointer(&pUsrData)))
+func (c *S7Client) GetCpInfo() (pUsrData TS7CpInfo, err error) {
+	var code C.int = C.Cli_GetCpInfo(c.client, (*C.TS7CpInfo)(unsafe.Pointer(&pUsrData)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_ReadSZL(S7Object Client, int ID, int Index, TS7SZL *pUsrData, int *Size);
-func Cli_ReadSZL(cli S7Object, id int, index int) (pUsrData TS7SZL, size int, err error) {
-	var code C.int = C.Cli_ReadSZL(cli, C.int(id), C.int(index), (*C.TS7SZL)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&size)))
+func (c *S7Client) ReadSZL(id int, index int) (pUsrData TS7SZL, size int, err error) {
+	var code C.int = C.Cli_ReadSZL(c.client, C.int(id), C.int(index), (*C.TS7SZL)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&size)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_ReadSZLList(S7Object Client, TS7SZLList *pUsrData, int *ItemsCount);
-func Cli_ReadSZLList(cli S7Object) (pUsrData TS7SZLList, itemsCount int, err error) {
-	var code C.int = C.Cli_ReadSZLList(cli, (*C.TS7SZLList)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&itemsCount)))
+func (c *S7Client) ReadSZLList() (pUsrData TS7SZLList, itemsCount int, err error) {
+	var code C.int = C.Cli_ReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&itemsCount)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_PlcHotStart(S7Object Client);
-func Cli_PlcHotStart(cli S7Object) (err error) {
-	var code C.int = C.Cli_PlcHotStart(cli)
+func (c *S7Client) PlcHotStart() (err error) {
+	var code C.int = C.Cli_PlcHotStart(c.client)
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_PlcColdStart(S7Object Client);
-func Cli_PlcColdStart(cli S7Object) (err error) {
-	var code C.int = C.Cli_PlcColdStart(cli)
+func (c *S7Client) PlcColdStart() (err error) {
+	var code C.int = C.Cli_PlcColdStart(c.client)
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_PlcStop(S7Object Client);
-func Cli_PlcStop(cli S7Object) (err error) {
-	var code C.int = C.Cli_PlcStop(cli)
+func (c *S7Client) PlcStop() (err error) {
+	var code C.int = C.Cli_PlcStop(c.client)
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_CopyRamToRom(S7Object Client, int Timeout);
-func Cli_CopyRamToRom(cli S7Object, timeout int) (err error) {
-	var code C.int = C.Cli_CopyRamToRom(cli, C.int(timeout))
+func (c *S7Client) CopyRamToRom(timeout int) (err error) {
+	var code C.int = C.Cli_CopyRamToRom(c.client, C.int(timeout))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_Compress(S7Object Client, int Timeout);
-func Cli_Compress(cli S7Object, timeout int) (err error) {
-	var code C.int = C.Cli_Compress(cli, C.int(timeout))
+func (c *S7Client) Compress(timeout int) (err error) {
+	var code C.int = C.Cli_Compress(c.client, C.int(timeout))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_GetPlcStatus(S7Object Client, int *Status);
-func Cli_GetPlcStatus(cli S7Object) (status S7CpuStatus, err error) {
-	var code C.int = C.Cli_GetPlcStatus(cli, (*C.int)(unsafe.Pointer(&status)))
+func (c *S7Client) GetPlcStatus() (status S7CpuStatus, err error) {
+	var code C.int = C.Cli_GetPlcStatus(c.client, (*C.int)(unsafe.Pointer(&status)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_GetProtection(S7Object Client, TS7Protection *pUsrData);
-func Cli_GetProtection(cli S7Object) (pUsrData TS7Protection, err error) {
-	var code C.int = C.Cli_GetProtection(cli, (*C.TS7Protection)(unsafe.Pointer(&pUsrData)))
+func (c *S7Client) GetProtection() (pUsrData TS7Protection, err error) {
+	var code C.int = C.Cli_GetProtection(c.client, (*C.TS7Protection)(unsafe.Pointer(&pUsrData)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_SetSessionPassword(S7Object Client, char *Password);
-func Cli_SetSessionPassword(cli S7Object, password string) (err error) {
-	var code C.int = C.Cli_SetSessionPassword(cli, (*C.char)(unsafe.Pointer(&password)))
+func (c *S7Client) SetSessionPassword(password string) (err error) {
+	var code C.int = C.Cli_SetSessionPassword(c.client, (*C.char)(unsafe.Pointer(&password)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_ClearSessionPassword(S7Object Client);
-func Cli_ClearSessionPassword(cli S7Object) (err error) {
-	var code C.int = C.Cli_ClearSessionPassword(cli)
+func (c *S7Client) ClearSessionPassword() (err error) {
+	var code C.int = C.Cli_ClearSessionPassword(c.client)
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_IsoExchangeBuffer(S7Object Client, void *pUsrData, int *Size);
-func Cli_IsoExchangeBuffer(cli S7Object, pUsrData []byte) (size int, err error) {
+func (c *S7Client) IsoExchangeBuffer(pUsrData []byte) (size int, err error) {
 	size = len(pUsrData)
-	var code C.int = C.Cli_IsoExchangeBuffer(cli, unsafe.Pointer(&pUsrData[0]), (*C.int)(unsafe.Pointer(&size)))
+	var code C.int = C.Cli_IsoExchangeBuffer(c.client, unsafe.Pointer(&pUsrData[0]), (*C.int)(unsafe.Pointer(&size)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_GetExecTime(S7Object Client, int *Time);
-func Cli_GetExecTime(cli S7Object) (time int, err error) {
-	var code C.int = C.Cli_GetExecTime(cli, (*C.int)(unsafe.Pointer(&time)))
+func (c *S7Client) GetExecTime() (time int, err error) {
+	var code C.int = C.Cli_GetExecTime(c.client, (*C.int)(unsafe.Pointer(&time)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_GetLastError(S7Object Client, int *LastError);
-func Cli_GetLastError(cli S7Object) (lastError ErrorCode, err error) {
-	var code C.int = C.Cli_GetLastError(cli, (*C.int)(unsafe.Pointer(&lastError)))
+func (c *S7Client) GetLastError() (lastError ErrorCode, err error) {
+	var code C.int = C.Cli_GetLastError(c.client, (*C.int)(unsafe.Pointer(&lastError)))
 	err = Cli_ErrorText(code)
 	return
 }
