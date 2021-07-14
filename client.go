@@ -437,6 +437,17 @@ func (c *S7Client) GetLastError() (lastError ErrorCode, err error) {
 }
 
 //int S7API Cli_GetPduLength(S7Object Client, int *Requested, int *Negotiated);
+func (c *S7Client) GetPduLength(requested int) (negotiated int, err error) {
+	var code C.int = C.Cli_GetPduLength(c.client, (*C.int)(unsafe.Pointer(&requested)), (*C.int)(unsafe.Pointer(&negotiated)))
+	err = Cli_ErrorText(code)
+	return
+}
+
 //int S7API Cli_ErrorText(int Error, char *Text, int TextLen);
-//// 1.1.0
+
 //int S7API Cli_GetConnected(S7Object Client, int *Connected);
+func (c *S7Client) GetConnected() (connected int, err error) {
+	var code C.int = C.Cli_GetConnected(c.client, (*C.int)(unsafe.Pointer(&connected)))
+	err = Cli_ErrorText(code)
+	return
+}
