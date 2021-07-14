@@ -63,6 +63,7 @@ func getSrvEventFormC(e C.PSrvEvent) (ego TSrvEvent) {
 
 //export GlobalEventsCallback
 func GlobalEventsCallback(usrPtr *C.void, event C.PSrvEvent, size C.int) {
+	// xxx(uintptr(event))
 	up := uintptr(unsafe.Pointer(usrPtr))
 	callback := svrEventCallbacks[up]
 	if callback == nil {

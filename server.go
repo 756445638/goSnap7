@@ -5,6 +5,7 @@ package snap7go
 //#include <stdlib.h>
 import "C"
 import (
+	"fmt"
 	"unsafe"
 )
 
@@ -203,10 +204,11 @@ func (s *S7Server) SetMask(MaskKind MaskKind, Mask uint32) (err error) {
 
 // func Srv_EventText(TSrvEvent *Event, char *Text, int TextLen)
 func Srv_EventText(Event *TSrvEvent) (text string, err error) {
+	fmt.Printf("event code:%x\n", Event.EvtCode)
 	const length = 1024
 	var buff [length]byte
 	var code C.int = C.Srv_EventText(
-		(*C.TSrvEvent)(unsafe.Pointer(&Event)),
+		(*C.TSrvEvent)(unsafe.Pointer(Event)),
 		(*C.char)(unsafe.Pointer(&buff[0])),
 		length)
 	err = Srv_ErrorText(code)

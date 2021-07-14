@@ -10,7 +10,6 @@ func justPrintEvent(e *TSrvEvent) {
 	s, err := Srv_EventText(e)
 	if err != nil {
 		panic(fmt.Sprintf("Srv_EventText failed,err:%v\n", err))
-		return
 	}
 	fmt.Println(s)
 }
@@ -31,7 +30,6 @@ func TestSomeCallBack(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	err = server.Start()
 	if err != nil {
 		t.Fatal(err)
@@ -46,7 +44,7 @@ func TestSomeCallBack(t *testing.T) {
 	}()
 
 	client := NewS7Client()
-	err = client.ConnectTo("127.0.0.1", 0, 2)
+	err = client.ConnectTo("127.0.0.1", 0, 1)
 	if err != nil {
 		t.Fatal(err)
 		return
