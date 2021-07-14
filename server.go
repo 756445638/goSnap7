@@ -181,6 +181,9 @@ func (s *S7Server) ClearEvents() (err error) {
 }
 
 // func Srv_PickEvent(S7Object Server, TSrvEvent *pEvent, int *EvtReady);
+/*
+	pEvent == nil 表示没有事件发生
+*/
 func (s *S7Server) PickEvent() (pEvent *TSrvEvent, err error) {
 	var EvtReady int
 	pEvent = new(TSrvEvent)
