@@ -101,3 +101,10 @@ type TS7SZLList struct {
 	Header	SZL_HEADER
 	List	[8190]uint16
 }
+type TS7Protection struct {
+	Sch_schal	uint16
+	Sch_par		uint16
+	Sch_rel		uint16
+	Bart_sch	uint16
+	Anl_sch		uint16
+}

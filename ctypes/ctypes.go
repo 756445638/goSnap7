@@ -19,3 +19,4 @@ type TS7CpInfo C.TS7CpInfo
 type SZL_HEADER C.SZL_HEADER
 type TS7SZL C.TS7SZL
 type TS7SZLList C.TS7SZLList
+type TS7Protection C.TS7Protection
