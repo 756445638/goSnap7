@@ -13,8 +13,8 @@ func Srv_Create() (server S7Object) {
 	return
 }
 
-func Srv_Destroy(server S7Object) {
-	C.Srv_Destroy((*C.S7Object)(unsafe.Pointer(&server)))
+func (s *S7Server) Destroy() {
+	C.Srv_Destroy((*C.S7Object)(unsafe.Pointer(&s.server)))
 	return
 }
 
@@ -22,7 +22,7 @@ func Srv_Destroy(server S7Object) {
 	ParamNumber 为P_u16_LocalPort的时候 value的数据是uint16 其他情况类似的
 */
 //int S7API Srv_GetParam(S7Object Server, int ParamNumber, void *pValue);
-func Srv_GetParam(Server S7Object, paraNumber ParamNumber) (value interface{}, err error) {
+func (s *S7Server) GetParam(paraNumber ParamNumber) (value interface{}, err error) {
 	var pValue unsafe.Pointer
 	switch paraNumber {
 	case P_u16_LocalPort:
@@ -56,7 +56,7 @@ func Srv_GetParam(Server S7Object, paraNumber ParamNumber) (value interface{}, e
 	case P_u32_KeepAliveTime:
 		pValue = unsafe.Pointer(new(uint32))
 	}
-	var code C.int = C.Srv_GetParam(Server, C.int(paraNumber), pValue)
+	var code C.int = C.Srv_GetParam(s.server, C.int(paraNumber), pValue)
 	err = Srv_ErrorText(code)
 	if err != nil {
 		return
@@ -96,106 +96,106 @@ func Srv_GetParam(Server S7Object, paraNumber ParamNumber) (value interface{}, e
 	return
 }
 
-func Srv_SetParam(Server S7Object, paraNumber ParamNumber, value interface{}) (err error) {
+func (s *S7Server) SetParam(paraNumber ParamNumber, value interface{}) (err error) {
 	var pValue unsafe.Pointer
 	pValue = Value_Pvalue(paraNumber, value)
-	var code C.int = C.Srv_SetParam(Server, C.int(paraNumber), pValue)
+	var code C.int = C.Srv_SetParam(s.server, C.int(paraNumber), pValue)
 	err = Srv_ErrorText(code)
 	return
 }
 
 // int S7API Srv_StartTo(S7Object Server, const char *Address);
-func Srv_StartTo(Server S7Object, Address string) (err error) {
+func (s *S7Server) StartTo(Address string) (err error) {
 	address := C.CString(Address)
 	defer func() {
 		C.free(unsafe.Pointer(address))
 	}()
-	var code C.int = C.Srv_StartTo(Server, address)
+	var code C.int = C.Srv_StartTo(s.server, address)
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_Start(S7Object Server);
-func Srv_Start(Server S7Object) (err error) {
-	var code C.int = C.Srv_Start(Server)
+func (s *S7Server) Start() (err error) {
+	var code C.int = C.Srv_Start(s.server)
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_Stop(S7Object Server)
-func Srv_Stop(Server S7Object) (err error) {
-	var code C.int = C.Srv_Stop(Server)
+func (s *S7Server) Stop() (err error) {
+	var code C.int = C.Srv_Stop(s.server)
 	err = Srv_ErrorText(code)
 	return
 }
 
 //typedef uint16_t   word;
 // func Srv_RegisterArea(S7Object Server, int AreaCode, word Index, void *pUsrData, int Size)
-func Srv_RegisterArea(Server S7Object, AreaCode S7Area, Index uint16, pUsrData []byte, Size int) (err error) {
-	var code C.int = C.Srv_RegisterArea(Server, C.int(AreaCode), C.uint16_t(Index), unsafe.Pointer(&pUsrData[0]), C.int(Size))
+func (s *S7Server) RegisterArea(AreaCode S7Area, Index uint16, pUsrData []byte, Size int) (err error) {
+	var code C.int = C.Srv_RegisterArea(s.server, C.int(AreaCode), C.uint16_t(Index), unsafe.Pointer(&pUsrData[0]), C.int(Size))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_UnregisterArea(S7Object Server, int AreaCode, word Index);
-func Srv_UnregisterArea(Server S7Object, AreaCode S7Area, Index uint16) (err error) {
-	var code C.int = C.Srv_UnregisterArea(Server, C.int(AreaCode), C.uint16_t(Index))
+func (s *S7Server) UnregisterArea(AreaCode S7Area, Index uint16) (err error) {
+	var code C.int = C.Srv_UnregisterArea(s.server, C.int(AreaCode), C.uint16_t(Index))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_LockArea(S7Object Server, int AreaCode, word Index);
-func Srv_LockArea(Server S7Object, AreaCode S7Area, Index uint16) (err error) {
-	var code C.int = C.Srv_LockArea(Server, C.int(AreaCode), C.uint16_t(Index))
+func (s *S7Server) LockArea(AreaCode S7Area, Index uint16) (err error) {
+	var code C.int = C.Srv_LockArea(s.server, C.int(AreaCode), C.uint16_t(Index))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_UnlockArea(S7Object Server, int AreaCode, word Index);
-func Srv_UnlockArea(Server S7Object, AreaCode S7Area, Index uint16) (err error) {
-	var code C.int = C.Srv_UnlockArea(Server, C.int(AreaCode), C.uint16_t(Index))
+func (s *S7Server) UnlockArea(AreaCode S7Area, Index uint16) (err error) {
+	var code C.int = C.Srv_UnlockArea(s.server, C.int(AreaCode), C.uint16_t(Index))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_GetStatus(S7Object Server, int *ServerStatus, int *CpuStatus, int *ClientsCount);
-func Srv_GetStatus(Server S7Object, CpuStatus S7CpuStatus, ClientsCount int) (ServerStatus S7ServerStatus, err error) {
-	var code C.int = C.Srv_GetStatus(Server, (*C.int)(unsafe.Pointer(&ServerStatus)), (*C.int)(unsafe.Pointer(&CpuStatus)), (*C.int)(unsafe.Pointer(&ClientsCount)))
+func (s *S7Server) GetStatus(CpuStatus S7CpuStatus, ClientsCount int) (ServerStatus S7ServerStatus, err error) {
+	var code C.int = C.Srv_GetStatus(s.server, (*C.int)(unsafe.Pointer(&ServerStatus)), (*C.int)(unsafe.Pointer(&CpuStatus)), (*C.int)(unsafe.Pointer(&ClientsCount)))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_SetCpuStatus(S7Object Server, int CpuStatus);
-func Srv_SetCpuStatus(Server S7Object, CpuStatus S7CpuStatus) (err error) {
-	var code C.int = C.Srv_SetCpuStatus(Server, C.int(CpuStatus))
+func (s *S7Server) SetCpuStatus(CpuStatus S7CpuStatus) (err error) {
+	var code C.int = C.Srv_SetCpuStatus(s.server, C.int(CpuStatus))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_ClearEvents(S7Object Server);
-func Srv_ClearEvents(Server S7Object) (err error) {
-	var code C.int = C.Srv_ClearEvents(Server)
+func (s *S7Server) ClearEvents() (err error) {
+	var code C.int = C.Srv_ClearEvents(s.server)
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_PickEvent(S7Object Server, TSrvEvent *pEvent, int *EvtReady);
-func Srv_PickEvent(Server S7Object, pEvent TSrvEvent, EvtReady int) (err error) {
-	var code C.int = C.Srv_PickEvent(Server, (*C.TSrvEvent)(unsafe.Pointer(&pEvent)), (*C.int)(unsafe.Pointer(&EvtReady)))
+func (s *S7Server) PickEvent(pEvent TSrvEvent, EvtReady int) (err error) {
+	var code C.int = C.Srv_PickEvent(s.server, (*C.TSrvEvent)(unsafe.Pointer(&pEvent)), (*C.int)(unsafe.Pointer(&EvtReady)))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_GetMask(S7Object Server, int MaskKind, longword *Mask);  uint32_t
-func Srv_GetMask(Server S7Object, MaskKind MaskKind) (Mask uint32, err error) {
-	var code C.int = C.Srv_GetMask(Server, C.int(MaskKind), (*C.uint32_t)((unsafe.Pointer(&Mask))))
+func (s *S7Server) GetMask(MaskKind MaskKind) (Mask uint32, err error) {
+	var code C.int = C.Srv_GetMask(s.server, C.int(MaskKind), (*C.uint32_t)((unsafe.Pointer(&Mask))))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_SetMask(S7Object Server, int MaskKind, longword Mask);
-func Srv_SetMask(Server S7Object, MaskKind MaskKind, Mask uint32) (err error) {
-	var code C.int = C.Srv_SetMask(Server, C.int(MaskKind), C.uint32_t(Mask))
+func (s *S7Server) SetMask(MaskKind MaskKind, Mask uint32) (err error) {
+	var code C.int = C.Srv_SetMask(s.server, C.int(MaskKind), C.uint32_t(Mask))
 	err = Srv_ErrorText(code)
 	return
 }
