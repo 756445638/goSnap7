@@ -436,6 +436,7 @@ func Cli_GetLastError(cli S7Object) (lastError ErrorCode, err error) {
 }
 
 //int S7API Cli_GetPduLength(S7Object Client, int *Requested, int *Negotiated);
+
 //int S7API Cli_ErrorText(int Error, char *Text, int TextLen);
 //// 1.1.0
 //int S7API Cli_GetConnected(S7Object Client, int *Connected);
