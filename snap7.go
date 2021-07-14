@@ -86,13 +86,6 @@ const Block_SFB Block = 0x46
 // const byte BlockLangDB        = 0x05;
 // const byte BlockLangGRAPH     = 0x06;
 
-// CPU status
-type S7CpuStatus int
-
-const S7CpuStatusUnknown S7CpuStatus = 0x00
-const S7CpuStatusRun S7CpuStatus = 0x08
-const S7CpuStatusStop S7CpuStatus = 0x04
-
 func dataLength(wordLen S7WL, amount int32, start int32) int32 {
 	return wordLen.size()*amount + start
 }
@@ -181,3 +174,31 @@ func Value_Pvalue(paraNumber ParamNumber, value interface{}) (pValue unsafe.Poin
 	}
 	return
 }
+
+//******************************************************************************
+//                                   SERVER
+//******************************************************************************
+
+type MaskKind = int
+
+//MaskKind  Srv_GetMask/Srv_SetMask
+const (
+	MaskKindEvent = 0
+	MaskKindLog   = 1
+)
+
+//ServerStatus
+type S7ServerStatus int
+
+const (
+	SrvStopped S7ServerStatus = 0 //The Server is stopped.
+	SrvRunning S7ServerStatus = 1 //The Server is Running.
+	SrvError   S7ServerStatus = 2 //Server Error.
+)
+
+// CPU status
+type S7CpuStatus int
+
+const S7CpuStatusUnknown S7CpuStatus = 0x00
+const S7CpuStatusRun S7CpuStatus = 0x08
+const S7CpuStatusStop S7CpuStatus = 0x04
