@@ -18,7 +18,7 @@ func Cli_ErrorText(code C.int) error {
 	var buf [length]byte
 	var errCode = C.Cli_ErrorText(code, (*C.char)(unsafe.Pointer(&buf[0])), length)
 	if errCode != 0 {
-		return fmt.Errorf(" C.Cli_ErrorText failed code :%d,origin code %d", errCode, code)
+		return fmt.Errorf("C.Cli_ErrorText failed code :%d,origin code %d", errCode, code)
 	}
 	return errors.New(string(buf[:]))
 }
@@ -31,7 +31,7 @@ func Srv_ErrorText(code C.int) error {
 	var buf [length]byte
 	var errCode = C.Srv_ErrorText(code, (*C.char)(unsafe.Pointer(&buf[0])), length)
 	if errCode != 0 {
-		return fmt.Errorf(" C.Srv_ErrorText failed code :%d,origin code %d", errCode, code)
+		return fmt.Errorf("C.Srv_ErrorText failed code :%d,origin code %d", errCode, code)
 	}
 	return errors.New(string(buf[:]))
 }
