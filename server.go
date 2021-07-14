@@ -131,28 +131,29 @@ func (s *S7Server) Stop() (err error) {
 
 //typedef uint16_t   word;
 // func Srv_RegisterArea(S7Object Server, int AreaCode, word Index, void *pUsrData, int Size)
-func (s *S7Server) RegisterArea(AreaCode S7Area, Index uint16, pUsrData []byte, Size int) (err error) {
-	var code C.int = C.Srv_RegisterArea(s.server, C.int(AreaCode), C.uint16_t(Index), unsafe.Pointer(&pUsrData[0]), C.int(Size))
+func (s *S7Server) RegisterArea(AreaCode SrvAreaType, Index uint16, pUsrData []byte) (err error) {
+	var code C.int = C.Srv_RegisterArea(
+		s.server, C.int(AreaCode), C.uint16_t(Index), unsafe.Pointer(&pUsrData[0]), C.int(len(pUsrData)))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_UnregisterArea(S7Object Server, int AreaCode, word Index);
-func (s *S7Server) UnregisterArea(AreaCode S7Area, Index uint16) (err error) {
+func (s *S7Server) UnregisterArea(AreaCode SrvAreaType, Index uint16) (err error) {
 	var code C.int = C.Srv_UnregisterArea(s.server, C.int(AreaCode), C.uint16_t(Index))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_LockArea(S7Object Server, int AreaCode, word Index);
-func (s *S7Server) LockArea(AreaCode S7Area, Index uint16) (err error) {
+func (s *S7Server) LockArea(AreaCode SrvAreaType, Index uint16) (err error) {
 	var code C.int = C.Srv_LockArea(s.server, C.int(AreaCode), C.uint16_t(Index))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_UnlockArea(S7Object Server, int AreaCode, word Index);
-func (s *S7Server) UnlockArea(AreaCode S7Area, Index uint16) (err error) {
+func (s *S7Server) UnlockArea(AreaCode SrvAreaType, Index uint16) (err error) {
 	var code C.int = C.Srv_UnlockArea(s.server, C.int(AreaCode), C.uint16_t(Index))
 	err = Srv_ErrorText(code)
 	return
@@ -201,7 +202,7 @@ func (s *S7Server) SetMask(MaskKind MaskKind, Mask uint32) (err error) {
 }
 
 // func Srv_EventText(TSrvEvent *Event, char *Text, int TextLen)
-func Srv_EventText(Event TSrvEvent) (buf string, err error) {
+func Srv_EventText(Event *TSrvEvent) (buf string, err error) {
 	const length = 512
 	var buff [length]byte
 	var code C.int = C.Srv_EventText((*C.TSrvEvent)(unsafe.Pointer(&Event)), (*C.char)(unsafe.Pointer(&buff[0])), length)

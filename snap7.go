@@ -244,3 +244,12 @@ type S7CpuStatus int
 const S7CpuStatusUnknown S7CpuStatus = 0x00
 const S7CpuStatusRun S7CpuStatus = 0x08
 const S7CpuStatusStop S7CpuStatus = 0x04
+
+type SrvAreaType = int
+
+const SrvAreaPE SrvAreaType = 0
+const SrvAreaPA SrvAreaType = 1
+const SrvAreaMK SrvAreaType = 2
+const SrvAreaCT SrvAreaType = 3
+const SrvAreaTM SrvAreaType = 4
+const SrvAreaDB SrvAreaType = 5

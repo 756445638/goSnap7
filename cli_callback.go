@@ -37,7 +37,7 @@ func Cli_SetAsCallback(
 		client,
 		/*
 			todo
-			为啥golang认为函数指针是这个类型
+			为啥golang认为函数指针是这个类型*[0]byte
 		*/
 		(*[0]byte)(unsafe.Pointer(C.GlobalCliAsCallback)),
 		unsafe.Pointer(usrptr))
