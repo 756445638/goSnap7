@@ -152,14 +152,23 @@ func Cli_WriteArea(cli S7Object, area S7Area, dBNumber int, start int, amount in
 	err = Cli_ErrorText(code)
 	return
 }
-func Cli_ReadMultiVars(cli S7Object, items []TS7DataItem) (datas [][]byte, err error) {
+func Cli_ReadMultiVars(cli S7Object, items []TS7DataItemGo) (err error) {
 	itemsCount := len(items)
-	for _, v := range items {
+	itemsC := make([]TS7DataItem, itemsCount)
+
+	for k, v := range items {
 		t := make([]byte, dataLength(S7WL(v.WordLen), v.Amount, v.Start))
-		datas = append(datas, t)
-		v.Pdata = &t[0]
+		itemsC[k].Area = v.Area
+		itemsC[k].WordLen = v.WordLen
+		itemsC[k].Result = v.Result
+		itemsC[k].DBNumber = v.DBNumber
+		itemsC[k].Start = v.Start
+		itemsC[k].Amount = v.Amount
+		itemsC[k].Pdata = &t[0]
+		v.Pdata = t
+
 	}
-	var code C.int = C.Cli_ReadMultiVars(cli, (C.PS7DataItem)(unsafe.Pointer(&items[0])), C.int(itemsCount))
+	var code C.int = C.Cli_ReadMultiVars(cli, (C.PS7DataItem)(unsafe.Pointer(&itemsC[0])), C.int(itemsCount))
 	err = Cli_ErrorText(code)
 	return
 }
