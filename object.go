@@ -70,11 +70,11 @@ func (s *S7Server) UnlockArea(AreaCode int, Index uint16) (err error) {
 	return Srv_UnlockArea(s.server, AreaCode, Index)
 }
 
-func (s *S7Server) GetStatus(CpuStatus int, ClientsCount int) (ServerStatus int, err error) {
+func (s *S7Server) GetStatus(CpuStatus S7CpuStatus, ClientsCount int) (ServerStatus S7ServerStatus, err error) {
 	return Srv_GetStatus(s.server, CpuStatus, ClientsCount)
 }
 
-func (s *S7Server) SetCpuStatus(CpuStatus int) (err error) {
+func (s *S7Server) SetCpuStatus(CpuStatus S7CpuStatus) (err error) {
 	return Srv_SetCpuStatus(s.server, CpuStatus)
 }
 
@@ -86,11 +86,11 @@ func (s *S7Server) PickEvent(pEvent TSrvEvent, EvtReady int) (err error) {
 	return Srv_PickEvent(s.server, pEvent, EvtReady)
 }
 
-func (s *S7Server) GetMask(MaskKind int) (Mask uint32, err error) {
+func (s *S7Server) GetMask(MaskKind MaskKind) (Mask uint32, err error) {
 	return Srv_GetMask(s.server, MaskKind)
 }
 
-func (s *S7Server) SetMask(MaskKind int, Mask uint32) (err error) {
+func (s *S7Server) SetMask(MaskKind MaskKind, Mask uint32) (err error) {
 	return Srv_SetMask(s.server, MaskKind, Mask)
 }
 
