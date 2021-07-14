@@ -30,6 +30,48 @@ const P_u32_KeepAliveTime ParamNumber = 15
 //******************************************************************************
 //                                   CLIENT
 //******************************************************************************
+// Error codes
+type ErrorCode int
+
+const errNegotiatingPDU ErrorCode = 0x00100000
+const errCliInvalidParams ErrorCode = 0x00200000
+const errCliJobPending ErrorCode = 0x00300000
+const errCliTooManyItems ErrorCode = 0x00400000
+const errCliInvalidWordLen ErrorCode = 0x00500000
+const errCliPartialDataWritten ErrorCode = 0x00600000
+const errCliSizeOverPDU ErrorCode = 0x00700000
+const errCliInvalidPlcAnswer ErrorCode = 0x00800000
+const errCliAddressOutOfRange ErrorCode = 0x00900000
+const errCliInvalidTransportSize ErrorCode = 0x00A00000
+const errCliWriteDataSizeMismatch ErrorCode = 0x00B00000
+const errCliItemNotAvailable ErrorCode = 0x00C00000
+const errCliInvalidValue ErrorCode = 0x00D00000
+const errCliCannotStartPLC ErrorCode = 0x00E00000
+const errCliAlreadyRun ErrorCode = 0x00F00000
+const errCliCannotStopPLC ErrorCode = 0x01000000
+const errCliCannotCopyRamToRom ErrorCode = 0x01100000
+const errCliCannotCompress ErrorCode = 0x01200000
+const errCliAlreadyStop ErrorCode = 0x01300000
+const errCliFunNotAvailable ErrorCode = 0x01400000
+const errCliUploadSequenceFailed ErrorCode = 0x01500000
+const errCliInvalidDataSizeRecvd ErrorCode = 0x01600000
+const errCliInvalidBlockType ErrorCode = 0x01700000
+const errCliInvalidBlockNumber ErrorCode = 0x01800000
+const errCliInvalidBlockSize ErrorCode = 0x01900000
+const errCliDownloadSequenceFailed ErrorCode = 0x01A00000
+const errCliInsertRefused ErrorCode = 0x01B00000
+const errCliDeleteRefused ErrorCode = 0x01C00000
+const errCliNeedPassword ErrorCode = 0x01D00000
+const errCliInvalidPassword ErrorCode = 0x01E00000
+const errCliNoPasswordToSetOrClear ErrorCode = 0x01F00000
+const errCliJobTimeout ErrorCode = 0x02000000
+const errCliPartialDataRead ErrorCode = 0x02100000
+const errCliBufferTooSmall ErrorCode = 0x02200000
+const errCliFunctionRefused ErrorCode = 0x02300000
+const errCliDestroying ErrorCode = 0x02400000
+const errCliInvalidParamNumber ErrorCode = 0x02500000
+const errCliCannotChangeParam ErrorCode = 0x02600000
+
 // Client Connection Type
 type CONNTYPE = uint16
 

@@ -429,6 +429,11 @@ func Cli_GetExecTime(cli S7Object) (time int, err error) {
 }
 
 //int S7API Cli_GetLastError(S7Object Client, int *LastError);
+func Cli_GetLastError(cli S7Object) (lastError ErrorCode, err error) {
+	var code C.int = C.Cli_GetLastError(cli, (*C.int)(unsafe.Pointer(&lastError)))
+	err = Cli_ErrorText(code)
+	return
+}
 
 //int S7API Cli_GetPduLength(S7Object Client, int *Requested, int *Negotiated);
 //int S7API Cli_ErrorText(int Error, char *Text, int TextLen);
