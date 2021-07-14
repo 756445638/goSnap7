@@ -27,6 +27,13 @@ const P_i32_BRecvTimeout ParamNumber = 13
 const P_u32_RecoveryTime ParamNumber = 14
 const P_u32_KeepAliveTime ParamNumber = 15
 
+// Client/Partner Job status
+type JobStatus int
+
+const JobComplete JobStatus = 0
+const JobPending JobStatus = 1
+const errLibInvalidObject JobStatus = -2
+
 //******************************************************************************
 //                                   CLIENT
 //******************************************************************************
