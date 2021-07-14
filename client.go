@@ -158,15 +158,8 @@ func Cli_ReadMultiVars(cli S7Object, items []TS7DataItemGo) (err error) {
 
 	for k, v := range items {
 		t := make([]byte, dataLength(S7WL(v.WordLen), v.Amount, v.Start))
-		itemsC[k].Area = v.Area
-		itemsC[k].WordLen = v.WordLen
-		itemsC[k].Result = v.Result
-		itemsC[k].DBNumber = v.DBNumber
-		itemsC[k].Start = v.Start
-		itemsC[k].Amount = v.Amount
-		itemsC[k].Pdata = &t[0]
 		v.Pdata = t
-
+		itemsC[k] = v.ToC()
 	}
 	var code C.int = C.Cli_ReadMultiVars(cli, (C.PS7DataItem)(unsafe.Pointer(&itemsC[0])), C.int(itemsCount))
 	err = Cli_ErrorText(code)
