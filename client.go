@@ -190,41 +190,41 @@ func (c *S7Client) WriteMultiVars(items []TS7DataItemGo) (err error) {
 	return
 }
 
-func (c *S7Client) DBRead(dBNumber int, start int, amount int) (pUsrData []byte, err error) {
-	return c.ReadArea(S7AreaDB, dBNumber, start, amount, S7WLByte)
+func (c *S7Client) DBRead(dBNumber int, start int, size int) (pUsrData []byte, err error) {
+	return c.ReadArea(S7AreaDB, dBNumber, start, size, S7WLByte)
 }
-func (c *S7Client) DBWrite(dBNumber int, start int, amount int, pUsrData []byte) (err error) {
-	return c.WriteArea(S7AreaDB, dBNumber, start, amount, S7WLByte, pUsrData)
+func (c *S7Client) DBWrite(dBNumber int, start int, size int, pUsrData []byte) (err error) {
+	return c.WriteArea(S7AreaDB, dBNumber, start, size, S7WLByte, pUsrData)
 }
-func (c *S7Client) MBRead(dBNumber int, start int, amount int) (pUsrData []byte, err error) {
-	return c.ReadArea(S7AreaMK, dBNumber, start, amount, S7WLByte)
+func (c *S7Client) MBRead(start int, size int) (pUsrData []byte, err error) {
+	return c.ReadArea(S7AreaMK, 0, start, size, S7WLByte)
 }
-func (c *S7Client) MBWrite(dBNumber int, start int, amount int, pUsrData []byte) (err error) {
-	return c.WriteArea(S7AreaMK, dBNumber, start, amount, S7WLByte, pUsrData)
+func (c *S7Client) MBWrite(start int, size int, pUsrData []byte) (err error) {
+	return c.WriteArea(S7AreaMK, 0, start, size, S7WLByte, pUsrData)
 }
-func (c *S7Client) EBRead(dBNumber int, start int, amount int) (pUsrData []byte, err error) {
-	return c.ReadArea(S7AreaPE, dBNumber, start, amount, S7WLByte)
+func (c *S7Client) EBRead(start int, size int) (pUsrData []byte, err error) {
+	return c.ReadArea(S7AreaPE, 0, start, size, S7WLByte)
 }
-func (c *S7Client) EBWrite(dBNumber int, start int, amount int, pUsrData []byte) (err error) {
-	return c.WriteArea(S7AreaPE, dBNumber, start, amount, S7WLByte, pUsrData)
+func (c *S7Client) EBWrite(start int, size int, pUsrData []byte) (err error) {
+	return c.WriteArea(S7AreaPE, 0, start, size, S7WLByte, pUsrData)
 }
-func (c *S7Client) ABRead(dBNumber int, start int, amount int) (pUsrData []byte, err error) {
-	return c.ReadArea(S7AreaPA, dBNumber, start, amount, S7WLByte)
+func (c *S7Client) ABRead(start int, size int) (pUsrData []byte, err error) {
+	return c.ReadArea(S7AreaPA, 0, start, size, S7WLByte)
 }
-func (c *S7Client) ABWrite(dBNumber int, start int, amount int, pUsrData []byte) (err error) {
-	return c.WriteArea(S7AreaPA, dBNumber, start, amount, S7WLByte, pUsrData)
+func (c *S7Client) ABWrite(start int, size int, pUsrData []byte) (err error) {
+	return c.WriteArea(S7AreaPA, 0, start, size, S7WLByte, pUsrData)
 }
-func (c *S7Client) TMRead(dBNumber int, start int, amount int) (pUsrData []byte, err error) {
-	return c.ReadArea(S7AreaTM, dBNumber, start, amount, S7WLByte)
+func (c *S7Client) TMRead(start int, size int) (pUsrData []byte, err error) {
+	return c.ReadArea(S7AreaTM, 0, start, size, S7WLByte)
 }
-func (c *S7Client) TMWrite(dBNumber int, start int, amount int, pUsrData []byte) (err error) {
-	return c.WriteArea(S7AreaTM, dBNumber, start, amount, S7WLByte, pUsrData)
+func (c *S7Client) TMWrite(start int, size int, pUsrData []byte) (err error) {
+	return c.WriteArea(S7AreaTM, 0, start, size, S7WLByte, pUsrData)
 }
-func (c *S7Client) CTRead(dBNumber int, start int, amount int) (pUsrData []byte, err error) {
-	return c.ReadArea(S7AreaCT, dBNumber, start, amount, S7WLByte)
+func (c *S7Client) CTRead(start int, size int) (pUsrData []byte, err error) {
+	return c.ReadArea(S7AreaCT, 0, start, size, S7WLByte)
 }
-func (c *S7Client) CTWrite(dBNumber int, start int, amount int, pUsrData []byte) (err error) {
-	return c.WriteArea(S7AreaCT, dBNumber, start, amount, S7WLByte, pUsrData)
+func (c *S7Client) CTWrite(start int, size int, pUsrData []byte) (err error) {
+	return c.WriteArea(S7AreaCT, 0, start, size, S7WLByte, pUsrData)
 }
 func (c *S7Client) ListBlocks() (pUsrData TS7BlocksList, err error) {
 	var code C.int = C.Cli_ListBlocks(c.client, (*C.TS7BlocksList)(unsafe.Pointer(&pUsrData)))
@@ -469,21 +469,64 @@ func (c *S7Client) AsWriteArea(area S7Area, dBNumber int, start int, amount int,
 }
 
 // int S7API Cli_AsDBRead(S7Object Client, int DBNumber, int Start, int Size, void *pUsrData);
-func (c *S7Client) AsDBRead(dBNumber int, start int, amount int) (pUsrData []byte, err error) {
-	return c.AsReadArea(S7AreaDB, dBNumber, start, amount, S7WLByte)
+func (c *S7Client) AsDBRead(dBNumber int, start int, size int) (pUsrData []byte, err error) {
+	return c.AsReadArea(S7AreaDB, dBNumber, start, size, S7WLByte)
 }
 
 // int S7API Cli_AsDBWrite(S7Object Client, int DBNumber, int Start, int Size, void *pUsrData);
+func (c *S7Client) AsDBWrite(dBNumber int, start int, size int, pUsrData []byte) (err error) {
+	return c.AsWriteArea(S7AreaDB, dBNumber, start, size, S7WLByte, pUsrData)
+}
+
 // int S7API Cli_AsMBRead(S7Object Client, int Start, int Size, void *pUsrData);
+func (c *S7Client) AsMBRead(start int, size int) (pUsrData []byte, err error) {
+	return c.AsReadArea(S7AreaMK, 0, start, size, S7WLByte)
+}
+
 // int S7API Cli_AsMBWrite(S7Object Client, int Start, int Size, void *pUsrData);
+func (c *S7Client) AsMBWrite(start int, size int, pUsrData []byte) (err error) {
+	return c.AsWriteArea(S7AreaMK, 0, start, size, S7WLByte, pUsrData)
+}
+
 // int S7API Cli_AsEBRead(S7Object Client, int Start, int Size, void *pUsrData);
+func (c *S7Client) AsEBRead(start int, size int) (pUsrData []byte, err error) {
+	return c.AsReadArea(S7AreaPE, 0, start, size, S7WLByte)
+}
+
 // int S7API Cli_AsEBWrite(S7Object Client, int Start, int Size, void *pUsrData);
+func (c *S7Client) AsEBWrite(start int, size int, pUsrData []byte) (err error) {
+	return c.AsWriteArea(S7AreaPE, 0, start, size, S7WLByte, pUsrData)
+}
+
 // int S7API Cli_AsABRead(S7Object Client, int Start, int Size, void *pUsrData);
+func (c *S7Client) AsABRead(start int, size int) (pUsrData []byte, err error) {
+	return c.AsReadArea(S7AreaPA, 0, start, size, S7WLByte)
+}
+
 // int S7API Cli_AsABWrite(S7Object Client, int Start, int Size, void *pUsrData);
+func (c *S7Client) AsABWrite(start int, size int, pUsrData []byte) (err error) {
+	return c.AsWriteArea(S7AreaPA, 0, start, size, S7WLByte, pUsrData)
+}
+
 // int S7API Cli_AsTMRead(S7Object Client, int Start, int Amount, void *pUsrData);
+func (c *S7Client) AsTMRead(start int, size int) (pUsrData []byte, err error) {
+	return c.AsReadArea(S7AreaTM, 0, start, size, S7WLByte)
+}
+
 // int S7API Cli_AsTMWrite(S7Object Client, int Start, int Amount, void *pUsrData);
+func (c *S7Client) AsTMWrite(start int, size int, pUsrData []byte) (err error) {
+	return c.AsWriteArea(S7AreaTM, 0, start, size, S7WLByte, pUsrData)
+}
+
 // int S7API Cli_AsCTRead(S7Object Client, int Start, int Amount, void *pUsrData);
+func (c *S7Client) AsCTRead(start int, size int) (pUsrData []byte, err error) {
+	return c.AsReadArea(S7AreaCT, 0, start, size, S7WLByte)
+}
+
 // int S7API Cli_AsCTWrite(S7Object Client, int Start, int Amount, void *pUsrData);
+func (c *S7Client) AsCTWrite(start int, size int, pUsrData []byte) (err error) {
+	return c.AsWriteArea(S7AreaCT, 0, start, size, S7WLByte, pUsrData)
+}
 
 // int S7API Cli_AsListBlocksOfType(S7Object Client, int BlockType, TS7BlocksOfType *pUsrData, int *ItemsCount);
 func (c *S7Client) AsListBlocksOfType(blockType Block) (pUsrData TS7BlocksOfType, itemsCount int, err error) {
@@ -523,36 +566,35 @@ func (c *S7Client) AsFullUpload(blockType Block, blockNum int, pUsrData []byte) 
 }
 
 // int S7API Cli_AsDownload(S7Object Client, int BlockNum, void *pUsrData, int Size);
-func (c *S7Client) AsDownload(BlockNum int, pUsrData []byte, size int) (err error) {
+func (c *S7Client) AsDownload(blockNum int, pUsrData []byte, size int) (err error) {
 	pUsrData = make([]byte, size)
-	var code C.int = C.Cli_AsDownload(c.client, C.int(BlockNum), unsafe.Pointer(&pUsrData[0]), C.int(size))
+	var code C.int = C.Cli_AsDownload(c.client, C.int(blockNum), unsafe.Pointer(&pUsrData[0]), C.int(size))
 	err = Cli_ErrorText(code)
 	return
 }
 
 // int S7API Cli_AsCopyRamToRom(S7Object Client, int Timeout);
-func (c *S7Client) AsCopyRamToRom(Timeout int) (err error) {
-	var code C.int = C.Cli_AsCopyRamToRom(c.client, C.int(Timeout))
+func (c *S7Client) AsCopyRamToRom(timeout int) (err error) {
+	var code C.int = C.Cli_AsCopyRamToRom(c.client, C.int(timeout))
 	err = Cli_ErrorText(code)
 	return
 }
 
 // int S7API Cli_AsCompress(S7Object Client, int Timeout);
-func (c *S7Client) AsCompress(Timeout int) (err error) {
-	var code C.int = C.Cli_AsCompress(c.client, C.int(Timeout))
+func (c *S7Client) AsCompress(timeout int) (err error) {
+	var code C.int = C.Cli_AsCompress(c.client, C.int(timeout))
 	err = Cli_ErrorText(code)
 	return
 }
 
 // int S7API Cli_AsDBGet(S7Object Client, int DBNumber, void *pUsrData, int *Size);
-func (c *S7Client) AsDBGet(DBNumber int, pUsrData []byte) (Size int, err error) {
-	return c.AsUpload(Block_DB, DBNumber, pUsrData)
-	return
+func (c *S7Client) AsDBGet(dBNumber int, pUsrData []byte) (size int, err error) {
+	return c.AsUpload(Block_DB, dBNumber, pUsrData)
 }
 
 // int S7API Cli_AsDBFill(S7Object Client, int DBNumber, int FillChar);
-func (c *S7Client) AsDBFill(DBNumber int, FillChar int) (err error) {
-	var code C.int = C.Cli_AsDBFill(c.client, C.int(DBNumber), C.int(FillChar))
+func (c *S7Client) AsDBFill(dBNumber int, fillChar int) (err error) {
+	var code C.int = C.Cli_AsDBFill(c.client, C.int(dBNumber), C.int(fillChar))
 	err = Cli_ErrorText(code)
 	return
 }
@@ -565,15 +607,8 @@ func (c *S7Client) CheckAsCompletion() (opResult JobStatus, err error) {
 }
 
 //int S7API Cli_WaitAsCompletion(S7Object Client, int Timeout);
-func (c *S7Client) WaitAsCompletion(Timeout int) (err error) {
-	var code C.int = C.Cli_WaitAsCompletion(c.client, C.int(Timeout))
+func (c *S7Client) WaitAsCompletion(timeout int) (err error) {
+	var code C.int = C.Cli_WaitAsCompletion(c.client, C.int(timeout))
 	err = Cli_ErrorText(code)
 	return
 }
-
-////int S7API Cli_CheckAsCompletion(S7Object Client, int *opResult);
-//func (c *S7Client) CheckAsCompletion() (opResult JobStatus, err error) {
-//	var code C.int = C.Cli_CheckAsCompletion(c.client, (*C.int)(unsafe.Pointer(&opResult)))
-//	err = Cli_ErrorText(code)
-//	return
-//}
