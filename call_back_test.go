@@ -18,6 +18,7 @@ func TestSomeCallBack(t *testing.T) {
 	server := NewS7Server()
 	server.SetEventsCallback(justPrintEvent)
 	server.SetReadEventsCallback(justPrintEvent)
+
 	var data [1024]byte
 	go func() {
 		for ; ; time.Sleep(time.Second) {
