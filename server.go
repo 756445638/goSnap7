@@ -181,9 +181,18 @@ func (s *S7Server) ClearEvents() (err error) {
 }
 
 // func Srv_PickEvent(S7Object Server, TSrvEvent *pEvent, int *EvtReady);
-func (s *S7Server) PickEvent(pEvent TSrvEvent, EvtReady int) (err error) {
-	var code C.int = C.Srv_PickEvent(s.server, (*C.TSrvEvent)(unsafe.Pointer(&pEvent)), (*C.int)(unsafe.Pointer(&EvtReady)))
+func (s *S7Server) PickEvent() (pEvent *TSrvEvent, err error) {
+	var EvtReady int
+	pEvent = new(TSrvEvent)
+	var code C.int = C.Srv_PickEvent(s.server, (*C.TSrvEvent)(unsafe.Pointer(pEvent)), (*C.int)(unsafe.Pointer(&EvtReady)))
 	err = Srv_ErrorText(code)
+	if err != nil {
+		pEvent = nil
+		return
+	}
+	if EvtReady == 0 {
+		pEvent = nil
+	}
 	return
 }
 
