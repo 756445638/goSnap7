@@ -5,11 +5,8 @@ package snap7go
 //#include <stdlib.h>
 import "C"
 import (
-
 	"unsafe"
 )
-
-
 
 func Srv_Create() (server S7Object) {
 	server = C.Srv_Create()
@@ -134,42 +131,42 @@ func Srv_Stop(Server S7Object) (err error) {
 
 //typedef uint16_t   word;
 // func Srv_RegisterArea(S7Object Server, int AreaCode, word Index, void *pUsrData, int Size)
-func Srv_RegisterArea(Server S7Object, AreaCode int, Index uint16, pUsrData []byte, Size int) (err error) {
+func Srv_RegisterArea(Server S7Object, AreaCode S7Area, Index uint16, pUsrData []byte, Size int) (err error) {
 	var code C.int = C.Srv_RegisterArea(Server, C.int(AreaCode), C.uint16_t(Index), unsafe.Pointer(&pUsrData[0]), C.int(Size))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_UnregisterArea(S7Object Server, int AreaCode, word Index);
-func Srv_UnregisterArea(Server S7Object, AreaCode int, Index uint16) (err error) {
+func Srv_UnregisterArea(Server S7Object, AreaCode S7Area, Index uint16) (err error) {
 	var code C.int = C.Srv_UnregisterArea(Server, C.int(AreaCode), C.uint16_t(Index))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_LockArea(S7Object Server, int AreaCode, word Index);
-func Srv_LockArea(Server S7Object, AreaCode int, Index uint16) (err error) {
+func Srv_LockArea(Server S7Object, AreaCode S7Area, Index uint16) (err error) {
 	var code C.int = C.Srv_LockArea(Server, C.int(AreaCode), C.uint16_t(Index))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_UnlockArea(S7Object Server, int AreaCode, word Index);
-func Srv_UnlockArea(Server S7Object, AreaCode int, Index uint16) (err error) {
+func Srv_UnlockArea(Server S7Object, AreaCode S7Area, Index uint16) (err error) {
 	var code C.int = C.Srv_UnlockArea(Server, C.int(AreaCode), C.uint16_t(Index))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_GetStatus(S7Object Server, int *ServerStatus, int *CpuStatus, int *ClientsCount);
-func Srv_GetStatus(Server S7Object, CpuStatus int, ClientsCount int) (ServerStatus int, err error) {
+func Srv_GetStatus(Server S7Object, CpuStatus S7CpuStatus, ClientsCount int) (ServerStatus S7ServerStatus, err error) {
 	var code C.int = C.Srv_GetStatus(Server, (*C.int)(unsafe.Pointer(&ServerStatus)), (*C.int)(unsafe.Pointer(&CpuStatus)), (*C.int)(unsafe.Pointer(&ClientsCount)))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_SetCpuStatus(S7Object Server, int CpuStatus);
-func Srv_SetCpuStatus(Server S7Object, CpuStatus int) (err error) {
+func Srv_SetCpuStatus(Server S7Object, CpuStatus S7CpuStatus) (err error) {
 	var code C.int = C.Srv_SetCpuStatus(Server, C.int(CpuStatus))
 	err = Srv_ErrorText(code)
 	return
@@ -190,28 +187,25 @@ func Srv_PickEvent(Server S7Object, pEvent TSrvEvent, EvtReady int) (err error) 
 }
 
 // func Srv_GetMask(S7Object Server, int MaskKind, longword *Mask);  uint32_t
-func Srv_GetMask(Server S7Object, MaskKind int) (Mask uint32, err error) {
+func Srv_GetMask(Server S7Object, MaskKind MaskKind) (Mask uint32, err error) {
 	var code C.int = C.Srv_GetMask(Server, C.int(MaskKind), (*C.uint32_t)((unsafe.Pointer(&Mask))))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_SetMask(S7Object Server, int MaskKind, longword Mask);
-func Srv_SetMask(Server S7Object, MaskKind int, Mask uint32) (err error) {
+func Srv_SetMask(Server S7Object, MaskKind MaskKind, Mask uint32) (err error) {
 	var code C.int = C.Srv_SetMask(Server, C.int(MaskKind), C.uint32_t(Mask))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_EventText(TSrvEvent *Event, char *Text, int TextLen)
-func Srv_EventText( Event TSrvEvent ) (buf string,err error)  {
+func Srv_EventText(Event TSrvEvent) (buf string, err error) {
 	const length = 512
 	var buff [length]byte
-	var code C.int = C.Srv_EventText((*C.TSrvEvent)(unsafe.Pointer(&Event)),(*C.char)(unsafe.Pointer(&buff[0])),length)
-      err = Srv_ErrorText(code)
-	   buf=string(buff[:])
-	   return
+	var code C.int = C.Srv_EventText((*C.TSrvEvent)(unsafe.Pointer(&Event)), (*C.char)(unsafe.Pointer(&buff[0])), length)
+	err = Srv_ErrorText(code)
+	buf = string(buff[:])
+	return
 }
-
-
-
