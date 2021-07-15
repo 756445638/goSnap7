@@ -4,16 +4,9 @@ package snap7go
 //#include "snap7.h"
 //#include <stdlib.h>
 /*
-	extern int dataLength_for_c(int wl , int amount);
+
 
 	//see issue https://github.com/756445638/snap7-go/issues/3
-
-	int S7API Cli_ReadMultiVarsXXX(S7Object Client, PS7DataItem Item, int ItemsCount) {
-		for(int i =0 ;i < ItemsCount;i++) {
-			Item[i].pdata = (char*)malloc(dataLength_for_c(Item[i].WordLen ,Item[i].Amount ));
-		}
-		return Cli_ReadMultiVars(Client ,Item , ItemsCount );
-	}
 
 	void freePS7DataItem(PS7DataItem Item, int ItemsCount) {
 		for(int i =0 ;i < ItemsCount;i++) {
@@ -180,7 +173,12 @@ func (c *S7Client) ReadMultiVars(items []TS7DataItemGo) (err error) {
 	for k := range items {
 		itemsC[k] = items[k].ToC()
 	}
-	var code C.int = C.Cli_ReadMultiVarsXXX(
+	for k := range itemsC {
+		itemsC[k].Pdata = (*byte)(C.malloc(
+			C.size_t(dataLength(S7WL(itemsC[k].WordLen), itemsC[k].Amount)),
+		))
+	}
+	var code C.int = C.Cli_ReadMultiVars(
 		c.client,
 		(C.PS7DataItem)(unsafe.Pointer(&itemsC[0])),
 		C.int(itemsCount),
