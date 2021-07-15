@@ -56,7 +56,7 @@ func Srv_SetRWAreaCallback(svr S7Object, handle Pfn_RWAreaCallBack, usrPtr uintp
 	return nil
 }
 
-func getSrvEventFormC(e C.PSrvEvent) (ego TSrvEvent) {
+func getSrvEventFromC(e C.PSrvEvent) (ego TSrvEvent) {
 	ego = *((*TSrvEvent)(unsafe.Pointer(e)))
 	return
 }
@@ -69,7 +69,7 @@ func GlobalEventsCallback(usrPtr *C.void, event C.PSrvEvent, size C.int) {
 	if callback == nil {
 		return
 	}
-	e := getSrvEventFormC(event)
+	e := getSrvEventFromC(event)
 	callback(up, &e)
 }
 
@@ -80,7 +80,7 @@ func GlobalReadEventsCallback(usrPtr *C.void, event C.PSrvEvent, size C.int) {
 	if callback == nil {
 		return
 	}
-	e := getSrvEventFormC(event)
+	e := getSrvEventFromC(event)
 	callback(up, &e)
 }
 func getPS7TagFormC(t C.PS7Tag) (et PS7Tag) {
