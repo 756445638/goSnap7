@@ -10,10 +10,11 @@ func TestSomeCallBack(t *testing.T) {
 	server := NewS7Server()
 	server.SetEventsCallback(justPrintEvent)
 	server.SetReadEventsCallback(justPrintEvent)
-
+	const duration = time.Millisecond * 50
 	var data [1024]byte
+
 	go func() {
-		for ; ; time.Sleep(time.Millisecond * 50) {
+		for ; ; time.Sleep(duration) {
 			for k, _ := range data {
 				data[k]++
 			}
@@ -43,7 +44,7 @@ func TestSomeCallBack(t *testing.T) {
 	}
 	for i := 0; i < 10; func() {
 		i++
-		time.Sleep(time.Millisecond * 50)
+		time.Sleep(duration)
 	}() {
 		data, err := client.ReadArea(S7AreaPA, 0, 1, 10, S7WLWord)
 		if err != nil {
@@ -52,4 +53,42 @@ func TestSomeCallBack(t *testing.T) {
 		}
 		fmt.Println("read data:", data)
 	}
+
+	{
+		// 读取区域的最后十个字节
+		data := []TS7DataItemGo{
+			{
+				Area:     int32(S7AreaPA),
+				WordLen:  int32(S7WLByte),
+				DBNumber: 0,
+				Start:    1014,
+				Amount:   10,
+			},
+		}
+		err := client.ReadMultiVars(data)
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		fmt.Println("!!!!!!!!read data:", data[0].Pdata)
+		for k, _ := range data[0].Pdata {
+			data[0].Pdata[k] = 100
+		}
+		// 把值全部改成100
+		err = client.WriteMultiVars(data)
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		err = client.ReadMultiVars(data)
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		fmt.Println("read data:", data[0].Pdata)
+		if data[0].Pdata[0] != 100 {
+			t.Fatalf("value shoudle be 100\n")
+		}
+	}
+
 }
