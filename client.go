@@ -3,19 +3,6 @@ package snap7go
 //#cgo CFLAGS: -I .
 //#include "snap7.h"
 //#include <stdlib.h>
-/*
-
-
-	//see issue https://github.com/756445638/snap7-go/issues/3
-
-	void freePS7DataItem(PS7DataItem Item, int ItemsCount) {
-		for(int i =0 ;i < ItemsCount;i++) {
-			free(Item[i].pdata);
-		}
-	}
-
-
-*/
 import "C"
 import (
 	"unsafe"
@@ -166,7 +153,11 @@ func (c *S7Client) WriteArea(area S7Area, dBNumber int, start int, amount int, w
 	err = Cli_ErrorText(code)
 	return
 }
-
+func (c *S7Client) freeItemsC(items []TS7DataItem) {
+	for k := range items {
+		C.free(unsafe.Pointer(items[k].Pdata))
+	}
+}
 func (c *S7Client) ReadMultiVars(items []TS7DataItemGo) (err error) {
 	itemsCount := len(items)
 	itemsC := make([]TS7DataItem, itemsCount)
@@ -178,14 +169,13 @@ func (c *S7Client) ReadMultiVars(items []TS7DataItemGo) (err error) {
 			C.size_t(dataLength(S7WL(itemsC[k].WordLen), itemsC[k].Amount)),
 		))
 	}
+	defer c.freeItemsC(itemsC)
 	var code C.int = C.Cli_ReadMultiVars(
 		c.client,
 		(C.PS7DataItem)(unsafe.Pointer(&itemsC[0])),
 		C.int(itemsCount),
 	)
-	defer func() {
-		C.freePS7DataItem((C.PS7DataItem)(unsafe.Pointer(&itemsC[0])), C.int(itemsCount))
-	}()
+
 	err = Cli_ErrorText(code)
 	if err != nil {
 		return
@@ -203,13 +193,12 @@ func (c *S7Client) WriteMultiVars(items []TS7DataItemGo) (err error) {
 		itemsC[k] = items[k].ToC()
 		items[k].CopyPdata(&itemsC[k])
 	}
+	defer c.freeItemsC(itemsC)
 	var code C.int = C.Cli_WriteMultiVars(
 		c.client,
 		(C.PS7DataItem)(unsafe.Pointer(&itemsC[0])),
 		C.int(itemsCount))
-	defer func() {
-		C.freePS7DataItem((C.PS7DataItem)(unsafe.Pointer(&itemsC[0])), C.int(itemsCount))
-	}()
+
 	err = Cli_ErrorText(code)
 	if err != nil {
 		return
