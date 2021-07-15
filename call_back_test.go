@@ -6,14 +6,6 @@ import (
 	"time"
 )
 
-func justPrintEvent(e *TSrvEvent) {
-	s, err := Srv_EventText(e)
-	if err != nil {
-		panic(fmt.Sprintf("Srv_EventText failed,err:%v\n", err))
-	}
-	fmt.Println(s)
-}
-
 func TestSomeCallBack(t *testing.T) {
 	server := NewS7Server()
 	server.SetEventsCallback(justPrintEvent)

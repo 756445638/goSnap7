@@ -260,3 +260,12 @@ const SrvAreaMK SrvAreaType = 2
 const SrvAreaCT SrvAreaType = 3
 const SrvAreaTM SrvAreaType = 4
 const SrvAreaDB SrvAreaType = 5
+
+func justPrintEvent(e *TSrvEvent) {
+	s, err := Srv_EventText(e)
+	if err != nil {
+		fmt.Printf("Srv_EventText() failed,code:%d err:%v\n", e.EvtCode, err)
+		return
+	}
+	fmt.Println(s)
+}
