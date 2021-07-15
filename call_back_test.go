@@ -13,7 +13,7 @@ func TestSomeCallBack(t *testing.T) {
 
 	var data [1024]byte
 	go func() {
-		for ; ; time.Sleep(time.Second) {
+		for ; ; time.Sleep(time.Millisecond * 50) {
 			for k, _ := range data {
 				data[k]++
 			}
@@ -35,7 +35,6 @@ func TestSomeCallBack(t *testing.T) {
 		}
 		server.Destroy()
 	}()
-
 	client := NewS7Client()
 	err = client.ConnectTo("127.0.0.1", 0, 1)
 	if err != nil {
@@ -44,7 +43,7 @@ func TestSomeCallBack(t *testing.T) {
 	}
 	for i := 0; i < 10; func() {
 		i++
-		time.Sleep(time.Second)
+		time.Sleep(time.Millisecond * 50)
 	}() {
 		data, err := client.ReadArea(S7AreaPA, 0, 0, 10, S7WLByte)
 		if err != nil {
