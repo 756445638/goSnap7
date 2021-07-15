@@ -1,5 +1,10 @@
 package snap7go
 
+import "unsafe"
+
+//#include <malloc.h>
+import "C"
+
 type TS7DataItemGo struct {
 	Area     int32
 	WordLen  int32
@@ -16,14 +21,39 @@ type TS7DataItemGo struct {
 	Pdata []byte
 }
 
+/*
+	Pdata没有处理
+	读和写需要单独处理
+*/
 func (g *TS7DataItemGo) ToC() TS7DataItem {
 	return TS7DataItem{
 		Area:     g.Area,
-		WordLen:  g.Area,
+		WordLen:  g.WordLen,
 		Result:   g.Result,
 		DBNumber: g.DBNumber,
 		Start:    g.Start,
 		Amount:   g.Amount,
-		Pdata:    &g.Pdata[0],
+	}
+}
+
+/*
+
+ */
+func (g *TS7DataItem) GetBytes() (data []byte) {
+	p := uintptr(unsafe.Pointer(g.Pdata))
+	length := dataLength(S7WL(g.WordLen), g.Amount)
+	data = make([]byte, length)
+	for i := 0; i < int(length); i++ {
+		data[i] = *(*byte)(unsafe.Pointer(p + uintptr(i)))
+	}
+	return data
+}
+
+func (g *TS7DataItemGo) CopyPdata(to *TS7DataItem) {
+	length := dataLength(S7WL(g.WordLen), g.Amount)
+	to.Pdata = (*byte)(C.malloc(C.ulong(length)))
+	up := uintptr(unsafe.Pointer(to.Pdata))
+	for i := 0; i < int(length); i++ {
+		*((*byte)(unsafe.Pointer(up + uintptr(i)))) = g.Pdata[i]
 	}
 }

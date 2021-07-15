@@ -3,6 +3,26 @@ package snap7go
 //#cgo CFLAGS: -I .
 //#include "snap7.h"
 //#include <stdlib.h>
+/*
+	extern int dataLength_for_c(int wl , int amount);
+
+	//see issue https://github.com/756445638/snap7-go/issues/3
+
+	int S7API Cli_ReadMultiVarsXXX(S7Object Client, PS7DataItem Item, int ItemsCount) {
+		for(int i =0 ;i < ItemsCount;i++) {
+			Item[i].pdata = (char*)malloc(dataLength_for_c(Item[i].WordLen ,Item[i].Amount ));
+		}
+		return Cli_ReadMultiVars(Client ,Item , ItemsCount );
+	}
+
+	void freePS7DataItem(PS7DataItem Item, int ItemsCount) {
+		for(int i =0 ;i < ItemsCount;i++) {
+			free(Item[i].pdata);
+		}
+	}
+
+
+*/
 import "C"
 import (
 	"unsafe"
@@ -141,14 +161,14 @@ func (c *S7Client) SetParam(paraNumber ParamNumber, value interface{}) (err erro
 	return
 }
 func (c *S7Client) ReadArea(area S7Area, dBNumber int, start int, amount int, wordLen S7WL) (pUsrData []byte, err error) {
-	pUsrData = make([]byte, dataLength(wordLen, int32(amount), int32(start)))
+	pUsrData = make([]byte, dataLength(wordLen, int32(amount)))
 	var code C.int = C.Cli_ReadArea(c.client, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
 	err = Cli_ErrorText(code)
 	return
 }
 
 func (c *S7Client) WriteArea(area S7Area, dBNumber int, start int, amount int, wordLen S7WL, pUsrData []byte) (err error) {
-	pUsrData = make([]byte, dataLength(wordLen, int32(amount), int32(start)))
+	pUsrData = make([]byte, dataLength(wordLen, int32(amount)))
 	var code C.int = C.Cli_WriteArea(c.client, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
 	err = Cli_ErrorText(code)
 	return
@@ -157,29 +177,41 @@ func (c *S7Client) WriteArea(area S7Area, dBNumber int, start int, amount int, w
 func (c *S7Client) ReadMultiVars(items []TS7DataItemGo) (err error) {
 	itemsCount := len(items)
 	itemsC := make([]TS7DataItem, itemsCount)
-
-	for k, v := range items {
-		t := make([]byte, dataLength(S7WL(v.WordLen), v.Amount, v.Start))
-		v.Pdata = t
-		itemsC[k] = v.ToC()
+	for k := range items {
+		itemsC[k] = items[k].ToC()
 	}
-	var code C.int = C.Cli_ReadMultiVars(c.client, (C.PS7DataItem)(unsafe.Pointer(&itemsC[0])), C.int(itemsCount))
+	var code C.int = C.Cli_ReadMultiVarsXXX(
+		c.client,
+		(C.PS7DataItem)(unsafe.Pointer(&itemsC[0])),
+		C.int(itemsCount),
+	)
+	defer func() {
+		C.freePS7DataItem((C.PS7DataItem)(unsafe.Pointer(&itemsC[0])), C.int(itemsCount))
+	}()
 	err = Cli_ErrorText(code)
 	if err != nil {
 		return
 	}
 	for k, v := range itemsC {
 		items[k].Result = v.Result
+		items[k].Pdata = v.GetBytes()
 	}
 	return
 }
 func (c *S7Client) WriteMultiVars(items []TS7DataItemGo) (err error) {
 	itemsCount := len(items)
 	itemsC := make([]TS7DataItem, itemsCount)
-	for k, v := range items {
-		itemsC[k] = v.ToC()
+	for k, _ := range items {
+		itemsC[k] = items[k].ToC()
+		items[k].CopyPdata(&itemsC[k])
 	}
-	var code C.int = C.Cli_WriteMultiVars(c.client, (C.PS7DataItem)(unsafe.Pointer(&itemsC[0])), C.int(itemsCount))
+	var code C.int = C.Cli_WriteMultiVars(
+		c.client,
+		(C.PS7DataItem)(unsafe.Pointer(&itemsC[0])),
+		C.int(itemsCount))
+	defer func() {
+		C.freePS7DataItem((C.PS7DataItem)(unsafe.Pointer(&itemsC[0])), C.int(itemsCount))
+	}()
 	err = Cli_ErrorText(code)
 	if err != nil {
 		return
@@ -454,7 +486,7 @@ func (c *S7Client) GetConnected() (connected int, err error) {
 
 //int S7API Cli_AsReadArea(S7Object Client, int Area, int DBNumber, int Start, int Amount, int WordLen, void *pUsrData);
 func (c *S7Client) AsReadArea(area S7Area, dBNumber int, start int, amount int, wordLen S7WL) (pUsrData []byte, err error) {
-	pUsrData = make([]byte, dataLength(wordLen, int32(amount), int32(start)))
+	pUsrData = make([]byte, dataLength(wordLen, int32(amount)))
 	var code C.int = C.Cli_AsReadArea(c.client, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
 	err = Cli_ErrorText(code)
 	return
@@ -462,7 +494,7 @@ func (c *S7Client) AsReadArea(area S7Area, dBNumber int, start int, amount int, 
 
 // int S7API Cli_AsWriteArea(S7Object Client, int Area, int DBNumber, int Start, int Amount, int WordLen, void *pUsrData);
 func (c *S7Client) AsWriteArea(area S7Area, dBNumber int, start int, amount int, wordLen S7WL, pUsrData []byte) (err error) {
-	pUsrData = make([]byte, dataLength(wordLen, int32(amount), int32(start)))
+	pUsrData = make([]byte, dataLength(wordLen, int32(amount)))
 	var code C.int = C.Cli_AsWriteArea(c.client, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
 	err = Cli_ErrorText(code)
 	return

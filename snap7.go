@@ -1,5 +1,6 @@
 package snap7go
 
+import "C"
 import (
 	"fmt"
 	"unsafe"
@@ -135,9 +136,15 @@ const Block_SFB Block = 0x46
 // const byte BlockLangDB        = 0x05;
 // const byte BlockLangGRAPH     = 0x06;
 
-func dataLength(wordLen S7WL, amount int32, start int32) int32 {
-	return wordLen.size()*amount + start
+func dataLength(wordLen S7WL, amount int32) int32 {
+	return wordLen.size() * amount
 }
+
+//export dataLength_for_c
+func dataLength_for_c(wordLen C.int, amount C.int) int32 {
+	return dataLength(S7WL(S7WLWord), int32(amount))
+}
+
 func (s S7WL) size() int32 {
 	switch s {
 	case S7WLBit:
