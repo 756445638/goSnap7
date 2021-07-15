@@ -160,7 +160,7 @@ func (s *S7Server) UnlockArea(AreaCode SrvAreaType, Index uint16) (err error) {
 }
 
 // func Srv_GetStatus(S7Object Server, int *ServerStatus, int *CpuStatus, int *ClientsCount);
-func (s *S7Server) GetStatus() (ServerStatus S7ServerStatus,CpuStatus S7CpuStatus, ClientsCount int, err error) {
+func (s *S7Server) GetStatus() (ServerStatus S7ServerStatus, CpuStatus S7CpuStatus, ClientsCount int, err error) {
 	var code C.int = C.Srv_GetStatus(s.server, (*C.int)(unsafe.Pointer(&ServerStatus)), (*C.int)(unsafe.Pointer(&CpuStatus)), (*C.int)(unsafe.Pointer(&ClientsCount)))
 	err = Srv_ErrorText(code)
 	return
@@ -182,7 +182,7 @@ func (s *S7Server) ClearEvents() (err error) {
 
 // func Srv_PickEvent(S7Object Server, TSrvEvent *pEvent, int *EvtReady);
 /*
-	pEvent == nil 表示没有事件发生
+	pEvent == nil && err == nil 表示没有事件发生
 */
 func (s *S7Server) PickEvent() (pEvent *TSrvEvent, err error) {
 	var EvtReady int

@@ -64,6 +64,13 @@ func TestSomeCallBack(t *testing.T) {
 				Start:    1014,
 				Amount:   10,
 			},
+			{
+				Area:     int32(S7AreaPA),
+				WordLen:  int32(S7WLByte),
+				DBNumber: 0,
+				Start:    100,
+				Amount:   10,
+			},
 		}
 		err := client.ReadMultiVars(data)
 		if err != nil {
@@ -89,6 +96,10 @@ func TestSomeCallBack(t *testing.T) {
 		if data[0].Pdata[0] != 100 {
 			t.Fatalf("value shoudle be 100\n")
 		}
+	}
+
+	{
+
 	}
 
 }
