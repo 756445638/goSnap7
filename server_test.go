@@ -17,17 +17,22 @@ func TestServerAdministrative(t *testing.T) {
 	err := serverDefault.Start()
 	ast.Nil(err)
 
-	defer func() {
-		err = serverDefault.Stop()
-		ast.Nil(err)
-		serverDefault.Destroy()
-	}()
+	//后面会测试Stop()和Destroy()，所以不用defer
+	//defer func() {
+	//	err = serverDefault.Stop()
+	//	ast.Nil(err)
+	//	serverDefault.Destroy()
+	//}()
 
 	clientDefault := NewS7Client()
 	defer clientDefault.Destroy()
 	//连接默认地址(127.0.0.1)
 	err = clientDefault.Connect()
 	ast.Nil(err)
+
+	err = serverDefault.Stop()
+	ast.Nil(err)
+	serverDefault.Destroy()
 
 	/*
 		指定地址的server
@@ -41,12 +46,6 @@ func TestServerAdministrative(t *testing.T) {
 	err = serverDesignated.StartTo("127.0.0.1")
 	ast.Nil(err)
 
-	defer func() {
-		err = serverDesignated.Stop()
-		ast.Nil(err)
-		serverDesignated.Destroy()
-	}()
-
 	clientDesignated := NewS7Client()
 	defer clientDesignated.Destroy()
 	//连接指定地址
@@ -56,4 +55,22 @@ func TestServerAdministrative(t *testing.T) {
 	getValue,err:=serverDesignated.GetParam(P_i32_MaxClients)
 	ast.Nil(err)
 	ast.Equal(int32(12),getValue)
+
+	//Stop后client无法连接
+	err = serverDesignated.Stop()
+	ast.Nil(err)
+	err = clientDesignated.ConnectTo("127.0.0.1",0,2)
+	ast.NotNil(err)
+	//重新startTo后，能够连接
+	err = serverDesignated.StartTo("127.0.0.1")
+	ast.Nil(err)
+	err = clientDesignated.ConnectTo("127.0.0.1",0,2)
+	ast.Nil(err)
+
+	//Destroy后无法startTo
+	err = serverDesignated.Stop()
+	ast.Nil(err)
+	serverDesignated.Destroy()
+	err = serverDesignated.StartTo("127.0.0.1")
+	ast.NotNil(err)
 }
