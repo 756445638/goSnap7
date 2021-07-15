@@ -54,7 +54,7 @@ func TestSomeCallBack(t *testing.T) {
 		i++
 		time.Sleep(time.Second)
 	}() {
-		data, err := client.ReadArea(S7AreaPA, 0, 0, 10, S7WLByte)
+		data, err := client.ReadArea(S7AreaPA, 0, 1, 10, S7WLWord)
 		if err != nil {
 			t.Fatal(err)
 			return
