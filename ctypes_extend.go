@@ -51,7 +51,7 @@ func (g *TS7DataItem) GetBytes() (data []byte) {
 
 func (g *TS7DataItemGo) CopyPdata(to *TS7DataItem) {
 	length := dataLength(S7WL(g.WordLen), g.Amount)
-	to.Pdata = (*byte)(C.malloc(C.ulong(length)))
+	to.Pdata = (*byte)(C.malloc(C.size_t(length)))
 	up := uintptr(unsafe.Pointer(to.Pdata))
 	for i := 0; i < int(length); i++ {
 		*((*byte)(unsafe.Pointer(up + uintptr(i)))) = g.Pdata[i]
