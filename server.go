@@ -160,7 +160,7 @@ func (s *S7Server) UnlockArea(AreaCode SrvAreaType, Index uint16) (err error) {
 }
 
 // func Srv_GetStatus(S7Object Server, int *ServerStatus, int *CpuStatus, int *ClientsCount);
-func (s *S7Server) GetStatus(CpuStatus S7CpuStatus, ClientsCount int) (ServerStatus S7ServerStatus, err error) {
+func (s *S7Server) GetStatus() (ServerStatus S7ServerStatus,CpuStatus S7CpuStatus, ClientsCount int, err error) {
 	var code C.int = C.Srv_GetStatus(s.server, (*C.int)(unsafe.Pointer(&ServerStatus)), (*C.int)(unsafe.Pointer(&CpuStatus)), (*C.int)(unsafe.Pointer(&ClientsCount)))
 	err = Srv_ErrorText(code)
 	return
