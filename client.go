@@ -374,8 +374,8 @@ func (c *S7Client) ReadSZL(id int, index int) (pUsrData TS7SZL, size int, err er
 }
 
 //int S7API Cli_ReadSZLList(S7Object Client, TS7SZLList *pUsrData, int *ItemsCount);
-func (c *S7Client) ReadSZLList() (pUsrData TS7SZLList, itemsCount int, err error) {
-	var code C.int = C.Cli_ReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&itemsCount)))
+func (c *S7Client) ReadSZLList(pUsrData []TS7SZLList) (itemsCount int, err error) {
+	var code C.int = C.Cli_ReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&pUsrData[0])), (*C.int)(unsafe.Pointer(&itemsCount)))
 	err = Cli_ErrorText(code)
 	return
 }
