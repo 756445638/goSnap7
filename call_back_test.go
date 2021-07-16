@@ -20,7 +20,7 @@ func TestSomeCallBack(t *testing.T) {
 			}
 		}
 	}()
-	err := server.RegisterArea(SrvAreaDB, 0, data[:])
+	err := server.RegisterArea(SrvAreaPA, 0, data[:])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +46,7 @@ func TestSomeCallBack(t *testing.T) {
 		i++
 		time.Sleep(duration)
 	}() {
-		data, err := client.ReadArea(S7AreaPA, 0, 1, 10, S7WLWord)
+		data, err := client.ReadArea(S7AreaPA, 0, 3, 10, S7WLWord)
 		if err != nil {
 			t.Fatal(err)
 			return
@@ -142,7 +142,7 @@ func TestSomeWordLenStart(t *testing.T) {
 			t.Fatal(err)
 			return
 		}
-		fmt.Println("!!!!!!!!!", data)
+		fmt.Println("bit value:", data)
 		err = client.WriteArea(S7AreaDB, 0, 1, S7WLBit, []byte{1})
 		if err != nil {
 			t.Fatal(err)
@@ -153,7 +153,7 @@ func TestSomeWordLenStart(t *testing.T) {
 			t.Fatal(err)
 			return
 		}
-		fmt.Println("!!!!!!!!!", data)
+		fmt.Println("bit value:", data)
 	}
 
 	/*
