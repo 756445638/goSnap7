@@ -137,8 +137,16 @@ func TestSomeWordLenStart(t *testing.T) {
 		return
 	}
 
-	/*
-		这里测试的是start是否包含长度信息
-	*/
+	{
+		/*
+			这里测试的是start是否包含长度信息
+		*/
+		data, err := client.ReadArea(SrvAreaPA, 0, 1, 9, S7WLBit)
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		fmt.Println(data)
+	}
 
 }
