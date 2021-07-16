@@ -85,7 +85,8 @@ func TestServerSharedMemory(t *testing.T) {
 	/*
 		RegisterArea(),服务器共享内存区域
 	*/
-	data := [10]byte{1, 2, 3}
+
+	data := [10]byte{1, 2, 3,4,5,6,7,8,9,10}
 	err := server.RegisterArea(SrvAreaPA, 0, data[:])
 	ast.Nil(err)
 
@@ -101,10 +102,16 @@ func TestServerSharedMemory(t *testing.T) {
 	client := NewS7Client()
 	err = client.Connect()
 	ast.Nil(err)
+
+	//WordLen=S7WLBit
+	_, err = client.ReadArea(S7AreaPA, 0, 2, 3, S7WLBit)
+	ast.Nil(err)
+	//ast.Equal([]byte{3, 4, 5,6,7,8}, dataReadS7WLBit)
+
 	//从S7AreaPA的第二个byte开始读，读取长度为3
 	dataRead, err := client.ReadArea(S7AreaPA, 0, 1, 3, S7WLByte)
 	ast.Nil(err)
-	ast.Equal([]byte{2, 3, 0}, dataRead)
+	ast.Equal([]byte{2, 3, 4}, dataRead)
 	//不能读取不同Area的共享信息
 	_, err = client.ReadArea(S7AreaPE, 0, 1, 3, S7WLByte)
 	ast.NotNil(err)
@@ -126,5 +133,8 @@ func TestServerSharedMemory(t *testing.T) {
 	ast.Nil(err)
 	err = server.LockArea(SrvAreaPE, 0)
 	ast.Nil(err)
+	//锁定区域后，client无法读取该区域的信息
+	_, err = client.ReadArea(S7AreaPE, 0, 1, 3, S7WLByte)
+	ast.NotNil(err)
 
 }

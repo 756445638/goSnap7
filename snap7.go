@@ -148,7 +148,7 @@ func dataLength_for_c(wordLen C.int, amount C.int) int32 {
 func (s S7WL) size() int32 {
 	switch s {
 	case S7WLBit:
-		return 1
+		return 2
 	case S7WLByte:
 		return 1
 	case S7WLWord:
@@ -160,7 +160,7 @@ func (s S7WL) size() int32 {
 	case S7WLCounter:
 		return 2
 	case S7WLTimer:
-		return 1
+		return 2
 	}
 	panic(fmt.Sprintf("S7WL not exist:%d", s))
 }
