@@ -100,6 +100,9 @@ func TestSomeCallBack(t *testing.T) {
 
 }
 
+/*
+
+ */
 func TestSomeWordLenStart(t *testing.T) {
 	server := NewS7Server()
 	server.SetEventsCallback(justPrintEvent)
@@ -107,13 +110,10 @@ func TestSomeWordLenStart(t *testing.T) {
 	const duration = time.Millisecond * 50
 	var data [10]byte
 
-	go func() {
-		for ; ; time.Sleep(duration) {
-			for k, _ := range data {
-				data[k]++
-			}
-		}
-	}()
+	for k, _ := range data {
+		data[k] = 100
+	}
+
 	err := server.RegisterArea(SrvAreaDB, 0, data[:])
 	if err != nil {
 		t.Fatal(err)
@@ -131,24 +131,29 @@ func TestSomeWordLenStart(t *testing.T) {
 		server.Destroy()
 	}()
 	client := NewS7Client()
-	err = client.ConnectTo("127.0.0.1", 0, 1)
+	err = client.ConnectTo("127.0.0.1", 0, 2)
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
-
 	{
 		data, err := client.ReadArea(S7AreaDB, 0, 1, 1, S7WLBit)
 		if err != nil {
 			t.Fatal(err)
 			return
 		}
-		fmt.Println(data)
-		err = client.WriteArea(S7AreaDB, 0, 1, S7WLBit, []byte{1, 1})
+		fmt.Println("!!!!!!!!!", data)
+		err = client.WriteArea(S7AreaDB, 0, 1, S7WLBit, []byte{1})
 		if err != nil {
 			t.Fatal(err)
 			return
 		}
+		data, err = client.ReadArea(S7AreaDB, 0, 1, 1, S7WLBit)
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		fmt.Println("!!!!!!!!!", data)
 	}
 
 	/*
@@ -161,5 +166,36 @@ func TestSomeWordLenStart(t *testing.T) {
 		} else {
 			fmt.Println("start包含长度")
 		}
+	}
+}
+
+func TestSomeWordLenStart222(t *testing.T) {
+	if testing.Short() {
+		return
+	}
+	client := NewS7Client()
+	err := client.ConnectTo("127.0.0.1", 0, 2)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	{
+		data, err := client.ReadArea(S7AreaDB, 1, 1, 1, S7WLBit)
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		fmt.Println("!!!!!!!!!", data)
+		err = client.WriteArea(S7AreaDB, 1, 1, S7WLBit, []byte{1})
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		data, err = client.ReadArea(S7AreaDB, 1, 1, 1, S7WLBit)
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		fmt.Println("!!!!!!!!!", data)
 	}
 }
