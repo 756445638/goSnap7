@@ -148,8 +148,8 @@ func (c *S7Client) ReadArea(area S7Area, dBNumber int, start int, amount int, wo
 	return
 }
 
-func (c *S7Client) WriteArea(area S7Area, dBNumber int, start int,  wordLen S7WL, pUsrData []byte) (err error) {
-	if len(pUsrData) % int(wordLen.size()) != 0 {
+func (c *S7Client) WriteArea(area S7Area, dBNumber int, start int, wordLen S7WL, pUsrData []byte) (err error) {
+	if len(pUsrData)%int(wordLen.size()) != 0 {
 		err = fmt.Errorf("length of pUserData != wordLen size * amount")
 		return
 	}
@@ -217,26 +217,26 @@ func (c *S7Client) WriteMultiVars(items []TS7DataItemGo) (err error) {
 func (c *S7Client) DBRead(dBNumber int, start int, size int) (pUsrData []byte, err error) {
 	return c.ReadArea(S7AreaDB, dBNumber, start, size, S7WLByte)
 }
-func (c *S7Client) DBWrite(dBNumber int, start int,  pUsrData []byte) (err error) {
-	return c.WriteArea(S7AreaDB, dBNumber, start,  S7WLByte, pUsrData)
+func (c *S7Client) DBWrite(dBNumber int, start int, pUsrData []byte) (err error) {
+	return c.WriteArea(S7AreaDB, dBNumber, start, S7WLByte, pUsrData)
 }
 func (c *S7Client) MBRead(start int, size int) (pUsrData []byte, err error) {
 	return c.ReadArea(S7AreaMK, 0, start, size, S7WLByte)
 }
 func (c *S7Client) MBWrite(start int, pUsrData []byte) (err error) {
-	return c.WriteArea(S7AreaMK, 0, start,  S7WLByte, pUsrData)
+	return c.WriteArea(S7AreaMK, 0, start, S7WLByte, pUsrData)
 }
 func (c *S7Client) EBRead(start int, size int) (pUsrData []byte, err error) {
 	return c.ReadArea(S7AreaPE, 0, start, size, S7WLByte)
 }
-func (c *S7Client) EBWrite(start int,  pUsrData []byte) (err error) {
+func (c *S7Client) EBWrite(start int, pUsrData []byte) (err error) {
 	return c.WriteArea(S7AreaPE, 0, start, S7WLByte, pUsrData)
 }
 func (c *S7Client) ABRead(start int, size int) (pUsrData []byte, err error) {
 	return c.ReadArea(S7AreaPA, 0, start, size, S7WLByte)
 }
 func (c *S7Client) ABWrite(start int, pUsrData []byte) (err error) {
-	return c.WriteArea(S7AreaPA, 0, start,  S7WLByte, pUsrData)
+	return c.WriteArea(S7AreaPA, 0, start, S7WLByte, pUsrData)
 }
 func (c *S7Client) TMRead(start int, size int) (pUsrData []byte, err error) {
 	return c.ReadArea(S7AreaTM, 0, start, size, S7WLByte)
@@ -248,7 +248,7 @@ func (c *S7Client) CTRead(start int, size int) (pUsrData []byte, err error) {
 	return c.ReadArea(S7AreaCT, 0, start, size, S7WLByte)
 }
 func (c *S7Client) CTWrite(start int, pUsrData []byte) (err error) {
-	return c.WriteArea(S7AreaCT, 0, start,  S7WLByte, pUsrData)
+	return c.WriteArea(S7AreaCT, 0, start, S7WLByte, pUsrData)
 }
 func (c *S7Client) ListBlocks() (pUsrData TS7BlocksList, err error) {
 	var code C.int = C.Cli_ListBlocks(c.client, (*C.TS7BlocksList)(unsafe.Pointer(&pUsrData)))
@@ -294,7 +294,6 @@ func (c *S7Client) FullUpload(blockType Block, blockNum int, pUsrData []byte) (s
 
 //int S7API Cli_Download(S7Object Client, int BlockNum, void *pUsrData, int Size);
 func (c *S7Client) Download(blockNum int, pUsrData []byte, size int) (err error) {
-	pUsrData = make([]byte, size)
 	var code C.int = C.Cli_Download(c.client, C.int(blockNum), unsafe.Pointer(&pUsrData[0]), C.int(size))
 	err = Cli_ErrorText(code)
 	return
@@ -485,8 +484,12 @@ func (c *S7Client) AsReadArea(area S7Area, dBNumber int, start int, amount int, 
 }
 
 // int S7API Cli_AsWriteArea(S7Object Client, int Area, int DBNumber, int Start, int Amount, int WordLen, void *pUsrData);
-func (c *S7Client) AsWriteArea(area S7Area, dBNumber int, start int, amount int, wordLen S7WL, pUsrData []byte) (err error) {
-	pUsrData = make([]byte, dataLength(wordLen, int32(amount)))
+func (c *S7Client) AsWriteArea(area S7Area, dBNumber int, start int,  wordLen S7WL, pUsrData []byte) (err error) {
+	if len(pUsrData)%int(wordLen.size()) != 0 {
+		err = fmt.Errorf("length of pUserData != wordLen size * amount")
+		return
+	}
+	amount := len(pUsrData) / int(wordLen.size())
 	var code C.int = C.Cli_AsWriteArea(c.client, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
 	err = Cli_ErrorText(code)
 	return
@@ -498,8 +501,8 @@ func (c *S7Client) AsDBRead(dBNumber int, start int, size int) (pUsrData []byte,
 }
 
 // int S7API Cli_AsDBWrite(S7Object Client, int DBNumber, int Start, int Size, void *pUsrData);
-func (c *S7Client) AsDBWrite(dBNumber int, start int, size int, pUsrData []byte) (err error) {
-	return c.AsWriteArea(S7AreaDB, dBNumber, start, size, S7WLByte, pUsrData)
+func (c *S7Client) AsDBWrite(dBNumber int, start int,  pUsrData []byte) (err error) {
+	return c.AsWriteArea(S7AreaDB, dBNumber, start, S7WLByte, pUsrData)
 }
 
 // int S7API Cli_AsMBRead(S7Object Client, int Start, int Size, void *pUsrData);
@@ -508,8 +511,8 @@ func (c *S7Client) AsMBRead(start int, size int) (pUsrData []byte, err error) {
 }
 
 // int S7API Cli_AsMBWrite(S7Object Client, int Start, int Size, void *pUsrData);
-func (c *S7Client) AsMBWrite(start int, size int, pUsrData []byte) (err error) {
-	return c.AsWriteArea(S7AreaMK, 0, start, size, S7WLByte, pUsrData)
+func (c *S7Client) AsMBWrite(start int,  pUsrData []byte) (err error) {
+	return c.AsWriteArea(S7AreaMK, 0, start,S7WLByte, pUsrData)
 }
 
 // int S7API Cli_AsEBRead(S7Object Client, int Start, int Size, void *pUsrData);
@@ -518,8 +521,8 @@ func (c *S7Client) AsEBRead(start int, size int) (pUsrData []byte, err error) {
 }
 
 // int S7API Cli_AsEBWrite(S7Object Client, int Start, int Size, void *pUsrData);
-func (c *S7Client) AsEBWrite(start int, size int, pUsrData []byte) (err error) {
-	return c.AsWriteArea(S7AreaPE, 0, start, size, S7WLByte, pUsrData)
+func (c *S7Client) AsEBWrite(start int,  pUsrData []byte) (err error) {
+	return c.AsWriteArea(S7AreaPE, 0, start,  S7WLByte, pUsrData)
 }
 
 // int S7API Cli_AsABRead(S7Object Client, int Start, int Size, void *pUsrData);
@@ -528,8 +531,8 @@ func (c *S7Client) AsABRead(start int, size int) (pUsrData []byte, err error) {
 }
 
 // int S7API Cli_AsABWrite(S7Object Client, int Start, int Size, void *pUsrData);
-func (c *S7Client) AsABWrite(start int, size int, pUsrData []byte) (err error) {
-	return c.AsWriteArea(S7AreaPA, 0, start, size, S7WLByte, pUsrData)
+func (c *S7Client) AsABWrite(start int,  pUsrData []byte) (err error) {
+	return c.AsWriteArea(S7AreaPA, 0, start,  S7WLByte, pUsrData)
 }
 
 // int S7API Cli_AsTMRead(S7Object Client, int Start, int Amount, void *pUsrData);
@@ -538,8 +541,8 @@ func (c *S7Client) AsTMRead(start int, size int) (pUsrData []byte, err error) {
 }
 
 // int S7API Cli_AsTMWrite(S7Object Client, int Start, int Amount, void *pUsrData);
-func (c *S7Client) AsTMWrite(start int, size int, pUsrData []byte) (err error) {
-	return c.AsWriteArea(S7AreaTM, 0, start, size, S7WLByte, pUsrData)
+func (c *S7Client) AsTMWrite(start int,  pUsrData []byte) (err error) {
+	return c.AsWriteArea(S7AreaTM, 0, start,  S7WLByte, pUsrData)
 }
 
 // int S7API Cli_AsCTRead(S7Object Client, int Start, int Amount, void *pUsrData);
@@ -548,8 +551,8 @@ func (c *S7Client) AsCTRead(start int, size int) (pUsrData []byte, err error) {
 }
 
 // int S7API Cli_AsCTWrite(S7Object Client, int Start, int Amount, void *pUsrData);
-func (c *S7Client) AsCTWrite(start int, size int, pUsrData []byte) (err error) {
-	return c.AsWriteArea(S7AreaCT, 0, start, size, S7WLByte, pUsrData)
+func (c *S7Client) AsCTWrite(start int,  pUsrData []byte) (err error) {
+	return c.AsWriteArea(S7AreaCT, 0, start, S7WLByte, pUsrData)
 }
 
 // int S7API Cli_AsListBlocksOfType(S7Object Client, int BlockType, TS7BlocksOfType *pUsrData, int *ItemsCount);
@@ -591,7 +594,6 @@ func (c *S7Client) AsFullUpload(blockType Block, blockNum int, pUsrData []byte) 
 
 // int S7API Cli_AsDownload(S7Object Client, int BlockNum, void *pUsrData, int Size);
 func (c *S7Client) AsDownload(blockNum int, pUsrData []byte, size int) (err error) {
-	pUsrData = make([]byte, size)
 	var code C.int = C.Cli_AsDownload(c.client, C.int(blockNum), unsafe.Pointer(&pUsrData[0]), C.int(size))
 	err = Cli_ErrorText(code)
 	return
