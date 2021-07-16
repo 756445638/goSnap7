@@ -20,7 +20,7 @@ func TestSomeCallBack(t *testing.T) {
 			}
 		}
 	}()
-	err := server.RegisterArea(SrvAreaPA, 0, data[:])
+	err := server.RegisterArea(SrvAreaDB, 0, data[:])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,8 +98,68 @@ func TestSomeCallBack(t *testing.T) {
 		}
 	}
 
-	{
+}
 
+func TestSomeWordLenStart(t *testing.T) {
+	server := NewS7Server()
+	server.SetEventsCallback(justPrintEvent)
+	server.SetReadEventsCallback(justPrintEvent)
+	const duration = time.Millisecond * 50
+	var data [10]byte
+
+	go func() {
+		for ; ; time.Sleep(duration) {
+			for k, _ := range data {
+				data[k]++
+			}
+		}
+	}()
+	err := server.RegisterArea(SrvAreaDB, 0, data[:])
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = server.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		err = server.Stop()
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		server.Destroy()
+	}()
+	client := NewS7Client()
+	err = client.ConnectTo("127.0.0.1", 0, 1)
+	if err != nil {
+		t.Fatal(err)
+		return
 	}
 
+	{
+		data, err := client.ReadArea(S7AreaDB, 0, 1, 1, S7WLBit)
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		fmt.Println(data)
+		err = client.WriteArea(S7AreaDB, 0, 1, S7WLBit, []byte{1, 1})
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+	}
+
+	/*
+		这里测试的是start是否包含长度信息
+	*/
+	{
+		_, err := client.ReadArea(S7AreaDB, 0, 6, 1, S7WLReal)
+		if err != nil {
+			fmt.Println("start不包含长度")
+		} else {
+			fmt.Println("start包含长度")
+		}
+	}
 }

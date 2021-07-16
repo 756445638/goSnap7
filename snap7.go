@@ -10,7 +10,7 @@ import (
 //                                  PARAMS LIST
 //------------------------------------------------------------------------------
 
-type ParamNumber = int
+type ParamNumber int
 
 const P_u16_LocalPort ParamNumber = 1
 const P_u16_RemotePort ParamNumber = 2
@@ -81,14 +81,14 @@ const errCliInvalidParamNumber CliErrorCode = 0x02500000
 const errCliCannotChangeParam CliErrorCode = 0x02600000
 
 // Client Connection Type
-type CONNTYPE = uint16
+type CONNTYPE uint16
 
 const CONNTYPE_PG CONNTYPE = 0x0001    // Connect to the PLC as a PG
 const CONNTYPE_OP CONNTYPE = 0x0002    // Connect to the PLC as an OP
 const CONNTYPE_BASIC CONNTYPE = 0x0003 // Basic connection
 
 // Area ID
-type S7Area = int
+type S7Area int
 
 const S7AreaPE S7Area = 0x81
 const S7AreaPA S7Area = 0x82
@@ -136,8 +136,12 @@ const Block_SFB Block = 0x46
 // const byte BlockLangDB        = 0x05;
 // const byte BlockLangGRAPH     = 0x06;
 
+/*
+	字节数组的长度
+*/
 func dataLength(wordLen S7WL, amount int32) int32 {
-	return wordLen.size() * amount
+	t := wordLen.size() * amount
+	return t
 }
 
 //export dataLength_for_c
@@ -235,7 +239,7 @@ func Value_Pvalue(paraNumber ParamNumber, value interface{}) (pValue unsafe.Poin
 //                                   SERVER
 //******************************************************************************
 
-type MaskKind = int
+type MaskKind int
 
 //MaskKind  Srv_GetMask/Srv_SetMask
 const (
