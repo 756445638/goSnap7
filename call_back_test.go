@@ -98,8 +98,47 @@ func TestSomeCallBack(t *testing.T) {
 		}
 	}
 
-	{
+}
 
+func TestSomeWordLenStart(t *testing.T) {
+	server := NewS7Server()
+	server.SetEventsCallback(justPrintEvent)
+	server.SetReadEventsCallback(justPrintEvent)
+	const duration = time.Millisecond * 50
+	var data [10]byte
+
+	go func() {
+		for ; ; time.Sleep(duration) {
+			for k, _ := range data {
+				data[k]++
+			}
+		}
+	}()
+	err := server.RegisterArea(SrvAreaPA, 0, data[:])
+	if err != nil {
+		t.Fatal(err)
 	}
+	err = server.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		err = server.Stop()
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		server.Destroy()
+	}()
+	client := NewS7Client()
+	err = client.ConnectTo("127.0.0.1", 0, 1)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	/*
+		这里测试的是start是否包含长度信息
+	*/
 
 }

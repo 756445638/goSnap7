@@ -136,8 +136,20 @@ const Block_SFB Block = 0x46
 // const byte BlockLangDB        = 0x05;
 // const byte BlockLangGRAPH     = 0x06;
 
+/*
+	字节数组的长度
+*/
 func dataLength(wordLen S7WL, amount int32) int32 {
-	return wordLen.size() * amount
+	t := wordLen.size() * amount
+	if wordLen != S7WLBit {
+		return t / 8
+	} else {
+		x := t / 8
+		if t%8 != 0 {
+			x++
+		}
+		return x
+	}
 }
 
 //export dataLength_for_c
@@ -145,22 +157,25 @@ func dataLength_for_c(wordLen C.int, amount C.int) int32 {
 	return dataLength(S7WL(S7WLWord), int32(amount))
 }
 
+/*
+	bit length
+*/
 func (s S7WL) size() int32 {
 	switch s {
 	case S7WLBit:
 		return 1
 	case S7WLByte:
-		return 1
+		return 1 * 8
 	case S7WLWord:
-		return 2
+		return 2 * 8
 	case S7WLDWord:
-		return 4
+		return 4 * 8
 	case S7WLReal:
-		return 4
+		return 4 * 8
 	case S7WLCounter:
-		return 2
+		return 2 * 8
 	case S7WLTimer:
-		return 1
+		return 2 * 8
 	}
 	panic(fmt.Sprintf("S7WL not exist:%d", s))
 }
