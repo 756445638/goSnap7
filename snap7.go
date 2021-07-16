@@ -152,7 +152,7 @@ func dataLength_for_c(wordLen C.int, amount C.int) int32 {
 func (s S7WL) size() int32 {
 	switch s {
 	case S7WLBit:
-		return 2
+		return 1
 	case S7WLByte:
 		return 1
 	case S7WLWord:
