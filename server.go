@@ -201,14 +201,14 @@ func (s *S7Server) PickEvent() (pEvent *TSrvEvent, err error) {
 
 // func Srv_GetMask(S7Object Server, int MaskKind, longword *Mask);  uint32_t
 func (s *S7Server) GetMask(MaskKind MaskKind) (Mask uint32, err error) {
-	var code C.int = C.Srv_GetMask(s.server, C.int(MaskKind), (*C.uint32_t)((unsafe.Pointer(&Mask))))
+	var code C.int = C.Srv_GetMask(s.server, C.int(MaskKind), (*C.longword)(unsafe.Pointer(&Mask)))
 	err = Srv_ErrorText(code)
 	return
 }
 
 // func Srv_SetMask(S7Object Server, int MaskKind, longword Mask);
 func (s *S7Server) SetMask(MaskKind MaskKind, Mask uint32) (err error) {
-	var code C.int = C.Srv_SetMask(s.server, C.int(MaskKind), C.uint32_t(Mask))
+	var code C.int = C.Srv_SetMask(s.server, C.int(MaskKind), C.longword(Mask))
 	err = Srv_ErrorText(code)
 	return
 }

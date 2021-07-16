@@ -141,6 +141,7 @@ func (c *S7Client) SetParam(paraNumber ParamNumber, value interface{}) (err erro
 	err = Cli_ErrorText(code)
 	return
 }
+//int S7API Cli_ReadArea(S7Object Client, int Area, int DBNumber, int Start, int Amount, int WordLen, void *pUsrData);
 func (c *S7Client) ReadArea(area S7Area, dBNumber int, start int, amount int, wordLen S7WL) (pUsrData []byte, err error) {
 	pUsrData = make([]byte, dataLength(wordLen, int32(amount)))
 	var code C.int = C.Cli_ReadArea(c.client, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))

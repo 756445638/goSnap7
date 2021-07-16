@@ -243,8 +243,8 @@ type MaskKind int
 
 //MaskKind  Srv_GetMask/Srv_SetMask
 const (
-	MaskKindEvent = 0
-	MaskKindLog   = 1
+	MaskKindEvent MaskKind = 0
+	MaskKindLog   MaskKind = 1
 )
 
 //ServerStatus
