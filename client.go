@@ -143,21 +143,16 @@ func (c *S7Client) SetParam(paraNumber ParamNumber, value interface{}) (err erro
 }
 func (c *S7Client) ReadArea(area S7Area, dBNumber int, start int, amount int, wordLen S7WL) (pUsrData []byte, err error) {
 	pUsrData = make([]byte, dataLength(wordLen, int32(amount)))
-
 	var code C.int = C.Cli_ReadArea(c.client, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
 	err = Cli_ErrorText(code)
 	return
 }
 func (c *S7Client) checkWriteAmount(pUsrData []byte, wordLen S7WL) (amount int, err error) {
-	if wordLen == S7WLBit {
-		amount = len(pUsrData) * 8
-		return
-	}
-	if len(pUsrData)%int(wordLen.size()/8) != 0 {
+	if len(pUsrData)%int(wordLen.size()) != 0 {
 		err = fmt.Errorf("length of pUserData != wordLen size * amount")
 		return
 	}
-	amount = len(pUsrData) / int(wordLen.size()/8)
+	amount = len(pUsrData) / int(wordLen.size())
 	return
 }
 func (c *S7Client) WriteArea(area S7Area, dBNumber int, start int, wordLen S7WL, pUsrData []byte) (err error) {

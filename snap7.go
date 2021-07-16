@@ -10,7 +10,7 @@ import (
 //                                  PARAMS LIST
 //------------------------------------------------------------------------------
 
-type ParamNumber = int
+type ParamNumber int
 
 const P_u16_LocalPort ParamNumber = 1
 const P_u16_RemotePort ParamNumber = 2
@@ -81,14 +81,14 @@ const errCliInvalidParamNumber CliErrorCode = 0x02500000
 const errCliCannotChangeParam CliErrorCode = 0x02600000
 
 // Client Connection Type
-type CONNTYPE = uint16
+type CONNTYPE uint16
 
 const CONNTYPE_PG CONNTYPE = 0x0001    // Connect to the PLC as a PG
 const CONNTYPE_OP CONNTYPE = 0x0002    // Connect to the PLC as an OP
 const CONNTYPE_BASIC CONNTYPE = 0x0003 // Basic connection
 
 // Area ID
-type S7Area = int
+type S7Area int
 
 const S7AreaPE S7Area = 0x81
 const S7AreaPA S7Area = 0x82
@@ -141,15 +141,7 @@ const Block_SFB Block = 0x46
 */
 func dataLength(wordLen S7WL, amount int32) int32 {
 	t := wordLen.size() * amount
-	if wordLen != S7WLBit {
-		return t / 8
-	} else {
-		x := t / 8
-		if t%8 != 0 {
-			x++
-		}
-		return x
-	}
+	return t
 }
 
 //export dataLength_for_c
@@ -157,25 +149,22 @@ func dataLength_for_c(wordLen C.int, amount C.int) int32 {
 	return dataLength(S7WL(S7WLWord), int32(amount))
 }
 
-/*
-	bit length
-*/
 func (s S7WL) size() int32 {
 	switch s {
 	case S7WLBit:
-		return 1
+		return 2
 	case S7WLByte:
-		return 1 * 8
+		return 1
 	case S7WLWord:
-		return 2 * 8
+		return 2
 	case S7WLDWord:
-		return 4 * 8
+		return 4
 	case S7WLReal:
-		return 4 * 8
+		return 4
 	case S7WLCounter:
-		return 2 * 8
+		return 2
 	case S7WLTimer:
-		return 2 * 8
+		return 2
 	}
 	panic(fmt.Sprintf("S7WL not exist:%d", s))
 }
@@ -250,7 +239,7 @@ func Value_Pvalue(paraNumber ParamNumber, value interface{}) (pValue unsafe.Poin
 //                                   SERVER
 //******************************************************************************
 
-type MaskKind = int
+type MaskKind int
 
 //MaskKind  Srv_GetMask/Srv_SetMask
 const (

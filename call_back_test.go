@@ -20,7 +20,7 @@ func TestSomeCallBack(t *testing.T) {
 			}
 		}
 	}()
-	err := server.RegisterArea(SrvAreaPA, 0, data[:])
+	err := server.RegisterArea(SrvAreaDB, 0, data[:])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +114,7 @@ func TestSomeWordLenStart(t *testing.T) {
 			}
 		}
 	}()
-	err := server.RegisterArea(SrvAreaPA, 0, data[:])
+	err := server.RegisterArea(SrvAreaDB, 0, data[:])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,12 +141,17 @@ func TestSomeWordLenStart(t *testing.T) {
 		/*
 			这里测试的是start是否包含长度信息
 		*/
-		data, err := client.ReadArea(SrvAreaPA, 0, 1, 9, S7WLBit)
+		data, err := client.ReadArea(S7AreaDB, 0, 1, 1, S7WLBit)
 		if err != nil {
 			t.Fatal(err)
 			return
 		}
 		fmt.Println(data)
-	}
 
+		err = client.WriteArea(S7AreaDB, 0, 1, S7WLBit, []byte{1, 1})
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+	}
 }
