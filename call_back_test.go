@@ -199,3 +199,48 @@ func TestSomeWordLenStart222(t *testing.T) {
 		fmt.Println("!!!!!!!!!", data)
 	}
 }
+func TestSomeSetRWAreaCallback(t *testing.T) {
+	server := NewS7Server()
+	err := server.SetEventsCallback(justPrintEvent)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	err = server.SetReadEventsCallback(justPrintEvent)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	err = server.SetRWAreaCallback(func(sender int, operation int, tag *PS7Tag, userData uintptr) {
+		CopyToC([]byte{1, 2, 3}, userData)
+	})
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	err = server.Start()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	defer func() {
+		err = server.Stop()
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		server.Destroy()
+	}()
+	client := NewS7Client()
+	err = client.ConnectTo("127.0.0.1", 0, 2)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	data, err := client.ReadArea(S7AreaDB, 0, 0, 3, S7WLByte)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	fmt.Println("data:", data)
+}

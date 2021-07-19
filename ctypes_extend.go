@@ -57,3 +57,10 @@ func (g *TS7DataItemGo) CopyPdata(to *TS7DataItem) {
 		*((*byte)(unsafe.Pointer(up + uintptr(i)))) = g.Pdata[i]
 	}
 }
+
+func CopyToC(bs []byte, c uintptr) {
+	length := len(bs)
+	for i := 0; i < int(length); i++ {
+		*((*byte)(unsafe.Pointer(c + uintptr(i)))) = bs[i]
+	}
+}
