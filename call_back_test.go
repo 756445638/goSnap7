@@ -211,7 +211,7 @@ func TestSomeSetRWAreaCallback(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
-	err = server.SetRWAreaCallback(func(sender int, operation int, tag *PS7Tag, userData uintptr) {
+	err = server.SetRWAreaCallback(func(sender int, operation Operation, tag *PS7Tag, userData uintptr) {
 		CopyToC([]byte{1, 2, 3}, userData)
 	})
 	if err != nil {
