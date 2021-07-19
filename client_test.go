@@ -348,41 +348,136 @@ func TestDirectoryCli(t *testing.T) { //未完成
 	err = client.Connect()
 	ast.Nil(err)
 
-	//Security
-	//查询保护级别 1 -mode selector   0-no password   1- CPU  2-:Mode selector setting RUN-P     0-Startup switch setting :undefined,
-	ret4, err4 := client.GetProtection()
-	//fmt.Println("Protection级别信息：",ret4)     {1 0 1 2 0}
-	ast.Nil(err4)
+	ret, err := client.GetProtection()
+	fmt.Println("Protection级别信息：", ret) // {1 0 1 2 0}
+	ast.Nil(err)
 	//设置8位用户密码
-	err2 := client.SetSessionPassword("12345678")
-	ast.Nil(err2)
-
-	ret4, err5 := client.GetProtection()
-	fmt.Println("Protection级别信息：", ret4)
-	ast.Nil(err5)
-
-	pUsrData := []byte{1, 2, 3, 4, 5, 6, 7, 8}
-	//func (c *S7Client) Upload(blockType Block, blockNum int, pUsrData []byte) (size int, err error) {
-
-	ret, err := client.FullUpload(Block_OB, 1, pUsrData)
-	fmt.Println("fullUpload Buffer size:", ret)
+	err = client.SetSessionPassword("12345678")
 	ast.Nil(err)
 
-	rete, err := client.ListBlocks()
+	//pUsrData := []byte{1, 2, 3, 4, 5, 6, 7, 8}
+	////func (c *S7Client) Upload(blockType Block, blockNum int, pUsrData []byte) (size int, err error) {
+	//ret1, err := client.Upload(Block_OB, 1, pUsrData) //CPU权限不够
+	//fmt.Println("fullUpload Buffer size:", ret1)
+	//ast.Nil(err)
+	//
+	//ret1, err = client.FullUpload(Block_OB, 1, pUsrData)
+	//fmt.Println("fullUpload Buffer size:", ret1)
+	//ast.Nil(err)
+
+	//显示（OB、FB、FC、SFB、SFC、DB、SDB）7种Blocks的数量
+	rete, err := client.ListBlocks() //Blocks都为0，不知道怎么建立block，应该是用upload建立内容，但是没有权限
 	fmt.Println("ListBlocks:", rete)
 	ast.Nil(err)
 
-	data, itemCounter, err := client.ListBlocksOfType(Block_OB)
+	data, itemCounter, err := client.ListBlocksOfType(Block_OB) //没有BLOCK无法测试
 	fmt.Println("TS7BlocksOfType", data)
 	fmt.Println(itemCounter)
 	ast.Nil(err)
 
-	ret1, err := client.GetAgBlockInfo(Block_OB, 1)
-	fmt.Println("AgBlockInfo:", ret1)
+	ret2, err := client.GetAgBlockInfo(Block_OB, 1)
+	fmt.Println("AgBlockInfo:", ret2)
 	ast.Nil(err)
 
-	//fmt.Println(ret)
-	//ast.Nil(err)
+}
+func TestBlockOrientedCli(t *testing.T) { //未完成
+	ast := assert.New(t)
+	/*
+	   默认地址（127.0.0.1）的server
+	*/
+	serverDefault := NewS7Server()
+	serverDefault.SetEventsCallback(justPrintEvent)
+	serverDefault.SetReadEventsCallback(justPrintEvent)
+
+	err := serverDefault.Start()
+	ast.Nil(err)
+
+	defer func() {
+		err = serverDefault.Stop()
+		ast.Nil(err)
+		serverDefault.Destroy()
+	}()
+	client := NewS7Client()
+	defer client.Destroy()
+	//连接地址(127.0.0.1)
+	err = client.Connect()
+	ast.Nil(err)
+
+	ret, err := client.GetProtection()
+	fmt.Println("Protection级别信息：", ret) // {1 0 1 2 0}
+	ast.Nil(err)
+	//设置8位用户密码
+	err = client.SetSessionPassword("12345678")
+	ast.Nil(err)
+
+	pUsrData := []byte{1, 2, 3, 4, 5, 6, 7, 8}
+	//func (c *S7Client) Upload(blockType Block, blockNum int, pUsrData []byte) (size int, err error) {
+	ret1, err := client.Upload(Block_OB, 1, pUsrData) //CPU权限不够  ,后面的都无法测试
+	fmt.Println("fullUpload Buffer size:", ret1)
+	ast.Nil(err)
+
+	ret1, err = client.FullUpload(Block_OB, 1, pUsrData)
+	fmt.Println("fullUpload Buffer size:", ret1)
+	ast.Nil(err)
+
+	err = client.Download(1, pUsrData, 32)
+	ast.Nil(err)
+
+	err = client.Delete(Block_OB, 1)
+	ast.Nil(err)
+
+	ret1, err = client.DBGet(2, pUsrData) //CPU权限不够
+	fmt.Println("fullUpload Buffer size:", ret1)
+	ast.Nil(err)
+
+	err = client.DBFill(2, 10086) //CPU权限不够
+	ast.Nil(err)
+}
+
+//系统状态列表（德语：System-ZustandsListen)
+func TestDateOrTimeCli(t *testing.T) { // 未完成
+	ast := assert.New(t)
+	/*
+	   默认地址（127.0.0.1）的server
+	*/
+	serverDefault := NewS7Server()
+	serverDefault.SetEventsCallback(justPrintEvent)
+	serverDefault.SetReadEventsCallback(justPrintEvent)
+
+	err := serverDefault.Start()
+	ast.Nil(err)
+
+	defer func() {
+		err = serverDefault.Stop()
+		ast.Nil(err)
+		serverDefault.Destroy()
+	}()
+
+	client := NewS7Client()
+	defer client.Destroy()
+	//连接地址(127.0.0.1)
+	err = client.Connect()
+	ast.Nil(err)
+
+	//time := TM{
+	//	Sec  ：
+	//	Min   int32
+	//	Hour  int32
+	//	Mday  int32
+	//	Mon   int32
+	//	Year  int32
+	//	Wday  int32
+	//	Yday  int32
+	//	Isdst int32
+	//}
+	err := client.GetPlcDateTime()
+	ast.Nil(err)
+
+	err = client.SetPlcDateTime()
+	ast.Nil(err)
+
+	err = client.SetPlcSystemDateTime()
+	ast.Nil(err)
 
 }
 
@@ -437,7 +532,13 @@ func TestSystemInfoCli(t *testing.T) { // 未完成,ReadSZL  与 ReadSZLList 未
 	fmt.Println("ordercode：", ordercode)
 	ast.Nil(err6)
 	cpuInf, err6 := client.GetCpuInfo()
+
 	fmt.Println("CpuInfo：", cpuInf)
+	fmt.Println("GetModuleTypeName：", cpuInf.GetModuleTypeName())
+	fmt.Println("GetSerialNumber：", cpuInf.GetSerialNumber())
+	fmt.Println("GetASName：", cpuInf.GetASName())
+	fmt.Println("GetCopyright：", cpuInf.GetCopyright())
+	fmt.Println("GetModuleName：", cpuInf.GetModuleName())
 	ast.Nil(err6)
 	cpInf, err7 := client.GetCpInfo()
 	fmt.Println("CpInfo：", cpInf)
@@ -489,7 +590,7 @@ func TestSecurityCli(t *testing.T) { //完成，但有点小疑惑
 	ast.Nil(err5)
 }
 
-func TestLowLevelCli(t *testing.T) { //未完成
+func TestMiscellaneousCli(t *testing.T) { //未完成
 	ast := assert.New(t)
 	/*
 	   默认地址（127.0.0.1）的server
@@ -512,8 +613,4 @@ func TestLowLevelCli(t *testing.T) { //未完成
 	err = client.Connect()
 	ast.Nil(err)
 
-	pUsrData1 := []byte{1, 2, 3, 4, 5, 6}
-	size, err5 := client.IsoExchangeBuffer(pUsrData1)
-	fmt.Println(size)
-	ast.Nil(err5)
 }
