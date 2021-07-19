@@ -23,3 +23,7 @@ func (t TS7CpuInfo) GetCopyright() string {
 func (t TS7CpuInfo) GetModuleName() string {
 	return convertInt8SliceToString(t.ModuleName[:])
 }
+
+func (t TS7Protection) String() string {
+
+}

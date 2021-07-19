@@ -361,9 +361,6 @@ func TestDirectoryCli(t *testing.T) { //未完成
 	fmt.Println("Protection级别信息：", ret4)
 	ast.Nil(err5)
 
-	err3 := client.ClearSessionPassword()
-	ast.Nil(err3, "清除密码成功")
-
 	pUsrData := []byte{1, 2, 3, 4, 5, 6, 7, 8}
 	//func (c *S7Client) Upload(blockType Block, blockNum int, pUsrData []byte) (size int, err error) {
 
