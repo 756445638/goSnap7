@@ -7,7 +7,7 @@ package snap7go
 	extern void GlobalEventsCallback(void *usrPtr, PSrvEvent PEvent, int Size);
 	extern void GlobalReadEventsCallback(void *usrPtr, PSrvEvent PEvent, int Size);
 
-	extern void GlobalRWAreaCallback(void *usrPtr, int Sender, int Operation, PS7Tag PTag, void *pUsrData);
+	extern int GlobalRWAreaCallback(void *usrPtr, int Sender, int Operation, PS7Tag PTag, void *pUsrData);
 
 */
 import "C"
@@ -15,7 +15,7 @@ import "unsafe"
 
 type Pfn_SrvEventCallBack = func(uintptr, *TSrvEvent)
 
-type Pfn_RWAreaCallBack = func(uintptr, int, int, *PS7Tag, uintptr)
+type Pfn_RWAreaCallBack = func(uintptr, int, int, *PS7Tag, uintptr) int
 
 var (
 	svrEventCallbacks      = make(map[uintptr]Pfn_SrvEventCallBack)
@@ -89,20 +89,20 @@ func getPS7TagFormC(t C.PS7Tag) (et PS7Tag) {
 }
 
 //export GlobalRWAreaCallback
-func GlobalRWAreaCallback(usrPtr *C.void, sender C.int, operation C.int, pTag C.PS7Tag, pUserData *C.void) {
+func GlobalRWAreaCallback(usrPtr *C.void, sender C.int, operation C.int, pTag C.PS7Tag, pUserData *C.void) C.int {
 	up := uintptr(unsafe.Pointer(usrPtr))
 	callback := svrRWAreaCallbacks[up]
 	if callback == nil {
-		return
+		return 0 // no callback no error
 	}
 
 	pt := getPS7TagFormC(pTag)
-	callback(
+	return C.int(callback(
 		up,
 		int(sender),
 		int(operation),
 		&pt,
-		uintptr(unsafe.Pointer(pUserData)))
+		uintptr(unsafe.Pointer(pUserData))))
 }
 
 /*

@@ -23,10 +23,10 @@ func (s *S7Server) SetReadEventsCallback(handle func(*TSrvEvent)) error {
 		handle(event)
 	}, uintptr(s.server))
 }
-func (s *S7Server) SetRWAreaCallback(handle func(sender int, operation Operation, tag *PS7Tag, userData uintptr)) error {
+func (s *S7Server) SetRWAreaCallback(handle func(sender int, operation Operation, tag *PS7Tag, userData uintptr) int) error {
 	return Srv_SetRWAreaCallback(s.server,
-		func(_ uintptr, sender int, operation int, tag *PS7Tag, userData uintptr) {
-			handle(sender, Operation(operation), tag, userData)
+		func(_ uintptr, sender int, operation int, tag *PS7Tag, userData uintptr) int {
+			return handle(sender, Operation(operation), tag, userData)
 		}, uintptr(s.server))
 }
 

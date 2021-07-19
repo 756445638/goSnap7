@@ -211,8 +211,15 @@ func TestSomeSetRWAreaCallback(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
-	err = server.SetRWAreaCallback(func(sender int, operation Operation, tag *PS7Tag, userData uintptr) {
-		CopyToC([]byte{1, 2, 3}, userData)
+	err = server.SetRWAreaCallback(func(sender int, operation Operation, tag *PS7Tag, userData uintptr) int {
+		if operation == 0 {
+			// read
+			CopyToC([]byte{1, 2, 3}, userData)
+			return 0
+		} else {
+			// write
+			return 0x20000
+		}
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -243,4 +250,9 @@ func TestSomeSetRWAreaCallback(t *testing.T) {
 		return
 	}
 	fmt.Println("data:", data)
+	err = client.WriteArea(S7AreaDB, 0, 0, S7WLByte, []byte{4, 5, 6})
+	if err == nil {
+		t.Fatalf("shoudle be a false error:%v\n", err)
+		return
+	}
 }
