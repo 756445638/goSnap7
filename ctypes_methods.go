@@ -1,5 +1,16 @@
 package snap7go
 
+/*
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+*/
+import "C"
+import (
+	"fmt"
+	"time"
+)
+
 func convertInt8SliceToString(s []int8) string {
 	ss := make([]byte, len(s))
 	for k, v := range s {
@@ -24,6 +35,14 @@ func (t TS7CpuInfo) GetModuleName() string {
 	return convertInt8SliceToString(t.ModuleName[:])
 }
 
-func (t TS7Protection) String() string {
+func (t TS7Protection) GetProtectionString() string {
+	return fmt.Sprintf("%+v", t)
+}
+
+func (t Tm) FromTime(goTime time.Time) {
+	t.Year = goTime.Year()
+}
+
+func (t Tm) ToTime() time.Time {
 
 }
