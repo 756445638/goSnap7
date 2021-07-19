@@ -2,8 +2,9 @@ package snap7go
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestClientAdministrativeCli(t *testing.T) { //已完成
@@ -362,10 +363,6 @@ func TestDirectoryCli(t *testing.T) { //未完成
 
 	err3 := client.ClearSessionPassword()
 	ast.Nil(err3, "清除密码成功")
-	pUsrData1 := []byte{1, 2, 3, 4, 5, 6}
-	size, err5 := client.IsoExchangeBuffer(pUsrData1)
-	fmt.Println(size)
-	ast.Nil(err5)
 
 	pUsrData := []byte{1, 2, 3, 4, 5, 6, 7, 8}
 	//func (c *S7Client) Upload(blockType Block, blockNum int, pUsrData []byte) (size int, err error) {
