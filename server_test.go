@@ -7,6 +7,15 @@ import (
 	"testing"
 )
 
+/*
+Srv_Create Creates a Server Object.
+Srv_Destroy Destroys a Server Object.
+Srv_StartTo Starts a Server Object onto a given IP Address.
+Srv_Start Starts a Server Object onto the default adapter.
+Srv_Stop Stops the Server.
+Srv_GetParam Reads an internal Server parameter.
+Srv_SetParam Writes an internal Server Parameter
+*/
 func TestServerAdministrative(t *testing.T) {
 	ast := assert.New(t)
 	/*
@@ -77,6 +86,12 @@ func TestServerAdministrative(t *testing.T) {
 	ast.NotNil(err)
 }
 
+/*
+Srv_RegisterArea Shares a given memory area with the server.
+Srv_UnRegisterArea “Unshares” a memory area previously shared.
+Srv_LockArea Locks a shared memory area.
+Srv_UnlockArea Unlocks a previously locked shared memory area.
+*/
 func TestServerSharedMemory(t *testing.T) {
 	ast := assert.New(t)
 
@@ -222,10 +237,12 @@ func TestServerControlFlow(t *testing.T) {
 	ast.Nil(pEventAfterClearEvents)
 }
 
-//Srv_GetStatus Returns the last job execution time in milliseconds.
-//Srv_SetCpuStatus Returns the last job result.
-//Srv_EventText Returns a textual explanation of a given event.
-//Srv_ErrorText Returns a textual explanation of a given error number
+/*
+Srv_GetStatus Returns the last job execution time in milliseconds.
+Srv_SetCpuStatus Returns the last job result.
+Srv_EventText Returns a textual explanation of a given event.
+Srv_ErrorText Returns a textual explanation of a given error number
+*/
 func TestServerMiscellaneous(t *testing.T) {
 	ast := assert.New(t)
 
