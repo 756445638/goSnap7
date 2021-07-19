@@ -32,12 +32,12 @@ func TestClientAdministrativeCli(t *testing.T) { //已完成
 	ast.Nil(err)
 
 	/*
-	   指定本地IP地址（192.168.187.1）的server
+	   指定地址的server
 	*/
 	serverDesignated := NewS7Server()
 	serverDesignated.SetEventsCallback(justPrintEvent)
 	serverDesignated.SetReadEventsCallback(justPrintEvent)
-	err = serverDesignated.StartTo("192.168.187.1")
+	err = serverDesignated.StartTo("127.0.0.1")
 	ast.Nil(err)
 
 	defer func() {
@@ -52,20 +52,19 @@ func TestClientAdministrativeCli(t *testing.T) { //已完成
 	//CONNTYPE_PG、CONNTYPE_OP、CONNTYPE_BASIC
 	err = clientDesignated.SetConnectionType(CONNTYPE_BASIC)
 	ast.Nil(err)
-	err = clientDesignated.SetConnectionParams("192.168.187.1", 0x1000, 0x1000)
+	err = clientDesignated.SetConnectionParams("127.0.0.1", 0x1000, 0x1000)
 	ast.Nil(err)
 
 	//在ConnectTo前后都可以
 	err = clientDesignated.SetParam(P_i32_SendTimeout, int32(4))
 	ast.Nil(err)
 	//连接指定地址(192.168.187.1)
-	err = clientDesignated.ConnectTo("192.168.187.1", 0, 1)
+	err = clientDesignated.ConnectTo("127.0.0.1", 0, 1)
 	ast.Nil(err)
 
 	paradata, err := clientDesignated.GetParam(P_i32_SendTimeout)
 	ast.Nil(err)
-	ast.Equal(4, paradata)
-
+	ast.Equal(int32(4), paradata)
 }
 
 func TestDataIOCli(t *testing.T) { //已完成
