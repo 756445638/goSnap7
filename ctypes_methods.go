@@ -21,23 +21,23 @@ func convertInt8SliceToString(s []int8) string {
 	return string(ss)
 }
 
-func (t TS7CpuInfo) GetModuleTypeName() string {
+func (t *TS7CpuInfo) GetModuleTypeName() string {
 	return convertInt8SliceToString(t.ModuleTypeName[:])
 }
-func (t TS7CpuInfo) GetSerialNumber() string {
+func (t *TS7CpuInfo) GetSerialNumber() string {
 	return convertInt8SliceToString(t.SerialNumber[:])
 }
-func (t TS7CpuInfo) GetASName() string {
+func (t *TS7CpuInfo) GetASName() string {
 	return convertInt8SliceToString(t.ASName[:])
 }
-func (t TS7CpuInfo) GetCopyright() string {
+func (t *TS7CpuInfo) GetCopyright() string {
 	return convertInt8SliceToString(t.Copyright[:])
 }
-func (t TS7CpuInfo) GetModuleName() string {
+func (t *TS7CpuInfo) GetModuleName() string {
 	return convertInt8SliceToString(t.ModuleName[:])
 }
 
-func (t TS7Protection) GetProtectionString() string {
+func (t *TS7Protection) GetProtectionString() string {
 	return fmt.Sprintf("%+v", t)
 }
 
