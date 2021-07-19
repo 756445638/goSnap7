@@ -1,6 +1,7 @@
 package snap7go
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
@@ -82,13 +83,15 @@ func TestServerSharedMemory(t *testing.T) {
 	server := NewS7Server()
 	server.SetEventsCallback(justPrintEvent)
 	server.SetReadEventsCallback(justPrintEvent)
+	err := server.SetRWAreaCallback(justPrintTag)
+	ast.Nil(err)
 
 	/*
 		RegisterArea(),服务器共享内存区域
 	*/
 
 	data := [10]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	err := server.RegisterArea(SrvAreaPA, 0, data[:])
+	err = server.RegisterArea(SrvAreaPA, 0, data[:])
 	ast.Nil(err)
 
 	err = server.Start()
@@ -175,8 +178,8 @@ func TestServerControlFlow(t *testing.T) {
 	ast.Nil(err)
 	err = server.SetReadEventsCallback(justPrintEvent)
 	ast.Nil(err)
-	//server.SetRWAreaCallback()
-	//ast.Nil(err)
+	err = server.SetRWAreaCallback(justPrintTag)
+	ast.Nil(err)
 
 	/*
 		SetMask(),设置掩码
@@ -286,6 +289,12 @@ func TestServerMiscellaneous(t *testing.T) {
 	/*
 		ErrorText(),
 	*/
-	err = Cli_ErrorText(0x00300000)
+	//code在1到8之间
+	err = Srv_ErrorText(0x00100000)
 	ast.NotNil(err)
+	ast.True(strings.Contains(fmt.Sprintf("%s", err), "Server cannot start"))
+	//超出1到8的范围，err 为 Unknown error
+	err = Srv_ErrorText(0x00900000)
+	ast.NotNil(err)
+	ast.True(strings.Contains(fmt.Sprintf("%s", err), "Unknown error"))
 }

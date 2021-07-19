@@ -238,6 +238,10 @@ func Value_Pvalue(paraNumber ParamNumber, value interface{}) (pValue unsafe.Poin
 //******************************************************************************
 //                                   SERVER
 //******************************************************************************
+type Operation int
+
+const OperationRead Operation = 0
+const OperationWrite Operation = 1
 
 type MaskKind int
 

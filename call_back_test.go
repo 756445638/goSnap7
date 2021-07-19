@@ -217,7 +217,12 @@ func TestSomeSetRWAreaCallback(t *testing.T) {
 			CopyToC([]byte{1, 2, 3}, userData)
 			return 0
 		} else {
+			data := GetBytesFromC(userData, int(dataLength(S7WL(tag.WordLen), tag.Size)))
+			if data[0] != 4 || data[1] != 5 || data[2] != 6 {
+				panic("data not right")
+			}
 			// write
+			// false error
 			return 0x20000
 		}
 	})
