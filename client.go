@@ -246,16 +246,16 @@ func (c *S7Client) ABWrite(start int, pUsrData []byte) (err error) {
 	return c.WriteArea(S7AreaPA, 0, start, S7WLByte, pUsrData)
 }
 func (c *S7Client) TMRead(start int, size int) (pUsrData []byte, err error) {
-	return c.ReadArea(S7AreaTM, 0, start, size, S7WLByte)
+	return c.ReadArea(S7AreaTM, 0, start, size,  S7WLTimer)
 }
 func (c *S7Client) TMWrite(start int, pUsrData []byte) (err error) {
-	return c.WriteArea(S7AreaTM, 0, start, S7WLByte, pUsrData)
+	return c.WriteArea(S7AreaTM, 0, start,  S7WLTimer, pUsrData)
 }
 func (c *S7Client) CTRead(start int, size int) (pUsrData []byte, err error) {
-	return c.ReadArea(S7AreaCT, 0, start, size, S7WLByte)
+	return c.ReadArea(S7AreaCT, 0, start, size, S7WLCounter)
 }
 func (c *S7Client) CTWrite(start int, pUsrData []byte) (err error) {
-	return c.WriteArea(S7AreaCT, 0, start, S7WLByte, pUsrData)
+	return c.WriteArea(S7AreaCT, 0, start, S7WLCounter, pUsrData)
 }
 func (c *S7Client) ListBlocks() (pUsrData TS7BlocksList, err error) {
 	var code C.int = C.Cli_ListBlocks(c.client, (*C.TS7BlocksList)(unsafe.Pointer(&pUsrData)))
