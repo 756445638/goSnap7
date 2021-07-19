@@ -46,6 +46,9 @@ https://www.runoob.com/cprogramming/c-standard-library-time-h.html
 */
 type time_t = C.time_t
 
+/*
+	精度只到秒数
+*/
 func (t *Tm) FromTime(goTime time.Time) {
 	var time_t = time_t(goTime.Unix())
 	*t = *(*Tm)(unsafe.Pointer(C.localtime(&time_t)))

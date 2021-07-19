@@ -489,7 +489,7 @@ func (c *S7Client) GetConnected() (connected int, err error) {
 }
 
 //int S7API Cli_AsReadArea(S7Object Client, int Area, int DBNumber, int Start, int Amount, int WordLen, void *pUsrData);
-func (c *S7Client) AsReadArea(area S7Area, dBNumber int, start int, amount int, wordLen S7WL) (pUsrData []byte, err error) {
+func (c *S7Client) AsReadArea(area S7Area, dBNumber int, start int, amount int, wordLen S7WL, pUsrData []byte) (err error) {
 	pUsrData = make([]byte, dataLength(wordLen, int32(amount)))
 	var code C.int = C.Cli_AsReadArea(c.client, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
 	err = Cli_ErrorText(code)
