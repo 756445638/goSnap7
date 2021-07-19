@@ -8,7 +8,6 @@ package snap7go
 import "C"
 import (
 	"fmt"
-	"time"
 )
 
 func convertInt8SliceToString(s []int8) string {
@@ -39,10 +38,10 @@ func (t TS7Protection) GetProtectionString() string {
 	return fmt.Sprintf("%+v", t)
 }
 
-func (t Tm) FromTime(goTime time.Time) {
-	t.Year = goTime.Year()
-}
-
-func (t Tm) ToTime() time.Time {
-
-}
+//func (t Tm) FromTime(goTime time.Time) {
+//	t.Year = goTime.Year()
+//}
+//
+//func (t Tm) ToTime() time.Time {
+//
+//}
