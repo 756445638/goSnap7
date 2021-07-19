@@ -42,10 +42,8 @@ func (g *TS7DataItemGo) ToC() TS7DataItem {
 func (g *TS7DataItem) GetBytes() (data []byte) {
 	p := uintptr(unsafe.Pointer(g.Pdata))
 	length := dataLength(S7WL(g.WordLen), g.Amount)
-	data = make([]byte, length)
-	for i := 0; i < int(length); i++ {
-		data[i] = *(*byte)(unsafe.Pointer(p + uintptr(i)))
-	}
+
+	data = GetBytesFromC(p, int(length))
 	return data
 }
 
@@ -53,9 +51,7 @@ func (g *TS7DataItemGo) CopyPdata(to *TS7DataItem) {
 	length := dataLength(S7WL(g.WordLen), g.Amount)
 	to.Pdata = (*byte)(C.malloc(C.size_t(length)))
 	up := uintptr(unsafe.Pointer(to.Pdata))
-	for i := 0; i < int(length); i++ {
-		*((*byte)(unsafe.Pointer(up + uintptr(i)))) = g.Pdata[i]
-	}
+	CopyToC(g.Pdata, up)
 }
 
 func CopyToC(bs []byte, c uintptr) {
@@ -63,4 +59,12 @@ func CopyToC(bs []byte, c uintptr) {
 	for i := 0; i < int(length); i++ {
 		*((*byte)(unsafe.Pointer(c + uintptr(i)))) = bs[i]
 	}
+}
+
+func GetBytesFromC(userData uintptr, length int) (data []byte) {
+	data = make([]byte, length)
+	for i := 0; i < int(length); i++ {
+		data[i] = *(*byte)(unsafe.Pointer(userData + uintptr(i)))
+	}
+	return
 }
