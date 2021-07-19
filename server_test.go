@@ -8,13 +8,14 @@ import (
 )
 
 /*
-Srv_Create Creates a Server Object.
-Srv_Destroy Destroys a Server Object.
-Srv_StartTo Starts a Server Object onto a given IP Address.
-Srv_Start Starts a Server Object onto the default adapter.
-Srv_Stop Stops the Server.
-Srv_GetParam Reads an internal Server parameter.
-Srv_SetParam Writes an internal Server Parameter
+TestServerAdministrative()
+	Srv_Create Creates a Server Object.
+	Srv_Destroy Destroys a Server Object.
+	Srv_StartTo Starts a Server Object onto a given IP Address.
+	Srv_Start Starts a Server Object onto the default adapter.
+	Srv_Stop Stops the Server.
+	Srv_GetParam Reads an internal Server parameter.
+	Srv_SetParam Writes an internal Server Parameter.
 */
 func TestServerAdministrative(t *testing.T) {
 	ast := assert.New(t)
@@ -87,10 +88,11 @@ func TestServerAdministrative(t *testing.T) {
 }
 
 /*
-Srv_RegisterArea Shares a given memory area with the server.
-Srv_UnRegisterArea “Unshares” a memory area previously shared.
-Srv_LockArea Locks a shared memory area.
-Srv_UnlockArea Unlocks a previously locked shared memory area.
+TestServerSharedMemory()
+	Srv_RegisterArea Shares a given memory area with the server.
+	Srv_UnRegisterArea “Unshares” a memory area previously shared.
+	Srv_LockArea Locks a shared memory area.
+	Srv_UnlockArea Unlocks a previously locked shared memory area.
 */
 func TestServerSharedMemory(t *testing.T) {
 	ast := assert.New(t)
@@ -176,12 +178,13 @@ func TestServerSharedMemory(t *testing.T) {
 }
 
 /*
-Srv_SetEventsCallback Sets the user callback that the Server object has to call when an event is created.
-Srv_SetRWAreaCallback Sets the user callback that the Server object has to call on a read or write request.
-Srv_GetMask Reads the specified filter mask.
-Srv_SetMask Writes the specified filter mask.
-Srv_PickEvent Extracts an event (if available) from the Events queue.
-Srv_ClearEvents Empties the Event queue.
+TestServerControlFlow()
+	Srv_SetEventsCallback Sets the user callback that the Server object has to call when an event is created.
+	Srv_SetRWAreaCallback Sets the user callback that the Server object has to call on a read or write request.
+	Srv_GetMask Reads the specified filter mask.
+	Srv_SetMask Writes the specified filter mask.
+	Srv_PickEvent Extracts an event (if available) from the Events queue.
+	Srv_ClearEvents Empties the Event queue.
 */
 func TestServerControlFlow(t *testing.T) {
 	ast := assert.New(t)
@@ -238,10 +241,11 @@ func TestServerControlFlow(t *testing.T) {
 }
 
 /*
-Srv_GetStatus Returns the last job execution time in milliseconds.
-Srv_SetCpuStatus Returns the last job result.
-Srv_EventText Returns a textual explanation of a given event.
-Srv_ErrorText Returns a textual explanation of a given error number
+TestServerMiscellaneous()
+	Srv_GetStatus Returns the last job execution time in milliseconds.
+	Srv_SetCpuStatus Returns the last job result.
+	Srv_EventText Returns a textual explanation of a given event.
+	Srv_ErrorText Returns a textual explanation of a given error number
 */
 func TestServerMiscellaneous(t *testing.T) {
 	ast := assert.New(t)

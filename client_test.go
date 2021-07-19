@@ -517,3 +517,287 @@ func TestLowLevelCli(t *testing.T) { //未完成
 	fmt.Println(size)
 	ast.Nil(err5)
 }
+
+/*
+TestAsynchronousCli()
+	Cli_AsReadArea Reads a data area from a PLC.
+	Cli_AsWriteArea Writes a data area into a PLC.
+	Cli_AsDBRead Reads a part of a DB from a PLC.
+	Cli_AsDBWrite Writes a part of a DB into a PLC.
+	Cli_AsABRead Reads a part of IPU area from a PLC.
+	Cli_AsABWrite Writes a part of IPU area into a PLC.
+	Cli_AsEBRead Reads a part of IPI area from a PLC.
+	Cli_AsEBWrite Writes a part of IPI area into a PLC.
+	Cli_AsMBRead Reads a part of Merkers area from a PLC.
+	Cli_AsMBWrite Writes a part of Merkers area into a PLC.
+	Cli_AsTMRead Reads timers from a PLC. Cli_AsTMWrite Write timers into a PLC.
+	Cli_AsCTRead Reads counters from a PLC.
+	Cli_AsCTWrite Write counters into a PLC.
+	Cli_AsListBlocksOfType Returns the AG blocks list of a given type.
+	Cli_AsReadSZL Reads a partial list of given ID and Index.
+	Cli_AsReadSZLList Reads the list of partial lists available in the CPU.
+	Cli_AsFullUpload Uploads a block from AG with Header and Footer infos.
+	Cli_AsUpload Uploads a block from AG.
+	Cli_AsDownload Download a block into AG.
+	Cli_AsDBGet Uploads a DB from AG using DBRead.
+	Cli_AsDBFill Fills a DB in AG with a given byte.
+	Cli_AsCopyRamToRom Performs the Copy Ram to Rom action.
+	Cli_AsCompress Performs the Compress action.
+*/
+func TestAsynchronousCli(t *testing.T) {
+	ast := assert.New(t)
+	/*
+	   默认地址（127.0.0.1）的server
+	*/
+	serverDefault := NewS7Server()
+	serverDefault.SetEventsCallback(justPrintEvent)
+	serverDefault.SetReadEventsCallback(justPrintEvent)
+
+	err := serverDefault.Start()
+	ast.Nil(err)
+	var dbArea [1024]byte
+	err = serverDefault.RegisterArea(SrvAreaPE, 1, dbArea[:])
+	ast.Nil(err)
+
+	defer func() {
+		err = serverDefault.Stop()
+		ast.Nil(err)
+		serverDefault.Destroy()
+	}()
+
+	client := NewS7Client()
+	defer client.Destroy()
+	//连接地址(127.0.0.1)
+	err = client.Connect()
+	ast.Nil(err)
+
+	//S7AreaPE    S7WLBit
+	pUsrData := []byte{1} // https://github.com/756445638/snap7-go/issues/4
+	err = client.AsWriteArea(S7AreaPE, 1, 0, S7WLBit, pUsrData)
+	ast.Nil(err)
+	ret, err := client.AsReadArea(S7AreaPE, 1, 0, 1, S7WLBit)
+	ast.Nil(err)
+	ast.Equal([]byte{1}, ret)
+
+	//S7AreaPE    S7WLByte
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12} //输入的数据length是S7WLBit的Word size的倍数
+	err = client.WriteArea(S7AreaPE, 1, 0, S7WLByte, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaPE, 1, 0, 12, S7WLByte)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	err = client.EBWrite(0, pUsrData)
+	ast.Nil(err)
+	ret, err = client.EBRead(0, 12)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	//S7AreaPE    S7WLWord
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaPE, 1, 0, S7WLWord, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaPE, 1, 0, 6, S7WLWord)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	//S7AreaPE    S7WLDWord
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaPE, 1, 0, S7WLDWord, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaPE, 1, 0, 3, S7WLDWord)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	//S7AreaPE    S7WLReal
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaPE, 1, 0, S7WLReal, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaPE, 1, 0, 3, S7WLReal)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	//server register dbAreapPA [1024]byte
+	err = serverDefault.RegisterArea(SrvAreaPA, 1, dbArea[:])
+	ast.Nil(err)
+	//S7AreaPA    S7WLBit
+	pUsrData = []byte{1} // https://github.com/756445638/snap7-go/issues/4
+	err = client.WriteArea(S7AreaPA, 1, 0, S7WLBit, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaPA, 1, 0, 1, S7WLBit)
+	ast.Nil(err)
+	ast.Equal([]byte{1}, ret)
+
+	//S7AreaPA    S7WLByte
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaPA, 1, 0, S7WLByte, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaPA, 1, 0, 12, S7WLByte)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	//当WordLen = S7WLBytes时，使用ABWrite/ABRead简化WriteArea/ReadArea
+	err = client.ABWrite(0, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ABRead(0, 12)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	//S7AreaPA    S7WLWord
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaPA, 1, 0, S7WLWord, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaPA, 1, 0, 6, S7WLWord)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	//S7AreaPA    S7WLDWord
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaPA, 1, 0, S7WLDWord, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaPA, 1, 0, 3, S7WLDWord)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	//S7AreaPA    S7WLReal
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaPA, 1, 0, S7WLReal, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaPA, 1, 0, 3, S7WLReal)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	//server register  SrvAreaMK 	（除了 SrvAreaDB特殊之外，其余的情况index与dbNmber设置无效）
+	err = serverDefault.RegisterArea(SrvAreaMK, 0, dbArea[:])
+	ast.Nil(err)
+	//S7AreaMK    S7WLBit
+	pUsrData = []byte{1} // https://github.com/756445638/snap7-go/issues/4
+	err = client.WriteArea(S7AreaMK, 2, 0, S7WLBit, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaMK, 2, 0, 1, S7WLBit)
+	ast.Nil(err)
+	ast.Equal([]byte{1}, ret)
+
+	//S7AreaMK    S7WLByte
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaMK, 1, 0, S7WLByte, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaMK, 1, 0, 12, S7WLByte)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	err = client.MBWrite(0, pUsrData)
+	ast.Nil(err)
+	ret, err = client.MBRead(0, 12)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	//S7AreaMK    S7WLWord
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaMK, 1, 0, S7WLWord, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaMK, 1, 0, 6, S7WLWord)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	//S7AreaMK    S7WLDWord
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaMK, 1, 0, S7WLDWord, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaMK, 1, 0, 3, S7WLDWord)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	//S7AreaMK    S7WLReal
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaMK, 1, 0, S7WLReal, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaMK, 1, 0, 3, S7WLReal)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	//server register  SrvAreaDB
+	//var dbAreapDB [1024]byte                  dbNumber与 index 相对应，index未注册的 dbNumber 无法找到  （SrvAreaDB特殊之处，其余的情况index与dbNmber设置无效）
+	err = serverDefault.RegisterArea(SrvAreaDB, 2, dbArea[:])
+	ast.Nil(err)
+	//S7AreaDB    S7WLBit
+	pUsrData = []byte{1} // https://github.com/756445638/snap7-go/issues/4
+	err = client.WriteArea(S7AreaDB, 2, 0, S7WLBit, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaDB, 2, 0, 1, S7WLBit)
+	ast.Nil(err)
+	ast.Equal([]byte{1}, ret)
+
+	//S7AreaDB    S7WLByte
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaDB, 2, 0, S7WLByte, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaDB, 2, 0, 12, S7WLByte)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	err = client.DBWrite(2, 0, pUsrData)
+	ast.Nil(err)
+	ret, err = client.DBRead(2, 0, 12)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	//S7AreaDB    S7WLWord
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaDB, 2, 0, S7WLWord, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaDB, 2, 0, 6, S7WLWord)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	//S7AreaDB    S7WLDWord
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaDB, 2, 0, S7WLDWord, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaDB, 2, 0, 3, S7WLDWord)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	//S7AreaDB    S7WLReal
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaDB, 2, 0, S7WLReal, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaDB, 2, 0, 3, S7WLReal)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	var dbAreaCT [1024]byte
+	err = serverDefault.RegisterArea(SrvAreaCT, 1, dbAreaCT[:])
+	ast.Nil(err)
+	//S7AreaCT    S7WLCounter
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaCT, 1, 0, S7WLCounter, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaCT, 1, 0, 6, S7WLCounter)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	err = client.CTWrite(0, pUsrData)
+	ast.Nil(err)
+	ret, err = client.CTRead(0, 6)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	var dbAreaTM [1024]byte
+	err = serverDefault.RegisterArea(SrvAreaTM, 1, dbAreaTM[:])
+	ast.Nil(err)
+	//S7AreaTM    S7WLTimer
+	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.WriteArea(S7AreaTM, 1, 0, S7WLTimer, pUsrData)
+	ast.Nil(err)
+	ret, err = client.ReadArea(S7AreaTM, 1, 0, 6, S7WLTimer)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	err = client.TMWrite(0, pUsrData)
+	ast.Nil(err)
+	ret, err = client.TMRead(0, 6)
+	ast.Nil(err)
+	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+}
