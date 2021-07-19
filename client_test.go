@@ -64,7 +64,6 @@ func TestClientAdministrativeCli(t *testing.T) { //已完成
 	paradata, err := clientDesignated.GetParam(P_i32_SendTimeout)
 	ast.Nil(err)
 	ast.Equal(int32(4), paradata)
-
 }
 
 func TestDataIOCli(t *testing.T) { //已完成
