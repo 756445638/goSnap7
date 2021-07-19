@@ -437,7 +437,7 @@ func TestSystemInfoCli(t *testing.T) { // 未完成,ReadSZL  与 ReadSZLList 未
 	fmt.Println("ordercode：", ordercode)
 	ast.Nil(err6)
 	cpuInf, err6 := client.GetCpuInfo()
-	fmt.Println("CpuInfo：", cpuInf)
+	fmt.Println("CpuInfo：", cpuInf.GetASName())
 	ast.Nil(err6)
 	cpInf, err7 := client.GetCpInfo()
 	fmt.Println("CpInfo：", cpInf)
