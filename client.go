@@ -141,6 +141,7 @@ func (c *S7Client) SetParam(paraNumber ParamNumber, value interface{}) (err erro
 	err = Cli_ErrorText(code)
 	return
 }
+
 //int S7API Cli_ReadArea(S7Object Client, int Area, int DBNumber, int Start, int Amount, int WordLen, void *pUsrData);
 func (c *S7Client) ReadArea(area S7Area, dBNumber int, start int, amount int, wordLen S7WL) (pUsrData []byte, err error) {
 	pUsrData = make([]byte, dataLength(wordLen, int32(amount)))
@@ -246,10 +247,10 @@ func (c *S7Client) ABWrite(start int, pUsrData []byte) (err error) {
 	return c.WriteArea(S7AreaPA, 0, start, S7WLByte, pUsrData)
 }
 func (c *S7Client) TMRead(start int, size int) (pUsrData []byte, err error) {
-	return c.ReadArea(S7AreaTM, 0, start, size,  S7WLTimer)
+	return c.ReadArea(S7AreaTM, 0, start, size, S7WLTimer)
 }
 func (c *S7Client) TMWrite(start int, pUsrData []byte) (err error) {
-	return c.WriteArea(S7AreaTM, 0, start,  S7WLTimer, pUsrData)
+	return c.WriteArea(S7AreaTM, 0, start, S7WLTimer, pUsrData)
 }
 func (c *S7Client) CTRead(start int, size int) (pUsrData []byte, err error) {
 	return c.ReadArea(S7AreaCT, 0, start, size, S7WLCounter)
@@ -375,14 +376,15 @@ func (c *S7Client) ReadSZL(id int, index int) (pUsrData TS7SZL, size int, err er
 }
 
 //int S7API Cli_ReadSZLList(S7Object Client, TS7SZLList *pUsrData, int *ItemsCount);
-func (c *S7Client) ReadSZLList(pUsrData []TS7SZLList) (ret []TS7SZLList, err error) {
-	itemsCount := len(pUsrData)
-	var code C.int = C.Cli_ReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&pUsrData[0])), (*C.int)(unsafe.Pointer(&itemsCount)))
+func (c *S7Client) ReadSZLList(capacity int) (ret []TS7SZLList, err error) {
+	var itemsCount = capacity
+	ret = make([]TS7SZLList, capacity)
+	var code C.int = C.Cli_ReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&ret[0])), (*C.int)(unsafe.Pointer(&capacity)))
 	err = Cli_ErrorText(code)
 	if err != nil {
 		return
 	}
-	ret = pUsrData[:itemsCount]
+	ret = ret[:itemsCount]
 	return
 }
 
