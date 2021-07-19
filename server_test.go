@@ -83,15 +83,13 @@ func TestServerSharedMemory(t *testing.T) {
 	server := NewS7Server()
 	server.SetEventsCallback(justPrintEvent)
 	server.SetReadEventsCallback(justPrintEvent)
-	err := server.SetRWAreaCallback(justPrintTag)
-	ast.Nil(err)
 
 	/*
 		RegisterArea(),服务器共享内存区域
 	*/
 
 	data := [10]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	err = server.RegisterArea(SrvAreaPA, 0, data[:])
+	err := server.RegisterArea(SrvAreaPA, 0, data[:])
 	ast.Nil(err)
 
 	err = server.Start()
@@ -177,8 +175,6 @@ func TestServerControlFlow(t *testing.T) {
 	err := server.SetEventsCallback(justPrintEvent)
 	ast.Nil(err)
 	err = server.SetReadEventsCallback(justPrintEvent)
-	ast.Nil(err)
-	err = server.SetRWAreaCallback(justPrintTag)
 	ast.Nil(err)
 
 	/*
