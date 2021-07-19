@@ -20,6 +20,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - run: go test -v  -short  -cover ./...
+      - run: go test -v  -short  -cover 
 
         
