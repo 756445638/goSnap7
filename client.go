@@ -551,22 +551,22 @@ func (c *S7Client) AsABWrite(start int, pUsrData []byte) (err error) {
 
 // int S7API Cli_AsTMRead(S7Object Client, int Start, int Amount, void *pUsrData);
 func (c *S7Client) AsTMRead(start int, size int) (pUsrData []byte, err error) {
-	return c.AsReadArea(S7AreaTM, 0, start, size, S7WLByte)
+	return c.AsReadArea(S7AreaTM, 0, start, size, S7WLTimer)
 }
 
 // int S7API Cli_AsTMWrite(S7Object Client, int Start, int Amount, void *pUsrData);
 func (c *S7Client) AsTMWrite(start int, pUsrData []byte) (err error) {
-	return c.AsWriteArea(S7AreaTM, 0, start, S7WLByte, pUsrData)
+	return c.AsWriteArea(S7AreaTM, 0, start, S7WLTimer, pUsrData)
 }
 
 // int S7API Cli_AsCTRead(S7Object Client, int Start, int Amount, void *pUsrData);
 func (c *S7Client) AsCTRead(start int, size int) (pUsrData []byte, err error) {
-	return c.AsReadArea(S7AreaCT, 0, start, size, S7WLByte)
+	return c.AsReadArea(S7AreaCT, 0, start, size, S7WLCounter)
 }
 
 // int S7API Cli_AsCTWrite(S7Object Client, int Start, int Amount, void *pUsrData);
 func (c *S7Client) AsCTWrite(start int, pUsrData []byte) (err error) {
-	return c.AsWriteArea(S7AreaCT, 0, start, S7WLByte, pUsrData)
+	return c.AsWriteArea(S7AreaCT, 0, start, S7WLCounter, pUsrData)
 }
 
 // int S7API Cli_AsListBlocksOfType(S7Object Client, int BlockType, TS7BlocksOfType *pUsrData, int *ItemsCount);
