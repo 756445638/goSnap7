@@ -270,17 +270,26 @@ func (c *S7Client) GetAgBlockInfo(blockType Block, blockNum int) (pUsrData TS7Bl
 }
 
 //int S7API Cli_GetPgBlockInfo(S7Object Client, void *pBlock, TS7BlockInfo *pUsrData, int Size);
-func (c *S7Client) GetPgBlockInfo(size int) (pBlock []byte, pUsrData TS7BlockInfo, err error) {
-	pBlock = make([]byte, size)
+func (c *S7Client) GetPgBlockInfo(pBlock []byte) (pUsrData TS7BlockInfo, err error) {
+	size := len(pBlock)
 	var code C.int = C.Cli_GetPgBlockInfo(c.client, unsafe.Pointer(&pBlock[0]), (*C.TS7BlockInfo)(unsafe.Pointer(&pUsrData)), C.int(size))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_ListBlocksOfType(S7Object Client, int BlockType, TS7BlocksOfType *pUsrData, int *ItemsCount);
-func (c *S7Client) ListBlocksOfType(blockType Block) (pUsrData TS7BlocksOfType, itemsCount int, err error) {
-	var code C.int = C.Cli_ListBlocksOfType(c.client, C.int(blockType), (*C.TS7BlocksOfType)(unsafe.Pointer(&pUsrData[0])), (*C.int)(unsafe.Pointer(&itemsCount)))
+func (c *S7Client) ListBlocksOfType(blockType Block, cap int) (pUsrData []TS7BlocksOfType, itemsCount int, err error) {
+	pUsrData = make([]TS7BlocksOfType, cap)
+	var code C.int = C.Cli_ListBlocksOfType(
+		c.client,
+		C.int(blockType),
+		(*C.TS7BlocksOfType)(unsafe.Pointer(&pUsrData[0])),
+		(*C.int)(unsafe.Pointer(&cap)))
 	err = Cli_ErrorText(code)
+	if err != nil {
+		return
+	}
+	pUsrData = pUsrData[:cap]
 	return
 }
 
@@ -301,7 +310,8 @@ func (c *S7Client) FullUpload(blockType Block, blockNum int, pUsrData []byte) (s
 }
 
 //int S7API Cli_Download(S7Object Client, int BlockNum, void *pUsrData, int Size);
-func (c *S7Client) Download(blockNum int, pUsrData []byte, size int) (err error) {
+func (c *S7Client) Download(blockNum int, size int) (pUsrData []byte, err error) {
+	pUsrData = make([]byte, size)
 	var code C.int = C.Cli_Download(c.client, C.int(blockNum), unsafe.Pointer(&pUsrData[0]), C.int(size))
 	err = Cli_ErrorText(code)
 	return
