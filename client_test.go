@@ -663,8 +663,14 @@ func TestAsynchronousCli(t *testing.T) {
 	pUsrData := []byte{1} // https://github.com/756445638/snap7-go/issues/4
 	err = client.AsWriteArea(S7AreaPE, 1, 0, S7WLBit, pUsrData)
 	ast.Nil(err)
+	//opResult1, err := client.CheckAsCompletion()
+	//ast.Nil(err)
+	//ast.Equal(JobPending, opResult1)
 	err = client.WaitAsCompletion(10000)
 	ast.Nil(err)
+	opResult2, err := client.CheckAsCompletion()
+	ast.Nil(err)
+	ast.Equal(JobComplete, opResult2)
 	ret, err := client.AsReadArea(S7AreaPE, 1, 0, 1, S7WLBit)
 	ast.Nil(err)
 	err = client.WaitAsCompletion(10000)
@@ -1000,4 +1006,22 @@ func TestAsynchronousCli(t *testing.T) {
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
+	//	Cli_AsListBlocksOfType Returns the AG blocks list of a given type.
+	//	Cli_AsReadSZL Reads a partial list of given ID and Index.
+	//	Cli_AsReadSZLList Reads the list of partial lists available in the CPU.
+	//	Cli_AsFullUpload Uploads a block from AG with Header and Footer infos.
+	//	Cli_AsUpload Uploads a block from AG.
+	//	Cli_AsDownload Download a block into AG.
+	//	Cli_AsDBGet Uploads a DB from AG using DBRead.
+	//	Cli_AsDBFill Fills a DB in AG with a given byte.
+	//	Cli_AsCopyRamToRom Performs the Copy Ram to Rom action.
+	//	Cli_AsCompress Performs the Compress action.
+	//	Cli_CheckAsCompletion Checks if the current asynchronous job was done and terminates immediately.
+
+	//ret1, err := client.FullUpload(Block_OB, 1, pUsrData)
+	//fmt.Println("fullUpload Buffer size:", ret1)
+	//ast.Nil(err)
+
+	//err = client.AsDownload(1, pUsrData, 12)
+	//ast.Nil(err)
 }
