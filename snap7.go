@@ -144,11 +144,6 @@ func dataLength(wordLen S7WL, amount int32) int32 {
 	return t
 }
 
-//export dataLength_for_c
-func dataLength_for_c(wordLen C.int, amount C.int) int32 {
-	return dataLength(S7WL(S7WLWord), int32(amount))
-}
-
 func (s S7WL) size() int32 {
 	switch s {
 	case S7WLBit:
@@ -267,7 +262,7 @@ const S7CpuStatusUnknown S7CpuStatus = 0x00
 const S7CpuStatusRun S7CpuStatus = 0x08
 const S7CpuStatusStop S7CpuStatus = 0x04
 
-type SrvAreaType = int
+type SrvAreaType int
 
 const SrvAreaPE SrvAreaType = 0
 const SrvAreaPA SrvAreaType = 1
