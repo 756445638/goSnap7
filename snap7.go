@@ -10,7 +10,7 @@ import (
 //                                  PARAMS LIST
 //------------------------------------------------------------------------------
 
-type ParamNumber int
+type ParamNumber int32
 
 const P_u16_LocalPort ParamNumber = 1
 const P_u16_RemotePort ParamNumber = 2
@@ -29,7 +29,7 @@ const P_u32_RecoveryTime ParamNumber = 14
 const P_u32_KeepAliveTime ParamNumber = 15
 
 // Client/Partner Job status
-type JobStatus int
+type JobStatus int32
 
 const JobComplete JobStatus = 0
 const JobPending JobStatus = 1
@@ -39,7 +39,7 @@ const errLibInvalidObject JobStatus = -2
 //                                   CLIENT
 //******************************************************************************
 // Error codes
-type CliErrorCode int
+type CliErrorCode int32
 
 const errNegotiatingPDU CliErrorCode = 0x00100000
 const errCliInvalidParams CliErrorCode = 0x00200000
@@ -88,7 +88,7 @@ const CONNTYPE_OP CONNTYPE = 0x0002    // Connect to the PLC as an OP
 const CONNTYPE_BASIC CONNTYPE = 0x0003 // Basic connection
 
 // Area ID
-type S7Area int
+type S7Area int32
 
 const S7AreaPE S7Area = 0x81
 const S7AreaPA S7Area = 0x82
@@ -98,7 +98,7 @@ const S7AreaCT S7Area = 0x1C
 const S7AreaTM S7Area = 0x1D
 
 // Word Length
-type S7WL int
+type S7WL int32
 
 const S7WLBit S7WL = 0x01
 const S7WLByte S7WL = 0x02
@@ -233,12 +233,12 @@ func Value_Pvalue(paraNumber ParamNumber, value interface{}) (pValue unsafe.Poin
 //******************************************************************************
 //                                   SERVER
 //******************************************************************************
-type Operation int
+type Operation int32
 
 const OperationRead Operation = 0
 const OperationWrite Operation = 1
 
-type MaskKind int
+type MaskKind int32
 
 //MaskKind  Srv_GetMask/Srv_SetMask
 const (
@@ -247,7 +247,7 @@ const (
 )
 
 //ServerStatus
-type S7ServerStatus int
+type S7ServerStatus int32
 
 const (
 	SrvStopped S7ServerStatus = 0 //The Server is stopped.
@@ -256,13 +256,13 @@ const (
 )
 
 // CPU status
-type S7CpuStatus int
+type S7CpuStatus int32
 
 const S7CpuStatusUnknown S7CpuStatus = 0x00
 const S7CpuStatusRun S7CpuStatus = 0x08
 const S7CpuStatusStop S7CpuStatus = 0x04
 
-type SrvAreaType int
+type SrvAreaType int32
 
 const SrvAreaPE SrvAreaType = 0
 const SrvAreaPA SrvAreaType = 1

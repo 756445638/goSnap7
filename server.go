@@ -27,34 +27,12 @@ func (s *S7Server) GetParam(paraNumber ParamNumber) (value interface{}, err erro
 	switch paraNumber {
 	case P_u16_LocalPort:
 		pValue = unsafe.Pointer(new(uint16))
-	case P_u16_RemotePort:
-		pValue = unsafe.Pointer(new(uint16))
-	case P_i32_PingTimeout:
-		pValue = unsafe.Pointer(new(int32))
-	case P_i32_SendTimeout:
-		pValue = unsafe.Pointer(new(int32))
-	case P_i32_RecvTimeout:
-		pValue = unsafe.Pointer(new(int32))
 	case P_i32_WorkInterval:
 		pValue = unsafe.Pointer(new(int32))
-	case P_u16_SrcRef:
-		pValue = unsafe.Pointer(new(uint16))
-	case P_u16_DstRef:
-		pValue = unsafe.Pointer(new(uint16))
-	case P_u16_SrcTSap:
-		pValue = unsafe.Pointer(new(uint16))
 	case P_i32_PDURequest:
 		pValue = unsafe.Pointer(new(int32))
 	case P_i32_MaxClients:
 		pValue = unsafe.Pointer(new(int32))
-	case P_i32_BSendTimeout:
-		pValue = unsafe.Pointer(new(int32))
-	case P_i32_BRecvTimeout:
-		pValue = unsafe.Pointer(new(int32))
-	case P_u32_RecoveryTime:
-		pValue = unsafe.Pointer(new(uint32))
-	case P_u32_KeepAliveTime:
-		pValue = unsafe.Pointer(new(uint32))
 	}
 	var code C.int = C.Srv_GetParam(s.server, C.int(paraNumber), pValue)
 	err = Srv_ErrorText(code)
@@ -64,34 +42,12 @@ func (s *S7Server) GetParam(paraNumber ParamNumber) (value interface{}, err erro
 	switch paraNumber {
 	case P_u16_LocalPort:
 		value = *(*uint16)(pValue)
-	case P_u16_RemotePort:
-		value = *(*uint16)(pValue)
-	case P_i32_PingTimeout:
-		value = *(*int32)(pValue)
-	case P_i32_SendTimeout:
-		value = *(*int32)(pValue)
-	case P_i32_RecvTimeout:
-		value = *(*int32)(pValue)
 	case P_i32_WorkInterval:
 		value = *(*int32)(pValue)
-	case P_u16_SrcRef:
-		value = *(*uint16)(pValue)
-	case P_u16_DstRef:
-		value = *(*uint16)(pValue)
-	case P_u16_SrcTSap:
-		value = *(*uint16)(pValue)
 	case P_i32_PDURequest:
 		value = *(*int32)(pValue)
 	case P_i32_MaxClients:
 		value = *(*int32)(pValue)
-	case P_i32_BSendTimeout:
-		value = *(*int32)(pValue)
-	case P_i32_BRecvTimeout:
-		value = *(*int32)(pValue)
-	case P_u32_RecoveryTime:
-		value = *(*uint32)(pValue)
-	case P_u32_KeepAliveTime:
-		value = *(*uint32)(pValue)
 	}
 	return
 }
@@ -160,7 +116,7 @@ func (s *S7Server) UnlockArea(AreaCode SrvAreaType, Index uint16) (err error) {
 }
 
 // func Srv_GetStatus(S7Object Server, int *ServerStatus, int *CpuStatus, int *ClientsCount);
-func (s *S7Server) GetStatus() (ServerStatus S7ServerStatus, CpuStatus S7CpuStatus, ClientsCount int, err error) {
+func (s *S7Server) GetStatus() (ServerStatus S7ServerStatus, CpuStatus S7CpuStatus, ClientsCount int32, err error) {
 	var code C.int = C.Srv_GetStatus(s.server, (*C.int)(unsafe.Pointer(&ServerStatus)), (*C.int)(unsafe.Pointer(&CpuStatus)), (*C.int)(unsafe.Pointer(&ClientsCount)))
 	err = Srv_ErrorText(code)
 	return

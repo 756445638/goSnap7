@@ -52,21 +52,39 @@ func TestServerAdministrative(t *testing.T) {
 	serverDesignated := NewS7Server()
 	serverDesignated.SetEventsCallback(justPrintEvent)
 	serverDesignated.SetReadEventsCallback(justPrintEvent)
+
 	//SetParam须在start之前，否则errSrvCannotChangeParam
-	err = serverDesignated.SetParam(P_i32_MaxClients, int32(12))
+	////设置了本地端口后，connectTo报错?
+	//err = serverDesignated.SetParam(P_u16_LocalPort, uint16(1))
+	//ast.Nil(err)
+	err = serverDesignated.SetParam(P_i32_WorkInterval, int32(6))
 	ast.Nil(err)
+	err = serverDesignated.SetParam(P_i32_PDURequest, int32(600))
+	ast.Nil(err)
+	err = serverDesignated.SetParam(P_i32_MaxClients, int32(11))
+	ast.Nil(err)
+
 	err = serverDesignated.StartTo("127.0.0.1")
 	ast.Nil(err)
 
 	clientDesignated := NewS7Client()
 	defer clientDesignated.Destroy()
 	//连接指定地址
-	err = clientDesignated.ConnectTo("127.0.0.1", 0, 2)
+	err = clientDesignated.ConnectTo("127.0.0.1", 0, 1)
 	ast.Nil(err)
 
-	getValue, err := serverDesignated.GetParam(P_i32_MaxClients)
+	//getValue1, err := serverDesignated.GetParam(P_u16_LocalPort)
+	//ast.Nil(err)
+	//ast.Equal(uint16(1), getValue1)
+	getValue6, err := serverDesignated.GetParam(P_i32_WorkInterval)
 	ast.Nil(err)
-	ast.Equal(int32(12), getValue)
+	ast.Equal(int32(6), getValue6)
+	getValue10, err := serverDesignated.GetParam(P_i32_PDURequest)
+	ast.Nil(err)
+	ast.Equal(int32(600), getValue10)
+	getValue11, err := serverDesignated.GetParam(P_i32_MaxClients)
+	ast.Nil(err)
+	ast.Equal(int32(11), getValue11)
 
 	//Stop后client无法连接
 	err = serverDesignated.Stop()
@@ -261,7 +279,7 @@ func TestServerMiscellaneous(t *testing.T) {
 	ast.Nil(err)
 	ast.Equal(SrvStopped, serverStatus)
 	ast.Equal(S7CpuStatusRun, cpuStatus)
-	ast.Equal(0, clientsCount)
+	ast.Equal(int32(0), clientsCount)
 
 	server.Start()
 	defer func() {
@@ -277,12 +295,12 @@ func TestServerMiscellaneous(t *testing.T) {
 	defer client1.Destroy()
 	client1.Connect()
 	_, _, clientsCount, err = server.GetStatus()
-	ast.Equal(1, clientsCount)
+	ast.Equal(int32(1), clientsCount)
 	client2 := NewS7Client()
 	defer client2.Destroy()
 	client2.Connect()
 	_, _, clientsCount, err = server.GetStatus()
-	ast.Equal(2, clientsCount)
+	ast.Equal(int32(2), clientsCount)
 
 	/*
 		SetCpuStatus(),设置CPU状态

@@ -65,8 +65,8 @@ type S7Client struct {
 	client S7Object
 }
 
-func (c *S7Client) SetAsCallback(handle func(opCode int, opResult int)) error {
-	return Cli_SetAsCallback(c.client, func(usrptr uintptr, opCode int, opResult int) {
+func (c *S7Client) SetAsCallback(handle func(opCode int32, opResult int32)) error {
+	return Cli_SetAsCallback(c.client, func(usrptr uintptr, opCode int32, opResult int32) {
 		handle(opCode, opResult)
 	}, uintptr(c.client))
 }

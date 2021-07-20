@@ -173,8 +173,31 @@ func TestSomeWordLenStart222(t *testing.T) {
 	if testing.Short() {
 		return
 	}
+	server := NewS7Server()
+	var data [10]byte
+
+	for k, _ := range data {
+		data[k] = 100
+	}
+
+	err := server.RegisterArea(SrvAreaDB, 1, data[:])
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = server.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		err = server.Stop()
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		server.Destroy()
+	}()
 	client := NewS7Client()
-	err := client.ConnectTo("127.0.0.1", 0, 2)
+	err = client.ConnectTo("127.0.0.1", 0, 2)
 	if err != nil {
 		t.Fatal(err)
 		return
