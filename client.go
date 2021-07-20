@@ -61,8 +61,6 @@ func (c *S7Client) Disconnect() (err error) {
 func (c *S7Client) GetParam(paraNumber ParamNumber) (value interface{}, err error) {
 	var pValue unsafe.Pointer
 	switch paraNumber {
-	case P_u16_LocalPort:
-		pValue = unsafe.Pointer(new(uint16))
 	case P_u16_RemotePort:
 		pValue = unsafe.Pointer(new(uint16))
 	case P_i32_PingTimeout:
@@ -70,8 +68,6 @@ func (c *S7Client) GetParam(paraNumber ParamNumber) (value interface{}, err erro
 	case P_i32_SendTimeout:
 		pValue = unsafe.Pointer(new(int32))
 	case P_i32_RecvTimeout:
-		pValue = unsafe.Pointer(new(int32))
-	case P_i32_WorkInterval:
 		pValue = unsafe.Pointer(new(int32))
 	case P_u16_SrcRef:
 		pValue = unsafe.Pointer(new(uint16))
@@ -81,16 +77,6 @@ func (c *S7Client) GetParam(paraNumber ParamNumber) (value interface{}, err erro
 		pValue = unsafe.Pointer(new(uint16))
 	case P_i32_PDURequest:
 		pValue = unsafe.Pointer(new(int32))
-	case P_i32_MaxClients:
-		pValue = unsafe.Pointer(new(int32))
-	case P_i32_BSendTimeout:
-		pValue = unsafe.Pointer(new(int32))
-	case P_i32_BRecvTimeout:
-		pValue = unsafe.Pointer(new(int32))
-	case P_u32_RecoveryTime:
-		pValue = unsafe.Pointer(new(uint32))
-	case P_u32_KeepAliveTime:
-		pValue = unsafe.Pointer(new(uint32))
 	}
 	var code C.int = C.Cli_GetParam(c.client, C.int(paraNumber), pValue)
 	err = Cli_ErrorText(code)
@@ -98,8 +84,6 @@ func (c *S7Client) GetParam(paraNumber ParamNumber) (value interface{}, err erro
 		return
 	}
 	switch paraNumber {
-	case P_u16_LocalPort:
-		value = *(*uint16)(pValue)
 	case P_u16_RemotePort:
 		value = *(*uint16)(pValue)
 	case P_i32_PingTimeout:
@@ -107,8 +91,6 @@ func (c *S7Client) GetParam(paraNumber ParamNumber) (value interface{}, err erro
 	case P_i32_SendTimeout:
 		value = *(*int32)(pValue)
 	case P_i32_RecvTimeout:
-		value = *(*int32)(pValue)
-	case P_i32_WorkInterval:
 		value = *(*int32)(pValue)
 	case P_u16_SrcRef:
 		value = *(*uint16)(pValue)
@@ -118,16 +100,6 @@ func (c *S7Client) GetParam(paraNumber ParamNumber) (value interface{}, err erro
 		value = *(*uint16)(pValue)
 	case P_i32_PDURequest:
 		value = *(*int32)(pValue)
-	case P_i32_MaxClients:
-		value = *(*int32)(pValue)
-	case P_i32_BSendTimeout:
-		value = *(*int32)(pValue)
-	case P_i32_BRecvTimeout:
-		value = *(*int32)(pValue)
-	case P_u32_RecoveryTime:
-		value = *(*uint32)(pValue)
-	case P_u32_KeepAliveTime:
-		value = *(*uint32)(pValue)
 	}
 	return
 }
