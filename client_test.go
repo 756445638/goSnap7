@@ -2,8 +2,9 @@ package snap7go
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestClientAdministrativeCli(t *testing.T) { //已完成
@@ -379,6 +380,7 @@ func TestDirectoryCli(t *testing.T) { //未完成
 	ast.Nil(err)
 
 }
+
 func TestBlockOrientedCli(t *testing.T) { //未完成
 	ast := assert.New(t)
 	/*
@@ -405,8 +407,13 @@ func TestBlockOrientedCli(t *testing.T) { //未完成
 	ret, err := client.GetProtection()
 	fmt.Println("Protection级别信息：", ret) // {1 0 1 2 0}
 	ast.Nil(err)
+
 	//设置8位用户密码
 	err = client.SetSessionPassword("12345678")
+	ast.Nil(err)
+
+	ret, err = client.GetProtection()
+	fmt.Println("Protection级别信息：", ret) // {1 0 1 2 0}
 	ast.Nil(err)
 
 	pUsrData := []byte{1, 2, 3, 4, 5, 6, 7, 8}
@@ -493,27 +500,13 @@ func TestSystemInfoCli(t *testing.T) { // 未完成,ReadSZL  与 ReadSZLList 未
 	err = client.Connect()
 	ast.Nil(err)
 
-	ts7szl, size, err2 := client.ReadSZL(0x0232, 0x0004) //与upload有关
+	ts7szl, size, err := client.ReadSZL(0x0232, 0x0004) //与upload有关
 	fmt.Println("系统状态列表：", ts7szl, size)
-	ast.Nil(err2)
+	ast.Nil(err)
 
-	//szlheader := SZL_HEADER {
-	//	LENTHDR :18,
-	//	DR   :  1,
-	//}
-	//
-	//szlList := []TS7SZLList {   这个看exmple不太像是自己输入的，现在也不清楚header里面的LENTHDR以及DR什么形式
-	//	{Header : szlheader,
-	//		//List  : [8190]uint16
-	//		},
-	//	{Header : szlheader,
-	//		//List  : [8190]uint16
-	//	},
-	//}
-
-	//iteCount,err2 := client.ReadSZLList(szlList)
-	//fmt.Println("ReadSZLList：",iteCount)
-	//ast.Nil(err2)
+	_, err = client.ReadSZLList(100)
+	//fmt.Println("ReadSZLList：", ret)
+	ast.Nil(err)
 
 	ordercode, err6 := client.GetOrderCode()
 	fmt.Println("ordercode：", ordercode)
@@ -532,6 +525,51 @@ func TestSystemInfoCli(t *testing.T) { // 未完成,ReadSZL  与 ReadSZLList 未
 	cpInf, err7 := client.GetCpInfo()
 	fmt.Println("CpInfo：", cpInf)
 	ast.Nil(err7)
+
+}
+
+func TestPLCControlCli(t *testing.T) { //已完成
+	ast := assert.New(t)
+	/*
+	   默认地址（127.0.0.1）的server
+	*/
+	serverDefault := NewS7Server()
+	serverDefault.SetEventsCallback(justPrintEvent)
+	serverDefault.SetReadEventsCallback(justPrintEvent)
+
+	err := serverDefault.Start()
+	ast.Nil(err)
+
+	defer func() {
+		err = serverDefault.Stop()
+		ast.Nil(err)
+		serverDefault.Destroy()
+	}()
+	client := NewS7Client()
+	defer client.Destroy()
+	//连接地址(127.0.0.1)
+	err = client.Connect()
+	ast.Nil(err)
+	//PLC running hot start
+	err = client.PlcHotStart()
+	ast.Nil(err)
+
+	err = client.PlcStop()
+	ast.Nil(err)
+
+	err = client.PlcColdStart()
+	ast.Nil(err)
+
+	//timeout：ms
+	err = client.CopyRamToRom(20)
+	ast.Nil(err)
+
+	err = client.Compress(30)
+	ast.Nil(err)
+
+	PlcStatus, err := client.GetPlcStatus()
+	ast.Equal(S7CpuStatusRun, PlcStatus)
+	ast.Nil(err)
 
 }
 
@@ -602,6 +640,22 @@ func TestMiscellaneousCli(t *testing.T) { //未完成
 	err = client.Connect()
 	ast.Nil(err)
 
+	time, err := client.GetExecTime()
+	fmt.Println(" last job execution time:", time)
+	ast.Nil(err)
+
+	lastErr, err := client.GetLastError()
+	fmt.Println(" lastErr:", lastErr)
+	ast.Nil(err)
+
+	//requested:Address of the PDU Req. variable       ???地址怎么找
+	negotiated, err := client.GetPduLength(0)
+	fmt.Println(" negotiated:", negotiated)
+	ast.Nil(err)
+
+	isconnecte, err := client.GetConnected()
+	fmt.Println(" isconnecte:", isconnecte)
+	ast.Nil(err)
 }
 
 /*
@@ -629,8 +683,6 @@ TestAsynchronousCli()
 	Cli_AsDBFill Fills a DB in AG with a given byte.
 	Cli_AsCopyRamToRom Performs the Copy Ram to Rom action.
 	Cli_AsCompress Performs the Compress action.
-	Cli_CheckAsCompletion Checks if the current asynchronous job was done and terminates immediately.
-	Cli_WaitAsCompletion Waits until the current asynchronous job is done or the timeout expires.
 */
 func TestAsynchronousCli(t *testing.T) {
 	ast := assert.New(t)
@@ -663,69 +715,45 @@ func TestAsynchronousCli(t *testing.T) {
 	pUsrData := []byte{1} // https://github.com/756445638/snap7-go/issues/4
 	err = client.AsWriteArea(S7AreaPE, 1, 0, S7WLBit, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
 	ret, err := client.AsReadArea(S7AreaPE, 1, 0, 1, S7WLBit)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
 	ast.Nil(err)
 	ast.Equal([]byte{1}, ret)
 
 	//S7AreaPE    S7WLByte
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12} //输入的数据length是S7WLBit的Word size的倍数
-	err = client.AsWriteArea(S7AreaPE, 1, 0, S7WLByte, pUsrData)
+	err = client.WriteArea(S7AreaPE, 1, 0, S7WLByte, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaPE, 1, 0, 12, S7WLByte)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaPE, 1, 0, 12, S7WLByte)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
-	err = client.AsEBWrite(0, pUsrData)
+	err = client.EBWrite(0, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsEBRead(0, 12)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.EBRead(0, 12)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
 	//S7AreaPE    S7WLWord
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaPE, 1, 0, S7WLWord, pUsrData)
+	err = client.WriteArea(S7AreaPE, 1, 0, S7WLWord, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaPE, 1, 0, 6, S7WLWord)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaPE, 1, 0, 6, S7WLWord)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
 	//S7AreaPE    S7WLDWord
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaPE, 1, 0, S7WLDWord, pUsrData)
+	err = client.WriteArea(S7AreaPE, 1, 0, S7WLDWord, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaPE, 1, 0, 3, S7WLDWord)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaPE, 1, 0, 3, S7WLDWord)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
 	//S7AreaPE    S7WLReal
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaPE, 1, 0, S7WLReal, pUsrData)
+	err = client.WriteArea(S7AreaPE, 1, 0, S7WLReal, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaPE, 1, 0, 3, S7WLReal)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaPE, 1, 0, 3, S7WLReal)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
@@ -734,72 +762,48 @@ func TestAsynchronousCli(t *testing.T) {
 	ast.Nil(err)
 	//S7AreaPA    S7WLBit
 	pUsrData = []byte{1} // https://github.com/756445638/snap7-go/issues/4
-	err = client.AsWriteArea(S7AreaPA, 1, 0, S7WLBit, pUsrData)
+	err = client.WriteArea(S7AreaPA, 1, 0, S7WLBit, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaPA, 1, 0, 1, S7WLBit)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaPA, 1, 0, 1, S7WLBit)
 	ast.Nil(err)
 	ast.Equal([]byte{1}, ret)
 
 	//S7AreaPA    S7WLByte
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaPA, 1, 0, S7WLByte, pUsrData)
+	err = client.WriteArea(S7AreaPA, 1, 0, S7WLByte, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaPA, 1, 0, 12, S7WLByte)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaPA, 1, 0, 12, S7WLByte)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
 	//当WordLen = S7WLBytes时，使用ABWrite/ABRead简化WriteArea/ReadArea
-	err = client.AsABWrite(0, pUsrData)
+	err = client.ABWrite(0, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsABRead(0, 12)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ABRead(0, 12)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
 	//S7AreaPA    S7WLWord
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaPA, 1, 0, S7WLWord, pUsrData)
+	err = client.WriteArea(S7AreaPA, 1, 0, S7WLWord, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaPA, 1, 0, 6, S7WLWord)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaPA, 1, 0, 6, S7WLWord)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
 	//S7AreaPA    S7WLDWord
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaPA, 1, 0, S7WLDWord, pUsrData)
+	err = client.WriteArea(S7AreaPA, 1, 0, S7WLDWord, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaPA, 1, 0, 3, S7WLDWord)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaPA, 1, 0, 3, S7WLDWord)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
 	//S7AreaPA    S7WLReal
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaPA, 1, 0, S7WLReal, pUsrData)
+	err = client.WriteArea(S7AreaPA, 1, 0, S7WLReal, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaPA, 1, 0, 3, S7WLReal)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaPA, 1, 0, 3, S7WLReal)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
@@ -808,71 +812,47 @@ func TestAsynchronousCli(t *testing.T) {
 	ast.Nil(err)
 	//S7AreaMK    S7WLBit
 	pUsrData = []byte{1} // https://github.com/756445638/snap7-go/issues/4
-	err = client.AsWriteArea(S7AreaMK, 2, 0, S7WLBit, pUsrData)
+	err = client.WriteArea(S7AreaMK, 2, 0, S7WLBit, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaMK, 2, 0, 1, S7WLBit)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaMK, 2, 0, 1, S7WLBit)
 	ast.Nil(err)
 	ast.Equal([]byte{1}, ret)
 
 	//S7AreaMK    S7WLByte
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaMK, 1, 0, S7WLByte, pUsrData)
+	err = client.WriteArea(S7AreaMK, 1, 0, S7WLByte, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaMK, 1, 0, 12, S7WLByte)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaMK, 1, 0, 12, S7WLByte)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
-	err = client.AsMBWrite(0, pUsrData)
+	err = client.MBWrite(0, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsMBRead(0, 12)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.MBRead(0, 12)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
 	//S7AreaMK    S7WLWord
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaMK, 1, 0, S7WLWord, pUsrData)
+	err = client.WriteArea(S7AreaMK, 1, 0, S7WLWord, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaMK, 1, 0, 6, S7WLWord)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaMK, 1, 0, 6, S7WLWord)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
 	//S7AreaMK    S7WLDWord
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaMK, 1, 0, S7WLDWord, pUsrData)
+	err = client.WriteArea(S7AreaMK, 1, 0, S7WLDWord, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaMK, 1, 0, 3, S7WLDWord)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaMK, 1, 0, 3, S7WLDWord)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
 	//S7AreaMK    S7WLReal
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaMK, 1, 0, S7WLReal, pUsrData)
+	err = client.WriteArea(S7AreaMK, 1, 0, S7WLReal, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaMK, 1, 0, 3, S7WLReal)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaMK, 1, 0, 3, S7WLReal)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
@@ -882,71 +862,47 @@ func TestAsynchronousCli(t *testing.T) {
 	ast.Nil(err)
 	//S7AreaDB    S7WLBit
 	pUsrData = []byte{1} // https://github.com/756445638/snap7-go/issues/4
-	err = client.AsWriteArea(S7AreaDB, 2, 0, S7WLBit, pUsrData)
+	err = client.WriteArea(S7AreaDB, 2, 0, S7WLBit, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaDB, 2, 0, 1, S7WLBit)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaDB, 2, 0, 1, S7WLBit)
 	ast.Nil(err)
 	ast.Equal([]byte{1}, ret)
 
 	//S7AreaDB    S7WLByte
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaDB, 2, 0, S7WLByte, pUsrData)
+	err = client.WriteArea(S7AreaDB, 2, 0, S7WLByte, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaDB, 2, 0, 12, S7WLByte)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaDB, 2, 0, 12, S7WLByte)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
-	err = client.AsDBWrite(2, 0, pUsrData)
+	err = client.DBWrite(2, 0, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsDBRead(2, 0, 12)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.DBRead(2, 0, 12)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
 	//S7AreaDB    S7WLWord
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaDB, 2, 0, S7WLWord, pUsrData)
+	err = client.WriteArea(S7AreaDB, 2, 0, S7WLWord, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaDB, 2, 0, 6, S7WLWord)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaDB, 2, 0, 6, S7WLWord)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
 	//S7AreaDB    S7WLDWord
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaDB, 2, 0, S7WLDWord, pUsrData)
+	err = client.WriteArea(S7AreaDB, 2, 0, S7WLDWord, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaDB, 2, 0, 3, S7WLDWord)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaDB, 2, 0, 3, S7WLDWord)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
 	//S7AreaDB    S7WLReal
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaDB, 2, 0, S7WLReal, pUsrData)
+	err = client.WriteArea(S7AreaDB, 2, 0, S7WLReal, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaDB, 2, 0, 3, S7WLReal)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaDB, 2, 0, 3, S7WLReal)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
@@ -955,23 +911,15 @@ func TestAsynchronousCli(t *testing.T) {
 	ast.Nil(err)
 	//S7AreaCT    S7WLCounter
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaCT, 1, 0, S7WLCounter, pUsrData)
+	err = client.WriteArea(S7AreaCT, 1, 0, S7WLCounter, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaCT, 1, 0, 6, S7WLCounter)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaCT, 1, 0, 6, S7WLCounter)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
-	err = client.AsCTWrite(0, pUsrData)
+	err = client.CTWrite(0, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsCTRead(0, 6)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.CTRead(0, 6)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
@@ -980,23 +928,15 @@ func TestAsynchronousCli(t *testing.T) {
 	ast.Nil(err)
 	//S7AreaTM    S7WLTimer
 	pUsrData = []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
-	err = client.AsWriteArea(S7AreaTM, 1, 0, S7WLTimer, pUsrData)
+	err = client.WriteArea(S7AreaTM, 1, 0, S7WLTimer, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsReadArea(S7AreaTM, 1, 0, 6, S7WLTimer)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.ReadArea(S7AreaTM, 1, 0, 6, S7WLTimer)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
-	err = client.AsTMWrite(0, pUsrData)
+	err = client.TMWrite(0, pUsrData)
 	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-	ret, err = client.AsTMRead(0, 6)
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
+	ret, err = client.TMRead(0, 6)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 

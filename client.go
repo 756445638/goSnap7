@@ -386,14 +386,15 @@ func (c *S7Client) ReadSZL(id int, index int) (pUsrData TS7SZL, size int, err er
 }
 
 //int S7API Cli_ReadSZLList(S7Object Client, TS7SZLList *pUsrData, int *ItemsCount);
-func (c *S7Client) ReadSZLList(pUsrData []TS7SZLList) (ret []TS7SZLList, err error) {
-	itemsCount := len(pUsrData)
-	var code C.int = C.Cli_ReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&pUsrData[0])), (*C.int)(unsafe.Pointer(&itemsCount)))
+func (c *S7Client) ReadSZLList(capacity int) (ret []TS7SZLList, err error) {
+	var itemsCount = capacity
+	ret = make([]TS7SZLList, capacity)
+	var code C.int = C.Cli_ReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&ret[0])), (*C.int)(unsafe.Pointer(&capacity)))
 	err = Cli_ErrorText(code)
 	if err != nil {
 		return
 	}
-	ret = pUsrData[:itemsCount]
+	ret = ret[:itemsCount]
 	return
 }
 
@@ -501,7 +502,7 @@ func (c *S7Client) GetConnected() (connected int, err error) {
 //int S7API Cli_AsReadArea(S7Object Client, int Area, int DBNumber, int Start, int Amount, int WordLen, void *pUsrData);
 func (c *S7Client) AsReadArea(area S7Area, dBNumber int, start int, amount int, wordLen S7WL) (pUsrData []byte, err error) {
 	pUsrData = make([]byte, dataLength(wordLen, int32(amount)))
-	var code C.int = C.Cli_AsReadArea(c.client, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
+	var code C.int = C.Cli_AsReadArea(c.client, C.igitnt(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
 	err = Cli_ErrorText(code)
 	return
 }
@@ -560,22 +561,22 @@ func (c *S7Client) AsABWrite(start int, pUsrData []byte) (err error) {
 
 // int S7API Cli_AsTMRead(S7Object Client, int Start, int Amount, void *pUsrData);
 func (c *S7Client) AsTMRead(start int, size int) (pUsrData []byte, err error) {
-	return c.AsReadArea(S7AreaTM, 0, start, size, S7WLTimer)
+	return c.AsReadArea(S7AreaTM, 0, start, size, S7WLByte)
 }
 
 // int S7API Cli_AsTMWrite(S7Object Client, int Start, int Amount, void *pUsrData);
 func (c *S7Client) AsTMWrite(start int, pUsrData []byte) (err error) {
-	return c.AsWriteArea(S7AreaTM, 0, start, S7WLTimer, pUsrData)
+	return c.AsWriteArea(S7AreaTM, 0, start, S7WLByte, pUsrData)
 }
 
 // int S7API Cli_AsCTRead(S7Object Client, int Start, int Amount, void *pUsrData);
 func (c *S7Client) AsCTRead(start int, size int) (pUsrData []byte, err error) {
-	return c.AsReadArea(S7AreaCT, 0, start, size, S7WLCounter)
+	return c.AsReadArea(S7AreaCT, 0, start, size, S7WLByte)
 }
 
 // int S7API Cli_AsCTWrite(S7Object Client, int Start, int Amount, void *pUsrData);
 func (c *S7Client) AsCTWrite(start int, pUsrData []byte) (err error) {
-	return c.AsWriteArea(S7AreaCT, 0, start, S7WLCounter, pUsrData)
+	return c.AsWriteArea(S7AreaCT, 0, start, S7WLByte, pUsrData)
 }
 
 // int S7API Cli_AsListBlocksOfType(S7Object Client, int BlockType, TS7BlocksOfType *pUsrData, int *ItemsCount);
@@ -593,9 +594,15 @@ func (c *S7Client) AsReadSZL(id int, index int) (pUsrData TS7SZL, size int, err 
 }
 
 // int S7API Cli_AsReadSZLList(S7Object Client, TS7SZLList *pUsrData, int *ItemsCount);
-func (c *S7Client) AsReadSZLList() (pUsrData TS7SZLList, itemsCount int, err error) {
-	var code C.int = C.Cli_AsReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&itemsCount)))
+func (c *S7Client) ASReadSZLList(capacity int) (ret []TS7SZLList, err error) {
+	var itemsCount = capacity
+	ret = make([]TS7SZLList, capacity)
+	var code C.int = C.Cli_AsReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&ret[0])), (*C.int)(unsafe.Pointer(&capacity)))
 	err = Cli_ErrorText(code)
+	if err != nil {
+		return
+	}
+	ret = ret[:itemsCount]
 	return
 }
 
