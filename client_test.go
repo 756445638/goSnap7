@@ -2,9 +2,9 @@ package snap7go
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
+	"testing"
+	"time"
 )
 
 func TestClientAdministrativeCli(t *testing.T) { //已完成
@@ -45,26 +45,98 @@ func TestClientAdministrativeCli(t *testing.T) { //已完成
 		ast.Nil(err)
 		serverDesignated.Destroy()
 	}()
-
+	//默认client    Connect 默认连接的是PG (the programming console)
+	client := NewS7Client()
+	defer client.Destroy()
+	//自定义client
 	clientDesignated := NewS7Client()
-
 	defer clientDesignated.Destroy()
-	//CONNTYPE_PG、CONNTYPE_OP、CONNTYPE_BASIC
+
+	//默认client连接默认server
+	err = client.Connect()
+	ast.Nil(err)
+
+	//SetParam在ConnectTo前后都可以 client与server可设置的ParamNumbers项不一样
+	err = clientDesignated.SetParam(P_u16_LocalPort, uint16(2484))
+	ast.NotNil(err)
+	//err = clientDesignated.SetParam(P_u16_RemotePort, uint16(1548))      RemotePort的设置与ConnectTo有关
+	//ast.Nil(err)
+	err = clientDesignated.SetParam(P_i32_PingTimeout, int32(10))
+	ast.Nil(err)
+	err = clientDesignated.SetParam(P_i32_SendTimeout, int32(10))
+	ast.Nil(err)
+	err = clientDesignated.SetParam(P_i32_RecvTimeout, int32(10))
+	ast.Nil(err)
+	err = clientDesignated.SetParam(P_i32_WorkInterval, int32(0))
+	ast.Nil(err)
+	err = clientDesignated.SetParam(P_u16_SrcRef, uint16(5))
+	ast.Nil(err)
+	err = clientDesignated.SetParam(P_u16_DstRef, uint16(5))
+	ast.Nil(err)
+	err = clientDesignated.SetParam(P_u16_SrcTSap, uint16(0x1000))
+	ast.Nil(err)
+	err = clientDesignated.SetParam(P_i32_PDURequest, int32(10))
+	ast.Nil(err)
+	err = clientDesignated.SetParam(P_i32_MaxClients, int32(4))
+	ast.NotNil(err)
+	err = clientDesignated.SetParam(P_i32_BSendTimeout, int32(4))
+	ast.NotNil(err)
+	err = clientDesignated.SetParam(P_i32_BRecvTimeout, int32(4))
+	ast.NotNil(err)
+	err = clientDesignated.SetParam(P_u32_RecoveryTime, uint32(4))
+	ast.NotNil(err)
+	err = clientDesignated.SetParam(P_u32_KeepAliveTime, uint32(4))
+	ast.NotNil(err)
+
+	//SetParam在ConnectTo前后都可以 client与server可设置的ParamNumbers项不一样
+	err = clientDesignated.SetParam(P_u16_LocalPort, uint16(2484))
+	ast.NotNil(err)
+	//err = clientDesignated.SetParam(P_u16_RemotePort, uint16(1548))      RemotePort的设置与ConnectTo有关
+	//ast.Nil(err)
+	_, err = clientDesignated.GetParam(P_i32_PingTimeout)
+	ast.Nil(err)
+	_, err = clientDesignated.GetParam(P_i32_SendTimeout)
+	ast.Nil(err)
+	_, err = clientDesignated.GetParam(P_i32_RecvTimeout)
+	ast.Nil(err)
+	//_, err = clientDesignated.GetParam(P_i32_WorkInterval)  这个不知道为什么通不过
+	//ast.NotNil(err)
+	_, err = clientDesignated.GetParam(P_u16_SrcRef)
+	ast.Nil(err)
+	_, err = clientDesignated.GetParam(P_u16_DstRef)
+	ast.Nil(err)
+	_, err = clientDesignated.GetParam(P_u16_SrcTSap)
+	ast.Nil(err)
+	_, err = clientDesignated.GetParam(P_i32_PDURequest)
+	ast.Nil(err)
+	_, err = clientDesignated.GetParam(P_i32_MaxClients)
+	ast.NotNil(err)
+	_, err = clientDesignated.GetParam(P_i32_BSendTimeout)
+	ast.NotNil(err)
+	_, err = clientDesignated.GetParam(P_i32_BRecvTimeout)
+	ast.NotNil(err)
+	_, err = clientDesignated.GetParam(P_u32_RecoveryTime)
+	ast.NotNil(err)
+	_, err = clientDesignated.GetParam(P_u32_KeepAliveTime)
+	ast.NotNil(err)
+
+	//SetConnectionType:CONNTYPE_PG、CONNTYPE_OP、CONNTYPE_BASIC
+	err = clientDesignated.SetConnectionType(CONNTYPE_PG)
+	ast.Nil(err)
+
+	err = clientDesignated.SetConnectionType(CONNTYPE_OP)
+	ast.Nil(err)
+
 	err = clientDesignated.SetConnectionType(CONNTYPE_BASIC)
 	ast.Nil(err)
+
 	err = clientDesignated.SetConnectionParams("127.0.0.1", 0x1000, 0x1000)
 	ast.Nil(err)
 
-	//在ConnectTo前后都可以
-	err = clientDesignated.SetParam(P_i32_SendTimeout, int32(4))
-	ast.Nil(err)
-	//连接指定地址
-	err = clientDesignated.ConnectTo("127.0.0.1", 0, 1)
+	//自定义client连接指定地址
+	err = clientDesignated.ConnectTo("127.0.0.1", 0, 0)
 	ast.Nil(err)
 
-	paradata, err := clientDesignated.GetParam(P_i32_SendTimeout)
-	ast.Nil(err)
-	ast.Equal(int32(4), paradata)
 }
 
 func TestDataIOCli(t *testing.T) { //已完成
@@ -465,13 +537,26 @@ func TestDateOrTimeCli(t *testing.T) { // 未完成
 	err = client.Connect()
 	ast.Nil(err)
 
-	//err := client.GetPlcDateTime()
-	//ast.Nil(err)
-	//err = client.SetPlcDateTime()
-	//ast.Nil(err)
+	//set目前无效
+	var timeSet Tm
+	goTime := time.Unix(11, 0)
+	timeSet.FromTime(goTime)
+	fmt.Printf("!!!!!!Set Tm：%#v\n", timeSet)
+	fmt.Printf("!!!!!!Set time：%#v\n", timeSet.ToTime())
+	fmt.Println("!!!!!!time", goTime)
+	err = client.SetPlcDateTime(timeSet)
+	ast.Nil(err)
 
 	err = client.SetPlcSystemDateTime()
 	ast.Nil(err)
+
+	dataTimeGet, err := client.GetPlcDateTime()
+	ast.Nil(err)
+	fmt.Printf("!!!!!!Get Tm：%#v\n", dataTimeGet)
+	fmt.Printf("!!!!!!Get time：%#v\n", dataTimeGet.ToTime())
+	fmt.Println("!!!!!!time", dataTimeGet.ToTime())
+	//ast.Equal(goTime, dataTimeGet.ToTime())
+	ast.Equal(timeSet, dataTimeGet)
 
 }
 
