@@ -47,7 +47,11 @@ func TestClientAdministrativeCli(t *testing.T) { //已完成
 	}()
 	//默认client    Connect 默认连接的是PG (the programming console)
 	client := NewS7Client()
-	defer client.Destroy()
+	defer func() {
+		err = client.Disconnect()
+		ast.Nil(err)
+		client.Destroy()
+	}()
 	//自定义client
 	clientDesignated := NewS7Client()
 	defer clientDesignated.Destroy()
@@ -442,8 +446,8 @@ func TestDirectoryCli(t *testing.T) { //未完成
 	fmt.Println("ListBlocks:", rete)
 	ast.Nil(err)
 
-	data, err := client.ListBlocksOfType(Block_OB, 10) //没有BLOCK无法测试
-	fmt.Println("TS7BlocksOfType", data)
+	_, err = client.ListBlocksOfType(Block_OB, 10) //没有BLOCK无法测试
+	//fmt.Println("TS7BlocksOfType", data)
 	ast.Nil(err)
 
 	ret2, err := client.GetAgBlockInfo(Block_OB, 1)
@@ -537,7 +541,7 @@ func TestDateOrTimeCli(t *testing.T) { // 未完成
 	err = client.Connect()
 	ast.Nil(err)
 
-	//set目前无效
+	//todo: set目前无效
 	var timeSet Tm
 	goTime := time.Unix(11, 0)
 	timeSet.FromTime(goTime)
@@ -1145,6 +1149,63 @@ func TestAsynchronousCli(t *testing.T) {
 	err = client.WaitAsCompletion(10000)
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
+
+	_, err = client.AsListBlocksOfType(Block_OB, 10) //没有BLOCK无法测试
+	ast.Nil(err)
+	err = client.WaitAsCompletion(10000)
+	ast.Nil(err)
+
+	szl, size, err := client.AsReadSZL(0x0232, 0x0004) //与upload有关
+	ast.Nil(err)
+	fmt.Println("系统状态列表：", szl, size)
+	err = client.WaitAsCompletion(10000)
+	ast.Nil(err)
+
+	_, err = client.AsReadSZLList(100)
+	//fmt.Println("ReadSZLList：", ret)
+	ast.Nil(err)
+	err = client.WaitAsCompletion(10000)
+	ast.Nil(err)
+
+	ret1, err := client.AsUpload(Block_OB, 1, pUsrData) //CPU权限不够  ,后面的都无法测试
+	ast.Nil(err)
+	fmt.Println("fullUpload Buffer size:", ret1)
+	err = client.WaitAsCompletion(10000)
+	ast.Nil(err)
+
+	ret1, err = client.AsFullUpload(Block_OB, 1, pUsrData)
+	ast.Nil(err)
+	fmt.Println("fullUpload Buffer size:", ret1)
+	err = client.WaitAsCompletion(10000)
+	ast.Nil(err)
+
+	asDownloadData, err := client.AsDownload(1, 32)
+	ast.Nil(err)
+	fmt.Println(asDownloadData)
+	err = client.WaitAsCompletion(10000)
+	ast.Nil(err)
+
+	dbGet, err := client.AsDBGet(2, pUsrData) //CPU权限不够
+	ast.Nil(err)
+	fmt.Println("fullUpload Buffer size:", dbGet)
+	err = client.WaitAsCompletion(10000)
+	ast.Nil(err)
+
+	err = client.AsDBFill(2, 10086) //CPU权限不够
+	ast.Nil(err)
+	err = client.WaitAsCompletion(10000)
+	ast.Nil(err)
+
+	//timeout：ms
+	err = client.AsCopyRamToRom(20)
+	ast.Nil(err)
+	err = client.WaitAsCompletion(10000)
+	ast.Nil(err)
+
+	err = client.AsCompress(30)
+	ast.Nil(err)
+	err = client.WaitAsCompletion(10000)
+	ast.Nil(err)
 
 	//	Cli_AsListBlocksOfType Returns the AG blocks list of a given type.
 	//	Cli_AsReadSZL Reads a partial list of given ID and Index.

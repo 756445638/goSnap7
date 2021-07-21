@@ -54,7 +54,7 @@ func TestServerAdministrative(t *testing.T) {
 	serverDesignated.SetReadEventsCallback(justPrintEvent)
 
 	//SetParam须在start之前，否则errSrvCannotChangeParam
-	////设置了本地端口后，connectTo报错?
+	//todo 设置了本地端口后，connectTo报错?
 	//err = serverDesignated.SetParam(P_u16_LocalPort, uint16(1))
 	//ast.Nil(err)
 	err = serverDesignated.SetParam(P_i32_WorkInterval, int32(6))

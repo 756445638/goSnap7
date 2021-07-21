@@ -579,7 +579,7 @@ func (c *S7Client) AsReadSZL(id int32, index int32) (pUsrData TS7SZL, size int32
 }
 
 // int S7API Cli_AsReadSZLList(S7Object Client, TS7SZLList *pUsrData, int *ItemsCount);
-func (c *S7Client) ASReadSZLList(capacity int32) (ret []TS7SZLList, err error) {
+func (c *S7Client) AsReadSZLList(capacity int32) (ret []TS7SZLList, err error) {
 	var itemsCount = capacity
 	ret = make([]TS7SZLList, capacity)
 	var code C.int = C.Cli_AsReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&ret[0])), (*C.int)(unsafe.Pointer(&capacity)))
