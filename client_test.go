@@ -454,7 +454,8 @@ func TestDirectoryCli(t *testing.T) { //未完成
 	fmt.Println("ListBlocks:", rete)
 	//ast.Nil(err)
 
-	_, err = client.ListBlocksOfType(Block_OB, 10) //没有BLOCK无法测试
+	_, itemsCount, err := client.ListBlocksOfType(Block_OB) //没有BLOCK无法测试
+	fmt.Printf("itemsCount: %#v\n", itemsCount)
 	//fmt.Println("TS7BlocksOfType", data)
 	//ast.Nil(err)
 

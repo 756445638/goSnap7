@@ -230,6 +230,8 @@ func (c *S7Client) CTRead(start int32, size int32) (pUsrData []byte, err error) 
 func (c *S7Client) CTWrite(start int32, pUsrData []byte) (err error) {
 	return c.WriteArea(S7AreaCT, 0, start, S7WLCounter, pUsrData)
 }
+
+//获取各种blockType的数量
 func (c *S7Client) ListBlocks() (pUsrData TS7BlocksList, err error) {
 	var code C.int = C.Cli_ListBlocks(c.client, (*C.TS7BlocksList)(unsafe.Pointer(&pUsrData)))
 	err = Cli_ErrorText(code)
@@ -249,15 +251,12 @@ func (c *S7Client) GetPgBlockInfo(pBlock []byte) (pUsrData TS7BlockInfo, err err
 	return
 }
 
+//获取指定blockType的 block number数组和 ItemsCount
 //int S7API Cli_ListBlocksOfType(S7Object Client, int BlockType, TS7BlocksOfType *pUsrData, int *ItemsCount);
-func (c *S7Client) ListBlocksOfType(blockType Block, cap int32) (pUsrData []TS7BlocksOfType, err error) {
-	pUsrData = make([]TS7BlocksOfType, cap)
-	var code C.int = C.Cli_ListBlocksOfType(c.client, C.int(blockType), (*C.TS7BlocksOfType)(unsafe.Pointer(&pUsrData[0])), (*C.int)(unsafe.Pointer(&cap)))
+func (c *S7Client) ListBlocksOfType(blockType Block) (pUsrData TS7BlocksOfType, itemsCount int32, err error) {
+	itemsCount = int32(8192)
+	var code C.int = C.Cli_ListBlocksOfType(c.client, C.int(blockType), (*C.TS7BlocksOfType)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&itemsCount)))
 	err = Cli_ErrorText(code)
-	if err != nil {
-		return
-	}
-	pUsrData = pUsrData[:cap]
 	return
 }
 
