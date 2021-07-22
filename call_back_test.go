@@ -284,3 +284,62 @@ func TestSomeSetRWAreaCallback(t *testing.T) {
 		return
 	}
 }
+
+func TestSetRWAreaCallbackInterface(t *testing.T) {
+	server := NewS7Server()
+	err := server.SetEventsCallback(justPrintEvent)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	err = server.SetReadEventsCallback(justPrintEvent)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	var handle1 handle
+	err = server.SetRWAreaCallbackInterface(handle1)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	err = server.Start()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	defer func() {
+		err = server.Stop()
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		server.Destroy()
+	}()
+	client := NewS7Client()
+	err = client.ConnectTo("127.0.0.1", 0, 2)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	data, err := client.ReadArea(S7AreaDB, 0, 0, 5, S7WLByte)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	fmt.Println("data:", data)
+	err = client.WriteArea(S7AreaDB, 0, 0, S7WLByte, []byte{6, 7, 8, 9})
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+}
+
+type handle struct{}
+
+func (h handle) Read(sender int, tag *PS7Tag) (data []byte, errCode int) {
+	return []byte{1, 2, 3, 4, 5}, 0
+}
+func (h handle) Write(sender int, tag *PS7Tag, data []byte) (errCode int) {
+	return 0
+}

@@ -518,7 +518,7 @@ func TestBlockOrientedCli(t *testing.T) { //未完成
 	ast.Nil(err)
 
 	ret1, err = client.DBGet(2, pUsrData) //CPU权限不够
-	fmt.Println("fullUpload Buffer size:", ret1)
+	fmt.Println("DBGet size:", ret1)
 	//ast.Nil(err)
 
 	err = client.DBFill(2, 10086) //CPU权限不够
@@ -526,7 +526,8 @@ func TestBlockOrientedCli(t *testing.T) { //未完成
 }
 
 //系统状态列表（德语：System-ZustandsListen)
-func TestDateOrTimeCli(t *testing.T) { // 未完成
+
+func TestDateOrTimeCli(t *testing.T) { // 已完成
 	ast := assert.New(t)
 	/*
 	   默认地址（127.0.0.1）的server
@@ -551,14 +552,23 @@ func TestDateOrTimeCli(t *testing.T) { // 未完成
 	ast.Nil(err)
 
 	//todo: set目前无效
+	//SetPlcDateTime/SetPlcSystemDateTime仅用于模拟 PLC 的存在,实际并未对主机的时间进行修改
 	//Get Date and time returns the Host (PC in which the server is running) date and time.
 	//Set date and time is accepted but the host date and time is not modified.
 	var timeSet Tm
+	fmt.Printf("原始时间Tm：%#v\n", timeSet)
 	goTime := time.Unix(11, 0)
+	fmt.Println("设置时间goTime：", goTime)
+
 	timeSet.FromTime(goTime)
-	fmt.Printf("!!!!!!Set Tm：%#v\n", timeSet)
-	fmt.Printf("!!!!!!Set time：%#v\n", timeSet.ToTime())
-	fmt.Println("!!!!!!time", goTime)
+	fmt.Printf("C语言FromTime转换后TM设置时间：%#v\n", timeSet)  //FromTime  将time.Unix()时间戳转换为需要的TM时间格式       用time.Unix()时间戳设置TM
+	fmt.Println("C语言ToTime转换后设置时间：", timeSet.ToTime()) //ToTime  将TM时间格式显示为time.Unix()时间戳格式
+
+	originData, err := client.GetPlcDateTime()
+	ast.Nil(err)
+	fmt.Printf("初始设置时间TM查看：%#v\n", originData)
+	fmt.Println("初始设置时间Unix查看", originData.ToTime())
+
 	err = client.SetPlcDateTime(timeSet)
 	ast.Nil(err)
 
@@ -567,11 +577,10 @@ func TestDateOrTimeCli(t *testing.T) { // 未完成
 
 	dataTimeGet, err := client.GetPlcDateTime()
 	ast.Nil(err)
-	fmt.Printf("!!!!!!Get Tm：%#v\n", dataTimeGet)
-	fmt.Printf("!!!!!!Get time：%#v\n", dataTimeGet.ToTime())
-	fmt.Println("!!!!!!time", dataTimeGet.ToTime())
-	//ast.Equal(goTime, dataTimeGet.ToTime())
-	//ast.Equal(timeSet, dataTimeGet)
+	fmt.Printf("修改设置时间查看TM：%#v\n", dataTimeGet)
+	fmt.Println("修改设置时间ToTime查看", dataTimeGet.ToTime())
+
+	ast.Equal(originData, dataTimeGet)
 
 }
 
