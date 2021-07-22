@@ -1164,22 +1164,25 @@ func TestAsynchronousCli(t *testing.T) {
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
-	_, err = client.AsListBlocksOfType(Block_OB, 10) //没有BLOCK无法测试
+	_, itemsCount, err := client.AsListBlocksOfType(Block_OB) //没有BLOCK无法测试
+	//ast.Nil(err)
+	//err = client.WaitAsCompletion(10000)
+	//ast.Nil(err)
+	fmt.Println("itemsCount：", itemsCount)
+
+	szl, size, err := client.AsReadSZL(0x0232, 0x0004)
+	ast.Nil(err)
+	//err = client.WaitAsCompletion(10000)
+	//ast.Nil(err)
+	fmt.Printf("szl：%#v\n", szl)
+	fmt.Println("size：", size)
+
+	tS7SZLList, itemsCount, err := client.AsReadSZLList()
 	ast.Nil(err)
 	err = client.WaitAsCompletion(10000)
-	//ast.Nil(err)
-
-	szl, size, err := client.AsReadSZL(0x0232, 0x0004) //与upload有关
-	//ast.Nil(err)
-	fmt.Println("系统状态列表：", szl, size)
-	err = client.WaitAsCompletion(10000)
-	//ast.Nil(err)
-
-	_, err = client.AsReadSZLList(100)
-	//fmt.Println("ReadSZLList：", ret)
-	//ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	//ast.Nil(err)
+	ast.Nil(err)
+	fmt.Printf("tS7SZLList：%#v\n", tS7SZLList)
+	fmt.Println("itemsCount：", itemsCount)
 
 	ret1, err := client.AsUpload(Block_OB, 1, pUsrData) //CPU权限不够  ,后面的都无法测试
 	//ast.Nil(err)
