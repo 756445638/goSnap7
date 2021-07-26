@@ -557,17 +557,15 @@ func (c *S7Client) AsCTWrite(start int32, pUsrData []byte) (err error) {
 
 // int S7API Cli_AsListBlocksOfType(S7Object Client, int BlockType, TS7BlocksOfType *pUsrData, int *ItemsCount);
 func (c *S7Client) AsListBlocksOfType(blockType Block, pUsrData []TS7BlocksOfType, pUsrDataLength *int32) (err error) {
-	pUsrData = make([]TS7BlocksOfType, cap)
 	var code C.int = C.Cli_AsListBlocksOfType(
 		c.client,
 		C.int(blockType),
 		(*C.TS7BlocksOfType)(unsafe.Pointer(&pUsrData[0])),
-		(*C.int)(unsafe.Pointer(&cap)))
+		(*C.int)(unsafe.Pointer(pUsrDataLength)))
 	err = Cli_ErrorText(code)
 	if err != nil {
 		return
 	}
-	pUsrData = pUsrData[:cap]
 	return
 }
 
@@ -581,14 +579,11 @@ func (c *S7Client) AsReadSZL(id int32, index int32) (pUsrData TS7SZL, size int32
 
 // int S7API Cli_AsReadSZLList(S7Object Client, TS7SZLList *pUsrData, int *ItemsCount);
 func (c *S7Client) AsReadSZLList(data []TS7SZLList, dataLength *int32) (err error) {
-	var itemsCount = capacity
-	ret = make([]TS7SZLList, capacity)
-	var code C.int = C.Cli_AsReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&ret[0])), (*C.int)(unsafe.Pointer(&capacity)))
+	var code C.int = C.Cli_AsReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&data[0])), (*C.int)(unsafe.Pointer(dataLength)))
 	err = Cli_ErrorText(code)
 	if err != nil {
 		return
 	}
-	ret = ret[:itemsCount]
 	return
 }
 
