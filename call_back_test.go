@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 	"time"
+	"unsafe"
 )
 
 func TestSomeCallBack(t *testing.T) {
@@ -342,4 +343,9 @@ func (h handle) Read(sender int, tag *PS7Tag) (data []byte, errCode int) {
 }
 func (h handle) Write(sender int, tag *PS7Tag, data []byte) (errCode int) {
 	return 0
+}
+
+func TestZXX(t *testing.T) {
+	var pUsrData TS7SZLList
+	panic(unsafe.Sizeof(pUsrData))
 }

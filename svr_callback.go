@@ -15,7 +15,7 @@ import "unsafe"
 
 type Pfn_SrvEventCallBack = func(uintptr, *TSrvEvent)
 
-type Pfn_RWAreaCallBack = func(uintptr, int, Operation, *PS7Tag, uintptr) int
+type Pfn_RWAreaCallBack = func(uintptr, int32, Operation, *PS7Tag, uintptr) int32
 
 var (
 	svrEventCallbacks      = make(map[uintptr]Pfn_SrvEventCallBack)
@@ -99,7 +99,7 @@ func GlobalRWAreaCallback(usrPtr *C.void, sender C.int, operation C.int, pTag C.
 	pt := getPS7TagFormC(pTag)
 	return C.int(callback(
 		up,
-		int(sender),
+		int32(sender),
 		Operation(operation),
 		&pt,
 		uintptr(unsafe.Pointer(pUserData))))
