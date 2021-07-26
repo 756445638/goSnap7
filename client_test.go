@@ -454,13 +454,13 @@ func TestDirectoryCli(t *testing.T) { //未完成
 	fmt.Println("ListBlocks:", rete)
 	//ast.Nil(err)
 
-	_, itemsCount, err := client.ListBlocksOfType(Block_OB) //没有BLOCK无法测试
-	fmt.Printf("itemsCount: %#v\n", itemsCount)
+	_, err = client.ListBlocksOfType(Block_OB, 10000) //没有BLOCK无法测试
+	//fmt.Printf("itemsCount: %#v\n", itemsCount)
 	//fmt.Println("TS7BlocksOfType", data)
 	//ast.Nil(err)
 
-	ret2, err := client.GetAgBlockInfo(Block_OB, 1)
-	fmt.Println("AgBlockInfo:", ret2)
+	//ret2, err := client.GetAgBlockInfo(Block_OB, 1)
+	//fmt.Println("AgBlockInfo:", ret2)
 	//ast.Nil(err)
 
 	ret3, err := client.GetPgBlockInfo([]byte{1, 2, 3})
@@ -609,15 +609,13 @@ func TestSystemInfoCli(t *testing.T) { // 未完成,ReadSZL  与 ReadSZLList 未
 	err = client.Connect()
 	ast.Nil(err)
 
-	ts7szl, size, err := client.ReadSZL(0x0232, 0x0004)
-	fmt.Printf("系统状态列表：%#v\n", ts7szl)
+	_, size, err := client.ReadSZL(0x0232, 0x0004)
+	//fmt.Printf("系统状态列表：%#v\n", ts7szl)
 	fmt.Println("size:", size)
 	ast.Nil(err)
 
-	pUsrData, itemsCount, err := client.ReadSZLList()
-	fmt.Printf("pUsrData：%#v\n", pUsrData)
-	fmt.Printf("itemsCount：%#v\n", itemsCount)
-
+	_, err = client.ReadSZLList(20000)
+	//fmt.Printf("ret：%#v\n", ret)
 	ast.Nil(err)
 
 	ordercode, err6 := client.GetOrderCode()
@@ -1173,25 +1171,28 @@ func TestAsynchronousCli(t *testing.T) {
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
-	_, itemsCount, err := client.AsListBlocksOfType(Block_OB) //没有BLOCK无法测试
-	//ast.Nil(err)
-	//err = client.WaitAsCompletion(10000)
-	//ast.Nil(err)
-	fmt.Println("itemsCount：", itemsCount)
-
-	szl, size, err := client.AsReadSZL(0x0232, 0x0004)
-	ast.Nil(err)
-	//err = client.WaitAsCompletion(10000)
-	//ast.Nil(err)
-	fmt.Printf("szl：%#v\n", szl)
-	fmt.Println("size：", size)
-
-	tS7SZLList, itemsCount, err := client.AsReadSZLList()
+	_, err = client.AsListBlocksOfType(Block_OB, 20000) //没有BLOCK无法测试
 	ast.Nil(err)
 	err = client.WaitAsCompletion(10000)
 	ast.Nil(err)
-	fmt.Printf("tS7SZLList：%#v\n", tS7SZLList)
-	fmt.Println("itemsCount：", itemsCount)
+	//fmt.Println("[]TS7BlocksOfType：", TS7BlocksOfType)
+
+	//_, size, err := client.AsReadSZL(0x0232, 0x0004)
+	//ast.Nil(err)
+	//err = client.WaitAsCompletion(10000)
+	//ast.Nil(err)
+	////fmt.Printf("szl：%#v\n", szl)
+	//fmt.Println("size：", size)
+
+	tS7SZLList, err := client.AsReadSZLList(20000)
+	ast.Nil(err)
+
+	err = client.WaitAsCompletion(10000)
+	ast.Nil(err)
+
+	fmt.Println("tS7SZLList length", len(tS7SZLList))
+
+	//fmt.Printf("tS7SZLList：%#v\n", tS7SZLList)
 
 	ret1, err := client.AsUpload(Block_OB, 1, pUsrData) //CPU权限不够  ,后面的都无法测试
 	//ast.Nil(err)
@@ -1205,9 +1206,9 @@ func TestAsynchronousCli(t *testing.T) {
 	err = client.WaitAsCompletion(10000)
 	//ast.Nil(err)
 
-	asDownloadData, err := client.AsDownload(1, 32)
+	_, err = client.AsDownload(1, 32)
 	//ast.Nil(err)
-	fmt.Println(asDownloadData)
+	//fmt.Println(asDownloadData)
 	err = client.WaitAsCompletion(10000)
 	//ast.Nil(err)
 

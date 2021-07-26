@@ -238,25 +238,30 @@ func (c *S7Client) ListBlocks() (pUsrData TS7BlocksList, err error) {
 	return
 }
 func (c *S7Client) GetAgBlockInfo(blockType Block, blockNum int32) (pUsrData TS7BlockInfo, err error) {
-	var code C.int = C.Cli_GetAgBlockInfo(c.client, C.int(blockType), C.int(blockNum), (*C.TS7BlockInfo)(unsafe.Pointer(&pUsrData)))
-	err = Cli_ErrorText(code)
+	//
+	panic("see issue https://gitee.com/yuyang-fine/snap7-go/issues/I42C3H")
 	return
 }
 
 //int S7API Cli_GetPgBlockInfo(S7Object Client, void *pBlock, TS7BlockInfo *pUsrData, int Size);
 func (c *S7Client) GetPgBlockInfo(pBlock []byte) (pUsrData TS7BlockInfo, err error) {
-	size := len(pBlock)
-	var code C.int = C.Cli_GetPgBlockInfo(c.client, unsafe.Pointer(&pBlock[0]), (*C.TS7BlockInfo)(unsafe.Pointer(&pUsrData)), C.int(size))
-	err = Cli_ErrorText(code)
+	panic("see issue https://gitee.com/yuyang-fine/snap7-go/issues/I41GA6")
 	return
 }
 
-//获取指定blockType的 block number数组和 ItemsCount
 //int S7API Cli_ListBlocksOfType(S7Object Client, int BlockType, TS7BlocksOfType *pUsrData, int *ItemsCount);
-func (c *S7Client) ListBlocksOfType(blockType Block) (pUsrData TS7BlocksOfType, itemsCount int32, err error) {
-	itemsCount = 8192
-	var code C.int = C.Cli_ListBlocksOfType(c.client, C.int(blockType), (*C.TS7BlocksOfType)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&itemsCount)))
+func (c *S7Client) ListBlocksOfType(blockType Block, cap int32) (pUsrData []TS7BlocksOfType, err error) {
+	pUsrData = make([]TS7BlocksOfType, cap)
+	var code C.int = C.Cli_ListBlocksOfType(
+		c.client,
+		C.int(blockType),
+		(*C.TS7BlocksOfType)(unsafe.Pointer(&pUsrData[0])),
+		(*C.int)(unsafe.Pointer(&cap)))
 	err = Cli_ErrorText(code)
+	if err != nil {
+		return
+	}
+	pUsrData = pUsrData[:cap]
 	return
 }
 
@@ -347,18 +352,21 @@ func (c *S7Client) GetCpInfo() (pUsrData TS7CpInfo, err error) {
 
 //int S7API Cli_ReadSZL(S7Object Client, int ID, int Index, TS7SZL *pUsrData, int *Size);
 func (c *S7Client) ReadSZL(id int32, index int32) (pUsrData TS7SZL, size int32, err error) {
-	//size：初始化足够大的Buffer size，返回为实际读到的byte数
-	size = 20000
 	var code C.int = C.Cli_ReadSZL(c.client, C.int(id), C.int(index), (*C.TS7SZL)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&size)))
 	err = Cli_ErrorText(code)
 	return
 }
 
 //int S7API Cli_ReadSZLList(S7Object Client, TS7SZLList *pUsrData, int *ItemsCount);
-func (c *S7Client) ReadSZLList() (pUsrData TS7SZLList, itemsCount int32, err error) {
-	itemsCount = 10000
-	var code C.int = C.Cli_ReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&itemsCount)))
+func (c *S7Client) ReadSZLList(capacity int32) (ret []TS7SZLList, err error) {
+	var itemsCount = capacity
+	ret = make([]TS7SZLList, capacity)
+	var code C.int = C.Cli_ReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&ret[0])), (*C.int)(unsafe.Pointer(&capacity)))
 	err = Cli_ErrorText(code)
+	if err != nil {
+		return
+	}
+	ret = ret[:itemsCount]
 	return
 }
 
@@ -548,52 +556,39 @@ func (c *S7Client) AsCTWrite(start int32, pUsrData []byte) (err error) {
 }
 
 // int S7API Cli_AsListBlocksOfType(S7Object Client, int BlockType, TS7BlocksOfType *pUsrData, int *ItemsCount);
-func (c *S7Client) AsListBlocksOfType(blockType Block) (pUsrData TS7BlocksOfType, itemsCount int32, err error) {
-	itemsCount = 8192
-	var code C.int = C.Cli_AsListBlocksOfType(c.client, C.int(blockType), (*C.TS7BlocksOfType)(unsafe.Pointer(&pUsrData[0])), (*C.int)(unsafe.Pointer(&itemsCount)))
+func (c *S7Client) AsListBlocksOfType(blockType Block, cap int32) (pUsrData []TS7BlocksOfType, err error) {
+	pUsrData = make([]TS7BlocksOfType, cap)
+	var code C.int = C.Cli_AsListBlocksOfType(
+		c.client,
+		C.int(blockType),
+		(*C.TS7BlocksOfType)(unsafe.Pointer(&pUsrData[0])),
+		(*C.int)(unsafe.Pointer(&cap)))
 	err = Cli_ErrorText(code)
 	if err != nil {
 		return
 	}
-	err = c.WaitAsCompletion(10000)
-	if err != nil {
-		err = fmt.Errorf("AsListBlocksOfType WaitAsCompletion err")
-		return
-	}
+	pUsrData = pUsrData[:cap]
 	return
 }
 
 // int S7API Cli_AsReadSZL(S7Object Client, int ID, int Index, TS7SZL *pUsrData, int *Size);
 func (c *S7Client) AsReadSZL(id int32, index int32) (pUsrData TS7SZL, size int32, err error) {
-	size = 20000
-	var code C.int = C.Cli_AsReadSZL(c.client, C.int(id), C.int(index), (*C.TS7SZL)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&size)))
-	err = Cli_ErrorText(code)
-	if err != nil {
-		return
-	}
-
-	//todo 需要等到C.Cli_AsReadSZL完成后，再return？
-	err = c.WaitAsCompletion(10000)
-	if err != nil {
-		err = fmt.Errorf("AsReadSZL WaitAsCompletion err")
-		return
-	}
+	//var code C.int = C.Cli_AsReadSZL(c.client, C.int(id), C.int(index), (*C.TS7SZL)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&size)))
+	//err = Cli_ErrorText(code)
+	panic("see issue https://gitee.com/yuyang-fine/snap7-go/issues/I41GG5")
 	return
 }
 
 // int S7API Cli_AsReadSZLList(S7Object Client, TS7SZLList *pUsrData, int *ItemsCount);
-func (c *S7Client) AsReadSZLList() (pUsrData TS7SZLList, itemsCount int32, err error) {
-	itemsCount = 10000
-	var code C.int = C.Cli_AsReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&itemsCount)))
+func (c *S7Client) AsReadSZLList(capacity int32) (ret []TS7SZLList, err error) {
+	var itemsCount = capacity
+	ret = make([]TS7SZLList, capacity)
+	var code C.int = C.Cli_AsReadSZLList(c.client, (*C.TS7SZLList)(unsafe.Pointer(&ret[0])), (*C.int)(unsafe.Pointer(&capacity)))
 	err = Cli_ErrorText(code)
 	if err != nil {
 		return
 	}
-	err = c.WaitAsCompletion(10000)
-	if err != nil {
-		err = fmt.Errorf("AsReadSZLList WaitAsCompletion err")
-		return
-	}
+	ret = ret[:itemsCount]
 	return
 }
 
