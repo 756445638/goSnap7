@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 	"time"
-	"unsafe"
 )
 
 func TestSomeCallBack(t *testing.T) {
@@ -235,7 +234,7 @@ func TestSomeSetRWAreaCallback(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
-	err = server.SetRWAreaCallback(func(sender int, operation Operation, tag *PS7Tag, userData uintptr) int {
+	err = server.SetRWAreaCallback(func(sender int32, operation Operation, tag *PS7Tag, userData uintptr) int32 {
 		if operation == 0 {
 			// read
 			CopyToC([]byte{1, 2, 3}, userData)
@@ -338,14 +337,9 @@ func TestSetRWAreaCallbackInterface(t *testing.T) {
 
 type handle struct{}
 
-func (h handle) Read(sender int, tag *PS7Tag) (data []byte, errCode int) {
+func (h handle) Read(sender int32, tag *PS7Tag) (data []byte, errCode int32) {
 	return []byte{1, 2, 3, 4, 5}, 0
 }
-func (h handle) Write(sender int, tag *PS7Tag, data []byte) (errCode int) {
+func (h handle) Write(sender int32, tag *PS7Tag, data []byte) (errCode int32) {
 	return 0
-}
-
-func TestZXX(t *testing.T) {
-	var pUsrData TS7SZLList
-	panic(unsafe.Sizeof(pUsrData))
 }

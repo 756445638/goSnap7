@@ -2,9 +2,11 @@ package snap7go
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+	"unsafe"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestClientAdministrativeCli(t *testing.T) { //已完成
@@ -1171,10 +1173,10 @@ func TestAsynchronousCli(t *testing.T) {
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
-	_, err = client.AsListBlocksOfType(Block_OB, 20000) //没有BLOCK无法测试
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
+	// _, err = client.AsListBlocksOfType(Block_OB, 20000) //没有BLOCK无法测试
+	// ast.Nil(err)
+	// err = client.WaitAsCompletion(10000)
+	// ast.Nil(err)
 	//fmt.Println("[]TS7BlocksOfType：", TS7BlocksOfType)
 
 	//_, size, err := client.AsReadSZL(0x0232, 0x0004)
@@ -1183,14 +1185,18 @@ func TestAsynchronousCli(t *testing.T) {
 	//ast.Nil(err)
 	////fmt.Printf("szl：%#v\n", szl)
 	//fmt.Println("size：", size)
+	{
+		var data [2000]TS7SZLList
+		var dataLength = int32(len(data))
+		err := client.AsReadSZLList(data[:], &dataLength)
+		ast.Nil(err)
 
-	tS7SZLList, err := client.AsReadSZLList(20000)
-	ast.Nil(err)
+		err = client.WaitAsCompletion(10000)
+		ast.Nil(err)
 
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
-
-	fmt.Println("tS7SZLList length", len(tS7SZLList))
+		var x TS7SZLList
+		panic(fmt.Sprintf("11111111111xxx:%d %d", dataLength, unsafe.Sizeof(x)))
+	}
 
 	//fmt.Printf("tS7SZLList：%#v\n", tS7SZLList)
 
