@@ -503,7 +503,7 @@ func TestBlockOrientedCli(t *testing.T) { //未完成
 	pUsrData := []byte{1, 2, 3, 4, 5, 6, 7, 8}
 	//func (c *S7Client) Upload(blockType Block, blockNum int, pUsrData []byte) (size int, err error) {
 	ret1, err := client.Upload(Block_OB, 1, pUsrData) //CPU权限不够  ,后面的都无法测试
-	fmt.Println("fullUpload Buffer size:", ret1)
+	fmt.Println("Upload Buffer size:", ret1)
 	//ast.Nil(err)
 
 	ret1, err = client.FullUpload(Block_OB, 1, pUsrData)
@@ -1171,10 +1171,10 @@ func TestAsynchronousCli(t *testing.T) {
 	ast.Nil(err)
 	ast.Equal([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, ret)
 
-	_, err = client.AsListBlocksOfType(Block_OB, 20000) //没有BLOCK无法测试
-	ast.Nil(err)
-	err = client.WaitAsCompletion(10000)
-	ast.Nil(err)
+	//_, err = client.AsListBlocksOfType(Block_OB, 20000) //没有BLOCK无法测试
+	//ast.Nil(err)
+	//err = client.WaitAsCompletion(10000)
+	//ast.Nil(err)
 	//fmt.Println("[]TS7BlocksOfType：", TS7BlocksOfType)
 
 	//_, size, err := client.AsReadSZL(0x0232, 0x0004)
@@ -1195,13 +1195,13 @@ func TestAsynchronousCli(t *testing.T) {
 	//fmt.Printf("tS7SZLList：%#v\n", tS7SZLList)
 
 	ret1, err := client.AsUpload(Block_OB, 1, pUsrData) //CPU权限不够  ,后面的都无法测试
-	//ast.Nil(err)
-	fmt.Println("fullUpload Buffer size:", ret1)
+	ast.Nil(err)
+	fmt.Println("Upload Buffer size:", ret1)
 	err = client.WaitAsCompletion(10000)
 	//ast.Nil(err)
 
 	ret1, err = client.AsFullUpload(Block_OB, 1, pUsrData)
-	//ast.Nil(err)
+	ast.Nil(err)
 	fmt.Println("fullUpload Buffer size:", ret1)
 	err = client.WaitAsCompletion(10000)
 	//ast.Nil(err)
