@@ -77,6 +77,9 @@ func (c *S7Client) GetParam(paraNumber ParamNumber) (value interface{}, err erro
 		pValue = unsafe.Pointer(new(uint16))
 	case P_i32_PDURequest:
 		pValue = unsafe.Pointer(new(int32))
+	default:
+		err = fmt.Errorf("paraNumber err")
+		return
 	}
 	var code C.int = C.Cli_GetParam(c.client, C.int(paraNumber), pValue)
 	err = Cli_ErrorText(code)

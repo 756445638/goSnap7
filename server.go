@@ -5,6 +5,7 @@ package snap7go
 //#include <stdlib.h>
 import "C"
 import (
+	"fmt"
 	"unsafe"
 )
 
@@ -33,6 +34,9 @@ func (s *S7Server) GetParam(paraNumber ParamNumber) (value interface{}, err erro
 		pValue = unsafe.Pointer(new(int32))
 	case P_i32_MaxClients:
 		pValue = unsafe.Pointer(new(int32))
+	default:
+		err = fmt.Errorf("paraNumber err")
+		return
 	}
 	var code C.int = C.Srv_GetParam(s.server, C.int(paraNumber), pValue)
 	err = Srv_ErrorText(code)
