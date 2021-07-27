@@ -376,6 +376,7 @@ func TestSetAsCallback(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 		return
+
 	}
 
 	pUsrData := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
@@ -383,6 +384,7 @@ func TestSetAsCallback(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 		return
+
 	}
 	for JobDone == false {
 		time.Sleep(time.Millisecond)
