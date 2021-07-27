@@ -39,6 +39,11 @@ func (s *S7Server) SetRWAreaCallbackInterface(handle RWAreaCallbackInterface) er
 				if errCode != 0 {
 					return errCode
 				}
+				if len(data) != int(dataLength(S7WL(tag.WordLen), tag.Size)) {
+
+					// panic("len(data) != int(dataLength(S7WL(tag.WordLen), tag.Size))")
+					return
+				}
 				CopyToC(data, userData)
 				return errCode
 			} else {
