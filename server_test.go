@@ -85,6 +85,9 @@ func TestServerAdministrative(t *testing.T) {
 	getValue11, err := serverDesignated.GetParam(P_i32_MaxClients)
 	ast.Nil(err)
 	ast.Equal(int32(11), getValue11)
+	//paraNumber err
+	_, err = serverDesignated.GetParam(22)
+	ast.NotNil(err)
 
 	//Stop后client无法连接
 	err = serverDesignated.Stop()
