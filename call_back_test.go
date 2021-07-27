@@ -2,6 +2,7 @@ package snap7go
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
@@ -338,8 +339,74 @@ func TestSetRWAreaCallbackInterface(t *testing.T) {
 type handle struct{}
 
 func (h handle) Read(sender int32, tag *PS7Tag, data []byte) (errCode SrvErrCode) {
+	data[0] = 1
+	data[1] = 2
 	return 0
 }
 func (h handle) Write(sender int32, tag *PS7Tag, data []byte) (errCode SrvErrCode) {
 	return 0
+}
+
+func TestSetAsCallback(t *testing.T) {
+	ast := assert.New(t)
+	/*
+	   默认地址（127.0.0.1）的server
+	*/
+	serverDefault := NewS7Server()
+	err := serverDefault.SetEventsCallback(justPrintEvent)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	err = serverDefault.SetReadEventsCallback(justPrintEvent)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	err = serverDefault.Start()
+	ast.Nil(err)
+	var dbArea [1024]byte
+	err = serverDefault.RegisterArea(SrvAreaPE, 1, dbArea[:])
+	ast.Nil(err)
+
+	defer func() {
+		err = serverDefault.Stop()
+		ast.Nil(err)
+		serverDefault.Destroy()
+	}()
+
+	client := NewS7Client()
+	err = client.SetAsCallback(func(opCode int32, opResult JobStatus) {
+		fmt.Println("JobComplete")
+	})
+	defer client.Destroy()
+	//连接地址(127.0.0.1)
+	err = client.Connect()
+	ast.Nil(err)
+
+	//S7AreaPE    S7WLBit
+	pUsrData := []byte{1} // https://github.com/756445638/snap7-go/issues/4
+	err = client.AsWriteArea(S7AreaPE, 1, 0, S7WLBit, pUsrData)
+	ast.Nil(err)
+
+	//opResult1, err := client.CheckAsCompletion()
+	//ast.Nil(err)
+	//ast.Equal(JobPending, opResult1)
+	err = client.WaitAsCompletion(10000)
+	ast.Nil(err)
+	opResult2, err := client.CheckAsCompletion()
+	ast.Nil(err)
+	ast.Equal(JobComplete, opResult2)
+
+	ret, err := client.AsReadArea(S7AreaPE, 1, 0, 1, S7WLBit)
+	ast.Nil(err)
+	err = client.WaitAsCompletion(10000)
+	ast.Nil(err)
+	ast.Equal([]byte{1}, ret)
+
+	ret1, err := client.AsUpload(Block_OB, 1, pUsrData) //CPU权限不够  ,后面的都无法测试
+	ast.Nil(err)
+	fmt.Println("AsUpload Buffer size:", ret1)
+	err = client.WaitAsCompletion(10000)
 }
