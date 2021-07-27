@@ -24,25 +24,21 @@ func (s *S7Server) SetReadEventsCallback(handle func(*TSrvEvent)) error {
 	}, uintptr(s.server))
 }
 
-func (s *S7Server) SetRWAreaCallback(handle func(sender int32, operation Operation, tag *PS7Tag, userData uintptr) int32) error {
+func (s *S7Server) SetRWAreaCallback(handle func(sender int32, operation Operation, tag *PS7Tag, userData uintptr) SrvErrCode) error {
 	return Srv_SetRWAreaCallback(s.server,
-		func(_ uintptr, sender int32, operation Operation, tag *PS7Tag, userData uintptr) int32 {
+		func(_ uintptr, sender int32, operation Operation, tag *PS7Tag, userData uintptr) SrvErrCode {
 			return handle(sender, Operation(operation), tag, userData)
 		}, uintptr(s.server))
 }
 
 func (s *S7Server) SetRWAreaCallbackInterface(handle RWAreaCallbackInterface) error {
 	return Srv_SetRWAreaCallback(s.server,
-		func(_ uintptr, sender int32, operation Operation, tag *PS7Tag, userData uintptr) int32 {
+		func(_ uintptr, sender int32, operation Operation, tag *PS7Tag, userData uintptr) SrvErrCode {
 			if operation == OperationRead {
-				data, errCode := handle.Read(sender, tag)
+				data := make([]byte, dataLength(S7WL(tag.WordLen), tag.Size))
+				errCode := handle.Read(sender, tag, data)
 				if errCode != 0 {
 					return errCode
-				}
-				if len(data) != int(dataLength(S7WL(tag.WordLen), tag.Size)) {
-
-					// panic("len(data) != int(dataLength(S7WL(tag.WordLen), tag.Size))")
-					return
 				}
 				CopyToC(data, userData)
 				return errCode
@@ -55,8 +51,8 @@ func (s *S7Server) SetRWAreaCallbackInterface(handle RWAreaCallbackInterface) er
 }
 
 type RWAreaCallbackInterface interface {
-	Read(sender int32, tag *PS7Tag) (data []byte, errCode int32)
-	Write(sender int32, tag *PS7Tag, data []byte) (errCode int32)
+	Read(sender int32, tag *PS7Tag, ret []byte) (errCode SrvErrCode)
+	Write(sender int32, tag *PS7Tag, data []byte) (errCode SrvErrCode)
 }
 
 //Client
