@@ -355,7 +355,11 @@ func (c *S7Client) GetCpInfo() (pUsrData TS7CpInfo, err error) {
 
 //int S7API Cli_ReadSZL(S7Object Client, int ID, int Index, TS7SZL *pUsrData, int *Size);
 func (c *S7Client) ReadSZL(id int32, index int32) (pUsrData TS7SZL, size int32, err error) {
-	var code C.int = C.Cli_ReadSZL(c.client, C.int(id), C.int(index), (*C.TS7SZL)(unsafe.Pointer(&pUsrData)), (*C.int)(unsafe.Pointer(&size)))
+	var code C.int = C.Cli_ReadSZL(c.client,
+		C.int(id),
+		C.int(index),
+		(*C.TS7SZL)(unsafe.Pointer(&pUsrData)),
+		(*C.int)(unsafe.Pointer(&size)))
 	err = Cli_ErrorText(code)
 	return
 }

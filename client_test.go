@@ -620,7 +620,7 @@ func TestSystemInfoCli(t *testing.T) { // 未完成,ReadSZL  与 ReadSZLList 未
 	ast.Nil(err)
 
 	ordercode, err6 := client.GetOrderCode()
-	fmt.Printf("ordercode：%#v\n", ordercode)
+	fmt.Println("ordercode.Code：", convertInt8SliceToString(ordercode.Code[:]))
 	ast.Nil(err6)
 	cpuInf, err6 := client.GetCpuInfo()
 	ast.Nil(err6)
@@ -1197,13 +1197,13 @@ func TestAsynchronousCli(t *testing.T) {
 
 	ret1, err := client.AsUpload(Block_OB, 1, pUsrData) //CPU权限不够  ,后面的都无法测试
 	ast.Nil(err)
-	fmt.Println("Upload Buffer size:", ret1)
+	fmt.Println("AsUpload Buffer size:", ret1)
 	err = client.WaitAsCompletion(10000)
 	//ast.Nil(err)
 
 	ret1, err = client.AsFullUpload(Block_OB, 1, pUsrData)
 	ast.Nil(err)
-	fmt.Println("fullUpload Buffer size:", ret1)
+	fmt.Println("AsFullUpload Buffer size:", ret1)
 	err = client.WaitAsCompletion(10000)
 	//ast.Nil(err)
 
@@ -1215,7 +1215,7 @@ func TestAsynchronousCli(t *testing.T) {
 
 	dbGet, err := client.AsDBGet(2, pUsrData) //CPU权限不够
 	//ast.Nil(err)
-	fmt.Println("fullUpload Buffer size:", dbGet)
+	fmt.Println("AsDBGet size:", dbGet)
 	err = client.WaitAsCompletion(10000)
 	//ast.Nil(err)
 
