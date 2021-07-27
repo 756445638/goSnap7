@@ -343,3 +343,57 @@ func (h handle) Read(sender int32, tag *PS7Tag) (data []byte, errCode int32) {
 func (h handle) Write(sender int32, tag *PS7Tag, data []byte) (errCode int32) {
 	return 0
 }
+
+func TestSetAsCallback(t *testing.T) {
+	server := NewS7Server()
+	server.SetEventsCallback(justPrintEvent)
+	server.SetReadEventsCallback(justPrintEvent)
+	server.Start()
+	defer func() {
+		err := server.Stop()
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		server.Destroy()
+	}()
+	client := NewS7Client()
+	err := client.ConnectTo("127.0.0.1", 0, 2)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	var JobDone = false
+	Pfn_CliCompletion := func(opCode int32, opResult int32) {
+		JobDone = true
+		fmt.Println("JobDone:", JobDone)
+	}
+
+	var db [1024]byte
+	server.RegisterArea(SrvAreaPE, 1, db[:])
+
+	err = client.SetAsCallback(Pfn_CliCompletion)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	pUsrData := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+	err = client.AsWriteArea(S7AreaPE, 1, 0, S7WLByte, pUsrData)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	for JobDone == false {
+		time.Sleep(time.Millisecond)
+	}
+	JobDone = false
+	_, err = client.AsReadArea(S7AreaPE, 1, 0, 12, S7WLByte)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	for JobDone == false {
+		time.Sleep(time.Millisecond)
+	}
+}
