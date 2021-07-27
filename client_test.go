@@ -60,7 +60,7 @@ func TestClientAdministrativeCli(t *testing.T) { //已完成
 	err = client.Connect()
 	ast.Nil(err)
 
-	//SetParam在ConnectTo前后都可以 client与server可设置的ParamNumbers项不一样
+	//SetParam   在ConnectTo前后都可以 client与server可设置的ParamNumbers项不一样
 	err = clientDesignated.SetParam(P_u16_LocalPort, uint16(2484))
 	ast.NotNil(err)
 	//err = clientDesignated.SetParam(P_u16_RemotePort, uint16(1548))      RemotePort的设置与ConnectTo有关
@@ -92,19 +92,19 @@ func TestClientAdministrativeCli(t *testing.T) { //已完成
 	err = clientDesignated.SetParam(P_u32_KeepAliveTime, uint32(4))
 	ast.NotNil(err)
 
-	//SetParam在ConnectTo前后都可以 client与server可设置的ParamNumbers项不一样
-	err = clientDesignated.SetParam(P_u16_LocalPort, uint16(2484))
+	//Getparam
+	_, err = clientDesignated.GetParam(P_u16_LocalPort)
 	ast.NotNil(err)
-	//err = clientDesignated.SetParam(P_u16_RemotePort, uint16(1548))      RemotePort的设置与ConnectTo有关
-	//ast.Nil(err)
+	_, err = clientDesignated.GetParam(P_u16_RemotePort) // RemotePort的设置与ConnectTo有关
+	ast.Nil(err)
 	_, err = clientDesignated.GetParam(P_i32_PingTimeout)
 	ast.Nil(err)
 	_, err = clientDesignated.GetParam(P_i32_SendTimeout)
 	ast.Nil(err)
 	_, err = clientDesignated.GetParam(P_i32_RecvTimeout)
 	ast.Nil(err)
-	//_, err = clientDesignated.GetParam(P_i32_WorkInterval)  这个不知道为什么通不过
-	//ast.NotNil(err)
+	_, err = clientDesignated.GetParam(P_i32_WorkInterval)
+	ast.NotNil(err)
 	_, err = clientDesignated.GetParam(P_u16_SrcRef)
 	ast.Nil(err)
 	_, err = clientDesignated.GetParam(P_u16_DstRef)
@@ -526,8 +526,6 @@ func TestBlockOrientedCli(t *testing.T) { //未完成
 	//ast.Nil(err)
 }
 
-//系统状态列表（德语：System-ZustandsListen)
-
 func TestDateOrTimeCli(t *testing.T) { // 已完成
 	ast := assert.New(t)
 	/*
@@ -586,7 +584,7 @@ func TestDateOrTimeCli(t *testing.T) { // 已完成
 }
 
 //系统状态列表（德语：System-ZustandsListen)
-func TestSystemInfoCli(t *testing.T) { // 未完成,ReadSZL  与 ReadSZLList 未完成
+func TestSystemInfoCli(t *testing.T) { // 未完成,  ReadSZL   未完成
 	ast := assert.New(t)
 	/*
 	   默认地址（127.0.0.1）的server
@@ -684,7 +682,7 @@ func TestPLCControlCli(t *testing.T) { //已完成
 
 }
 
-func TestSecurityCli(t *testing.T) { //完成，但有点小疑惑
+func TestSecurityCli(t *testing.T) { //已完成
 	ast := assert.New(t)
 	/*
 	   默认地址（127.0.0.1）的server
@@ -728,7 +726,7 @@ func TestSecurityCli(t *testing.T) { //完成，但有点小疑惑
 	ast.Nil(err5)
 }
 
-func TestMiscellaneousCli(t *testing.T) { //未完成
+func TestMiscellaneousCli(t *testing.T) { //已完成
 	ast := assert.New(t)
 	/*
 	   默认地址（127.0.0.1）的server
@@ -759,7 +757,7 @@ func TestMiscellaneousCli(t *testing.T) { //未完成
 	fmt.Println(" lastErr:", lastErr)
 	ast.Nil(err)
 
-	//requested:Address of the PDU Req. variable       ???地址怎么找
+	//requested:Address of the PDU Req. variable
 	requested, negotiated, err := client.GetPduLength()
 	fmt.Println(" negotiated:", negotiated)
 	fmt.Println(" requested:", requested)
