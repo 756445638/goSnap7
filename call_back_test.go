@@ -234,7 +234,7 @@ func TestSomeSetRWAreaCallback(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
-	err = server.SetRWAreaCallback(func(sender int32, operation Operation, tag *PS7Tag, userData uintptr) int32 {
+	err = server.SetRWAreaCallback(func(sender int32, operation Operation, tag *PS7Tag, userData uintptr) SrvErrCode {
 		if operation == 0 {
 			// read
 			CopyToC([]byte{1, 2, 3}, userData)
@@ -337,10 +337,10 @@ func TestSetRWAreaCallbackInterface(t *testing.T) {
 
 type handle struct{}
 
-func (h handle) Read(sender int32, tag *PS7Tag) (data []byte, errCode int32) {
-	return []byte{1, 2, 3, 4, 5}, 0
+func (h handle) Read(sender int32, tag *PS7Tag, data []byte) (errCode SrvErrCode) {
+	return 0
 }
-func (h handle) Write(sender int32, tag *PS7Tag, data []byte) (errCode int32) {
+func (h handle) Write(sender int32, tag *PS7Tag, data []byte) (errCode SrvErrCode) {
 	return 0
 }
 

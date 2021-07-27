@@ -271,6 +271,17 @@ const SrvAreaCT SrvAreaType = 3
 const SrvAreaTM SrvAreaType = 4
 const SrvAreaDB SrvAreaType = 5
 
+type SrvErrCode int32
+
+const errSrvCannotStart SrvErrCode = 0x00100000        // Server cannot start
+const errSrvDBNullPointer SrvErrCode = 0x00200000      // Passed null as PData
+const errSrvAreaAlreadyExists SrvErrCode = 0x00300000  // Area Re-registration
+const errSrvUnknownArea SrvErrCode = 0x00400000        // Unknown area
+const errSrvInvalidParams SrvErrCode = 0x00500000      // Invalid param(s) supplied
+const errSrvTooManyDB SrvErrCode = 0x00600000          // Cannot register DB
+const errSrvInvalidParamNumber SrvErrCode = 0x00700000 // Invalid param (srv_get/set_param)
+const errSrvCannotChangeParam SrvErrCode = 0x00800000  // Cannot change because running
+
 func justPrintEvent(e *TSrvEvent) {
 	s, err := Srv_EventText(e)
 	if err != nil {

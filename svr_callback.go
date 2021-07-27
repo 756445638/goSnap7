@@ -15,7 +15,7 @@ import "unsafe"
 
 type Pfn_SrvEventCallBack = func(uintptr, *TSrvEvent)
 
-type Pfn_RWAreaCallBack = func(uintptr, int32, Operation, *PS7Tag, uintptr) int32
+type Pfn_RWAreaCallBack = func(uintptr, int32, Operation, *PS7Tag, uintptr) SrvErrCode
 
 var (
 	svrEventCallbacks      = make(map[uintptr]Pfn_SrvEventCallBack)
