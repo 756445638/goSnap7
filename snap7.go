@@ -139,12 +139,12 @@ const Block_SFB Block = 0x46
 /*
 	字节数组的长度
 */
-func dataLength(wordLen S7WL, amount int32) int32 {
-	t := wordLen.size() * amount
+func DataLength(wordLen S7WL, amount int32) int32 {
+	t := wordLen.Size() * amount
 	return t
 }
 
-func (s S7WL) size() int32 {
+func (s S7WL) Size() int32 {
 	switch s {
 	case S7WLBit:
 		return 1
