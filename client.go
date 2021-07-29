@@ -14,7 +14,22 @@ func Cli_Create() (cli S7Object) {
 	return
 }
 
-type S7Object = C.S7Object
+//Client
+func NewS7Client() *S7Client {
+	server := &S7Client{}
+	server.client = Cli_Create()
+	return server
+}
+
+type S7Client struct {
+	client S7Object
+}
+
+func (c *S7Client) SetAsCallback(handle func(opCode int32, opResult JobStatus)) error {
+	return Cli_SetAsCallback(c.client, func(usrptr uintptr, opCode int32, opResult JobStatus) {
+		handle(opCode, opResult)
+	}, uintptr(c.client))
+}
 
 func (c *S7Client) Destroy() {
 	C.Cli_Destroy((*C.S7Object)(unsafe.Pointer(&c.client)))

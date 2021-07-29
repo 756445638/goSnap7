@@ -1,10 +1,14 @@
 package snap7go
 
+//#cgo CFLAGS: -I .
+//#include "snap7.h"
 import "C"
 import (
 	"fmt"
 	"unsafe"
 )
+
+type S7Object = C.S7Object
 
 //------------------------------------------------------------------------------
 //                                  PARAMS LIST

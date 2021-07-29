@@ -14,6 +14,59 @@ func Srv_Create() (server S7Object) {
 	return
 }
 
+func NewS7Server() *S7Server {
+	server := &S7Server{}
+	server.server = Srv_Create()
+	return server
+}
+
+type S7Server struct {
+	server S7Object
+}
+
+func (s *S7Server) SetEventsCallback(handle func(*TSrvEvent)) error {
+	return Srv_SetEventsCallback(s.server, func(usrPtr uintptr, event *TSrvEvent) {
+		handle(event)
+	}, uintptr(s.server))
+}
+
+func (s *S7Server) SetReadEventsCallback(handle func(*TSrvEvent)) error {
+	return Srv_SetReadEventsCallback(s.server, func(usrPtr uintptr, event *TSrvEvent) {
+		handle(event)
+	}, uintptr(s.server))
+}
+
+func (s *S7Server) SetRWAreaCallback(handle func(sender int32, operation Operation, tag *PS7Tag, userData uintptr) SrvErrCode) error {
+	return Srv_SetRWAreaCallback(s.server,
+		func(_ uintptr, sender int32, operation Operation, tag *PS7Tag, userData uintptr) SrvErrCode {
+			return handle(sender, Operation(operation), tag, userData)
+		}, uintptr(s.server))
+}
+
+func (s *S7Server) SetRWAreaCallbackInterface(handle RWAreaCallbackInterface) error {
+	return Srv_SetRWAreaCallback(s.server,
+		func(_ uintptr, sender int32, operation Operation, tag *PS7Tag, userData uintptr) SrvErrCode {
+			if operation == OperationRead {
+				data := make([]byte, DataLength(S7WL(tag.WordLen), tag.Size))
+				errCode := handle.Read(sender, tag, data)
+				if errCode != 0 {
+					return errCode
+				}
+				CopyToC(data, userData)
+				return errCode
+			} else {
+				// write
+				data := GetBytesFromC(userData, int(DataLength(S7WL(tag.WordLen), tag.Size)))
+				return handle.Write(sender, tag, data)
+			}
+		}, uintptr(s.server))
+}
+
+type RWAreaCallbackInterface interface {
+	Read(sender int32, tag *PS7Tag, ret []byte) (errCode SrvErrCode)
+	Write(sender int32, tag *PS7Tag, data []byte) (errCode SrvErrCode)
+}
+
 func (s *S7Server) Destroy() {
 	C.Srv_Destroy((*C.S7Object)(unsafe.Pointer(&s.server)))
 	return
