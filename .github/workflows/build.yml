@@ -15,6 +15,9 @@ jobs:
         name: install gcc 
         run: sudo apt install gcc -y
       -
+        name: cp snap.so 
+        run: cp ./libsnap7.so /usr/lib
+      -
         name: build 
         run: go build
   test:
