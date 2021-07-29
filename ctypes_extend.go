@@ -41,14 +41,14 @@ func (g *TS7DataItemGo) ToC() TS7DataItem {
  */
 func (g *TS7DataItem) GetBytes() (data []byte) {
 	p := uintptr(unsafe.Pointer(g.Pdata))
-	length := dataLength(S7WL(g.WordLen), g.Amount)
+	length := DataLength(S7WL(g.WordLen), g.Amount)
 
 	data = GetBytesFromC(p, int(length))
 	return data
 }
 
 func (g *TS7DataItemGo) CopyPdata(to *TS7DataItem) {
-	length := dataLength(S7WL(g.WordLen), g.Amount)
+	length := DataLength(S7WL(g.WordLen), g.Amount)
 	to.Pdata = (*byte)(C.malloc(C.size_t(length)))
 	up := uintptr(unsafe.Pointer(to.Pdata))
 	CopyToC(g.Pdata, up)

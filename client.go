@@ -119,17 +119,17 @@ func (c *S7Client) SetParam(paraNumber ParamNumber, value interface{}) (err erro
 
 //int S7API Cli_ReadArea(S7Object Client, int Area, int DBNumber, int Start, int Amount, int WordLen, void *pUsrData);
 func (c *S7Client) ReadArea(area S7Area, dBNumber int32, start int32, amount int32, wordLen S7WL) (pUsrData []byte, err error) {
-	pUsrData = make([]byte, dataLength(wordLen, amount))
+	pUsrData = make([]byte, DataLength(wordLen, amount))
 	var code C.int = C.Cli_ReadArea(c.client, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
 	err = Cli_ErrorText(code)
 	return
 }
 func (c *S7Client) checkWriteAmount(pUsrData []byte, wordLen S7WL) (amount int32, err error) {
-	if len(pUsrData)%int(wordLen.size()) != 0 {
+	if len(pUsrData)%int(wordLen.Size()) != 0 {
 		err = fmt.Errorf("length of pUserData != wordLen size * amount")
 		return
 	}
-	amount = int32(len(pUsrData)) / wordLen.size()
+	amount = int32(len(pUsrData)) / wordLen.Size()
 	return
 }
 func (c *S7Client) WriteArea(area S7Area, dBNumber int32, start int32, wordLen S7WL, pUsrData []byte) (err error) {
@@ -154,7 +154,7 @@ func (c *S7Client) ReadMultiVars(items []TS7DataItemGo) (err error) {
 	}
 	for k := range itemsC {
 		itemsC[k].Pdata = (*byte)(C.malloc(
-			C.size_t(dataLength(S7WL(itemsC[k].WordLen), itemsC[k].Amount)),
+			C.size_t(DataLength(S7WL(itemsC[k].WordLen), itemsC[k].Amount)),
 		))
 	}
 	defer c.freeItemsC(itemsC)
@@ -484,7 +484,7 @@ func (c *S7Client) GetConnected() (connected int32, err error) {
 
 //int S7API Cli_AsReadArea(S7Object Client, int Area, int DBNumber, int Start, int Amount, int WordLen, void *pUsrData);
 func (c *S7Client) AsReadArea(area S7Area, dBNumber int32, start int32, amount int32, wordLen S7WL) (pUsrData []byte, err error) {
-	pUsrData = make([]byte, dataLength(wordLen, amount))
+	pUsrData = make([]byte, DataLength(wordLen, amount))
 	var code C.int = C.Cli_AsReadArea(c.client, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
 	err = Cli_ErrorText(code)
 	return
@@ -492,11 +492,11 @@ func (c *S7Client) AsReadArea(area S7Area, dBNumber int32, start int32, amount i
 
 // int S7API Cli_AsWriteArea(S7Object Client, int Area, int DBNumber, int Start, int Amount, int WordLen, void *pUsrData);
 func (c *S7Client) AsWriteArea(area S7Area, dBNumber int32, start int32, wordLen S7WL, pUsrData []byte) (err error) {
-	if len(pUsrData)%int(wordLen.size()) != 0 {
+	if len(pUsrData)%int(wordLen.Size()) != 0 {
 		err = fmt.Errorf("length of pUserData != wordLen size * amount")
 		return
 	}
-	amount := int32(len(pUsrData)) / wordLen.size()
+	amount := int32(len(pUsrData)) / wordLen.Size()
 	var code C.int = C.Cli_AsWriteArea(c.client, C.int(area), C.int(dBNumber), C.int(start), C.int(amount), C.int(wordLen), unsafe.Pointer(&pUsrData[0]))
 	err = Cli_ErrorText(code)
 	return

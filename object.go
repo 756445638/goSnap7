@@ -35,7 +35,7 @@ func (s *S7Server) SetRWAreaCallbackInterface(handle RWAreaCallbackInterface) er
 	return Srv_SetRWAreaCallback(s.server,
 		func(_ uintptr, sender int32, operation Operation, tag *PS7Tag, userData uintptr) SrvErrCode {
 			if operation == OperationRead {
-				data := make([]byte, dataLength(S7WL(tag.WordLen), tag.Size))
+				data := make([]byte, DataLength(S7WL(tag.WordLen), tag.Size))
 				errCode := handle.Read(sender, tag, data)
 				if errCode != 0 {
 					return errCode
@@ -44,7 +44,7 @@ func (s *S7Server) SetRWAreaCallbackInterface(handle RWAreaCallbackInterface) er
 				return errCode
 			} else {
 				// write
-				data := GetBytesFromC(userData, int(dataLength(S7WL(tag.WordLen), tag.Size)))
+				data := GetBytesFromC(userData, int(DataLength(S7WL(tag.WordLen), tag.Size)))
 				return handle.Write(sender, tag, data)
 			}
 		}, uintptr(s.server))
